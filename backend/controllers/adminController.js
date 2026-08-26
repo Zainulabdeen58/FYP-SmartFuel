@@ -18,9 +18,26 @@ export async function updateUser(req, res) {
   if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
   if (fullName !== undefined) user.fullName = fullName;
-  if (email !== undefined) user.email = email.toLowerCase();
+  if (email !== undefined) {
+    const exists = await User.findOne({
+      email: email.toLowerCase(),
+      _id: { $ne: user._id },
+    });
+    if (exists) {
+      return res.status(409).json({ success: false, message: "Email already in use" });
+    }
+    user.email = email.toLowerCase();
+  }
   if (contactNumber !== undefined) user.contactNumber = contactNumber;
-  if (role !== undefined && ["Individual", "Admin"].includes(role)) user.role = role;
+  if (role !== undefined && ["Individual", "Admin"].includes(role)) {
+    if (user._id.toString() === req.user._id.toString() && role !== "Admin") {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot remove your own admin role",
+      });
+    }
+    user.role = role;
+  }
 
   await user.save();
   res.json({ success: true, message: "User updated", user: { ...user.toObject(), password: undefined } });
@@ -29,6 +46,13 @@ export async function updateUser(req, res) {
 export async function deleteUser(req, res) {
   const user = await User.findById(req.params.id);
   if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+  if (user._id.toString() === req.user._id.toString()) {
+    return res.status(400).json({
+      success: false,
+      message: "You cannot delete your own account",
+    });
+  }
 
   await Vehicle.deleteMany({ user: user._id });
   await user.deleteOne();

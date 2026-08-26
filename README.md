@@ -14,8 +14,9 @@ Prototype for the Spring 2026 CS619 requirements.
 - Profile viewing/updating
 - Individual users can manage only their own vehicles
 - Admins can manage all users and vehicles
-- Vehicle CRUD
-- Admin vehicle search by user or registration number
+- Vehicle CRUD (create, read, update, delete)
+- Admin user view/update/delete
+- Admin vehicle search, update, and delete
 - RESTful API integration with React frontend
 
 ## Run
@@ -24,8 +25,6 @@ Prototype for the Spring 2026 CS619 requirements.
 ```bash
 cd backend
 npm install
-cp .env.example .env
-# Set MONGO_URI and JWT_SECRET in .env
 npm run dev
 ```
 
@@ -36,10 +35,10 @@ npm install
 npm run dev
 ```
 
-The frontend expects the backend at `http://localhost:5000/api` by default.
+The frontend expects the backend at `http://localhost:5000/api`.
 
 ## MongoDB
-Use a local MongoDB instance or a MongoDB connection string in `backend/.env`.
+Use a local MongoDB instance at `mongodb://localhost:27017`.
 
 ## Important
 The assignment explicitly asks the registration form to include User type/role (Individual and Admin), so this prototype includes that field.

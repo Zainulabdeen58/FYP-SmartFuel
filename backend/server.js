@@ -1,13 +1,11 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import vehicleRoutes from "./routes/vehicleRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 
-dotenv.config();
 await connectDB();
 
 const app = express();
@@ -27,5 +25,5 @@ app.use((req, res) => {
   res.status(404).json({ success: false, message: "Route not found" });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
