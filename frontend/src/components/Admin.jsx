@@ -1,110 +1,32 @@
-import { useEffect, useState } from "react";
-import api from "../api";
+import { useState } from "react";
+import useAdmin from "../hooks/useAdmin";
 import Icon from "./Icon";
 import VehicleForm from "./VehicleForm";
 import UserForm from "./UserForm";
 
 function Admin({ currentUser }) {
-  const [users, setUsers] = useState([]);
-  const [vehicles, setVehicles] = useState([]);
-
-  const [search, setSearch] = useState({
-    user: "",
-    registrationNumber: "",
-  });
-  const [userSearch, setUserSearch] = useState("");
+  const {
+    users,
+    vehicles,
+    filteredUsers,
+    search,
+    setSearch,
+    userSearch,
+    setUserSearch,
+    error,
+    currentUserId,
+    editingUser,
+    setEditingUser,
+    editingVehicle,
+    setEditingVehicle,
+    loadUsers,
+    loadVehicles,
+    openUserDetails,
+    deleteUser,
+    deleteVehicle,
+  } = useAdmin(currentUser);
 
   const [tab, setTab] = useState("users");
-  const [error, setError] = useState("");
-  const [editingUser, setEditingUser] = useState(null);
-  const [editingVehicle, setEditingVehicle] = useState(null);
-
-  const currentUserId = currentUser?.id || currentUser?._id;
-
-  const filteredUsers = users.filter((u) => {
-    const q = userSearch.trim().toLowerCase();
-    if (!q) return true;
-
-    return (
-      u.fullName?.toLowerCase().includes(q) ||
-      u.email?.toLowerCase().includes(q) ||
-      u.contactNumber?.toLowerCase().includes(q) ||
-      u.role?.toLowerCase().includes(q)
-    );
-  });
-
-  const loadUsers = async () => {
-    try {
-      const { data } = await api.get("/admin/users");
-      setUsers(data.users);
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not load users");
-    }
-  };
-
-  const loadVehicles = async (params = search) => {
-    try {
-      const { data } = await api.get("/admin/vehicles", {
-        params,
-      });
-
-      setVehicles(data.vehicles);
-      setError("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not load vehicles");
-    }
-  };
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadVehicles(search);
-    }, 250);
-
-    return () => clearTimeout(timer);
-  }, [search.user, search.registrationNumber]);
-
-  const openUserDetails = async (id) => {
-    try {
-      const { data } = await api.get(`/admin/users/${id}`);
-      setEditingUser(data.user);
-      setError("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not load user details");
-    }
-  };
-
-  const deleteUser = async (id) => {
-    if (String(id) === String(currentUserId)) {
-      setError("You cannot delete your own account");
-      return;
-    }
-
-    if (confirm("Delete this user and their vehicles?")) {
-      try {
-        await api.delete(`/admin/users/${id}`);
-
-        loadUsers();
-        loadVehicles();
-      } catch (err) {
-        setError(err.response?.data?.message || "Could not delete user");
-      }
-    }
-  };
-
-  const deleteVehicle = async (id) => {
-    if (!confirm("Delete this vehicle?")) return;
-
-    try {
-      await api.delete(`/vehicles/${id}`);
-      loadVehicles();
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not delete vehicle");
-    }
-  };
 
   return (
     <section>

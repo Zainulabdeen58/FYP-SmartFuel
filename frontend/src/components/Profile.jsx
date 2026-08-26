@@ -1,8 +1,8 @@
 import { useState } from "react";
 import api from "../api";
+import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
-  hasErrors,
   validateContactNumber,
   validateEmail,
   validateFullName,
@@ -10,56 +10,38 @@ import {
 } from "../validation";
 
 function Profile({ user, saveUser }) {
-  const [form, setForm] = useState({
-    ...user,
-    password: "",
-  });
-
-  const [fieldErrors, setFieldErrors] = useState({});
   const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const updateField = (name, value) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const validate = () => {
-    const errors = {
-      fullName: validateFullName(form.fullName),
-      email: validateEmail(form.email),
-      contactNumber: validateContactNumber(form.contactNumber),
-      password: validatePassword(form.password, { required: false }),
-    };
-
-    setFieldErrors(errors);
-    return !hasErrors(errors);
-  };
-
-  const submit = async (e) => {
-    e.preventDefault();
-
-    setMessage("");
-    setError("");
-
-    if (!validate()) return;
-
-    setLoading(true);
-
-    try {
-      const { data } = await api.put("/users/profile", form);
+  const {
+    form,
+    fieldErrors,
+    error,
+    loading,
+    updateField,
+    handleSubmit,
+  } = useForm({
+    initialValues: { ...user, password: "" },
+    validate: (f) => ({
+      fullName: validateFullName(f.fullName),
+      email: validateEmail(f.email),
+      contactNumber: validateContactNumber(f.contactNumber),
+      password: validatePassword(f.password, { required: false }),
+    }),
+    onSubmit: async (f, { setForm }) => {
+      const { data } = await api.put("/users/profile", f);
 
       localStorage.setItem("user", JSON.stringify(data.user));
 
       saveUser(data.user);
       setMessage(data.message);
       setForm((prev) => ({ ...prev, password: "" }));
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not update profile");
-    } finally {
-      setLoading(false);
-    }
+    },
+    errorMessage: "Could not update profile",
+  });
+
+  const submit = (e) => {
+    setMessage("");
+    handleSubmit(e);
   };
 
   return (

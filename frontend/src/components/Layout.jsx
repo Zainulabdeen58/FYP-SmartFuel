@@ -1,36 +1,16 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { ADMIN_LINK, NAV_LINKS } from "../constant";
 import Icon from "./Icon";
+import useTheme from "../hooks/useTheme";
 
 function Layout({ user, logout, children }) {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { theme, toggle } = useTheme();
 
-  const links = [
-    {
-      to: "/dashboard",
-      label: "Dashboard",
-      icon: "dashboard",
-    },
-    {
-      to: "/vehicles",
-      label: "Vehicles",
-      icon: "car",
-    },
-    {
-      to: "/profile",
-      label: "Profile",
-      icon: "user",
-    },
-  ];
-
-  if (user.role === "Admin") {
-    links.push({
-      to: "/admin",
-      label: "Administration",
-      icon: "shield",
-    });
-  }
+  const links =
+    user.role === "Admin" ? [...NAV_LINKS, ADMIN_LINK] : NAV_LINKS;
 
   return (
     <div className="app-shell">
@@ -121,6 +101,15 @@ function Layout({ user, logout, children }) {
               <span className="status-dot" />
               System operational
             </div>
+
+            <button
+              className="theme-toggle"
+              onClick={toggle}
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label="Toggle color theme"
+            >
+              <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
+            </button>
 
             <Link to="/profile" className="top-avatar">
               {user.fullName?.charAt(0)?.toUpperCase() || "U"}

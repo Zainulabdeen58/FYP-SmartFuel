@@ -1,26 +1,26 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import api from "../api";
+import useFetch from "../hooks/useFetch";
 import Icon from "./Icon";
 import VehicleForm from "./VehicleForm";
 
 function Vehicles() {
-  const [vehicles, setVehicles] = useState([]);
+  const {
+    data: vehicles,
+    error,
+    setError,
+    reload: load,
+  } = useFetch(
+    async () => {
+      const { data } = await api.get("/vehicles");
+      return data.vehicles;
+    },
+    [],
+    { initialData: [] }
+  );
+
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [error, setError] = useState("");
-
-  const load = async () => {
-    try {
-      const { data } = await api.get("/vehicles");
-      setVehicles(data.vehicles);
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not load vehicles");
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
 
   const remove = async (id) => {
     if (!confirm("Delete this vehicle?")) return;

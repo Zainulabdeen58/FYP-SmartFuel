@@ -7,7 +7,7 @@ import Dashboard from "./components/Dashboard";
 import Vehicles from "./components/Vehicles";
 import Profile from "./components/Profile";
 import Admin from "./components/Admin";
-import "./SmartFuel.css";
+import "./global.css";
 
 export default function App() {
   const { user, save, logout } = useAuth();

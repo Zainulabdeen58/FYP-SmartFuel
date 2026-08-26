@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
+import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
-  hasErrors,
   validateContactNumber,
   validateEmail,
   validateFullName,
@@ -29,65 +29,47 @@ function AuthPage({ mode, save }) {
   const navigate = useNavigate();
   const isLogin = mode === "login";
 
-  const [form, setForm] = useState(() => getInitialForm(mode));
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const {
+    form,
+    setForm,
+    fieldErrors,
+    setFieldErrors,
+    error,
+    setError,
+    loading,
+    updateField,
+    handleSubmit: submit,
+  } = useForm({
+    initialValues: getInitialForm(mode),
+    validate: (f) =>
+      isLogin
+        ? {
+            email: validateEmail(f.email),
+            password: validatePassword(f.password),
+          }
+        : {
+            fullName: validateFullName(f.fullName),
+            contactNumber: validateContactNumber(f.contactNumber),
+            role: validateRole(f.role || "Individual"),
+            email: validateEmail(f.email),
+            password: validatePassword(f.password),
+          },
+    onSubmit: async (f) => {
+      const endpoint = isLogin ? "/auth/login" : "/auth/register";
+      const payload = isLogin ? f : { ...f, role: f.role || "Individual" };
+      const { data } = await api.post(endpoint, payload);
+      save(data);
+      navigate("/dashboard");
+    },
+    errorMessage: "Something went wrong. Please try again.",
+  });
 
   useEffect(() => {
     setForm(getInitialForm(mode));
     setFieldErrors({});
     setError("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
-
-  const updateField = (name, value) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const validate = () => {
-    const errors = isLogin
-      ? {
-          email: validateEmail(form.email),
-          password: validatePassword(form.password),
-        }
-      : {
-          fullName: validateFullName(form.fullName),
-          contactNumber: validateContactNumber(form.contactNumber),
-          role: validateRole(form.role || "Individual"),
-          email: validateEmail(form.email),
-          password: validatePassword(form.password),
-        };
-
-    setFieldErrors(errors);
-    return !hasErrors(errors);
-  };
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    if (!validate()) return;
-
-    setLoading(true);
-
-    try {
-      const endpoint = isLogin ? "/auth/login" : "/auth/register";
-      const payload = isLogin
-        ? form
-        : { ...form, role: form.role || "Individual" };
-      const { data } = await api.post(endpoint, payload);
-      save(data);
-      navigate("/dashboard");
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Something went wrong. Please try again.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="auth-page">
@@ -162,9 +144,7 @@ function AuthPage({ mode, save }) {
               </span>
 
               <h2>
-                {isLogin
-                  ? "Sign in to your workspace"
-                  : "Create your account"}
+                {isLogin ? "Sign in to your workspace" : "Create your account"}
               </h2>
 
               <p>

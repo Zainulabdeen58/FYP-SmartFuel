@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { createPortal } from "react-dom";
 import api from "../api";
+import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
-  hasErrors,
   validateContactNumber,
   validateEmail,
   validateFullName,
@@ -10,52 +10,34 @@ import {
 } from "../validation";
 
 function UserForm({ user, onSave, onCancel, lockRole = false }) {
-  const [form, setForm] = useState({
-    fullName: user.fullName || "",
-    email: user.email || "",
-    contactNumber: user.contactNumber || "",
-    role: user.role || "Individual",
-  });
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const updateField = (name, value) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const validate = () => {
-    const errors = {
-      fullName: validateFullName(form.fullName),
-      email: validateEmail(form.email),
-      contactNumber: validateContactNumber(form.contactNumber),
-      role: validateRole(form.role),
-    };
-
-    setFieldErrors(errors);
-    return !hasErrors(errors);
-  };
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    if (!validate()) return;
-
-    setLoading(true);
-
-    try {
-      const { data } = await api.put(`/admin/users/${user._id}`, form);
+  const {
+    form,
+    fieldErrors,
+    error,
+    loading,
+    updateField,
+    handleSubmit: submit,
+  } = useForm({
+    initialValues: {
+      fullName: user.fullName || "",
+      email: user.email || "",
+      contactNumber: user.contactNumber || "",
+      role: user.role || "Individual",
+    },
+    validate: (f) => ({
+      fullName: validateFullName(f.fullName),
+      email: validateEmail(f.email),
+      contactNumber: validateContactNumber(f.contactNumber),
+      role: validateRole(f.role),
+    }),
+    onSubmit: async (f) => {
+      const { data } = await api.put(`/admin/users/${user._id}`, f);
       onSave(data.user);
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not update user");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    errorMessage: "Could not update user",
+  });
 
-  return (
+  return createPortal(
     <div
       className="modal-backdrop"
       onClick={onCancel}
@@ -152,7 +134,8 @@ function UserForm({ user, onSave, onCancel, lockRole = false }) {
           </button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

@@ -1,26 +1,22 @@
-import { useState } from "react";
+import { createPortal } from "react-dom";
 import api from "../api";
+import {
+  EMPTY_VEHICLE,
+  FUEL_TYPES,
+  NUMBER_FIELDS,
+  VEHICLE_LABELS,
+} from "../constant";
+import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
-  hasErrors,
   validateFuelType,
   validateModelYear,
   validatePositiveNumber,
   validateRequired,
 } from "../validation";
 
-const emptyVehicle = {
-  vehicleName: "",
-  registrationNumber: "",
-  manufacturer: "",
-  modelYear: "",
-  fuelType: "Petrol",
-  fuelEfficiency: "",
-  fuelTankCapacity: "",
-};
-
 function toFormValues(vehicle) {
-  if (!vehicle) return emptyVehicle;
+  if (!vehicle) return EMPTY_VEHICLE;
 
   return {
     vehicleName: vehicle.vehicleName || "",
@@ -35,65 +31,44 @@ function toFormValues(vehicle) {
 
 function VehicleForm({ vehicle = null, onSave, onCancel }) {
   const isEdit = Boolean(vehicle?._id);
-  const [form, setForm] = useState(() => toFormValues(vehicle));
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const labels = {
-    vehicleName: "Vehicle name",
-    registrationNumber: "Registration number",
-    manufacturer: "Manufacturer",
-    modelYear: "Model year",
-    fuelType: "Fuel type",
-    fuelEfficiency: "Fuel efficiency",
-    fuelTankCapacity: "Fuel tank capacity",
-  };
-
-  const updateField = (name, value) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const validate = () => {
-    const errors = {
-      vehicleName: validateRequired(form.vehicleName, labels.vehicleName),
+  const {
+    form,
+    fieldErrors,
+    error,
+    loading,
+    updateField,
+    handleSubmit: submit,
+  } = useForm({
+    initialValues: toFormValues(vehicle),
+    validate: (f) => ({
+      vehicleName: validateRequired(f.vehicleName, VEHICLE_LABELS.vehicleName),
       registrationNumber: validateRequired(
-        form.registrationNumber,
-        labels.registrationNumber,
+        f.registrationNumber,
+        VEHICLE_LABELS.registrationNumber,
       ),
-      manufacturer: validateRequired(form.manufacturer, labels.manufacturer),
-      modelYear: validateModelYear(form.modelYear),
-      fuelType: validateFuelType(form.fuelType),
+      manufacturer: validateRequired(
+        f.manufacturer,
+        VEHICLE_LABELS.manufacturer,
+      ),
+      modelYear: validateModelYear(f.modelYear),
+      fuelType: validateFuelType(f.fuelType),
       fuelEfficiency: validatePositiveNumber(
-        form.fuelEfficiency,
-        labels.fuelEfficiency,
+        f.fuelEfficiency,
+        VEHICLE_LABELS.fuelEfficiency,
       ),
       fuelTankCapacity: validatePositiveNumber(
-        form.fuelTankCapacity,
-        labels.fuelTankCapacity,
+        f.fuelTankCapacity,
+        VEHICLE_LABELS.fuelTankCapacity,
       ),
-    };
-
-    setFieldErrors(errors);
-    return !hasErrors(errors);
-  };
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    if (!validate()) return;
-
-    setLoading(true);
-
-    try {
+    }),
+    onSubmit: async (f) => {
       const payload = {
-        ...form,
-        modelYear: Number(form.modelYear),
-        fuelEfficiency: Number(form.fuelEfficiency),
-        fuelTankCapacity: Number(form.fuelTankCapacity),
-        registrationNumber: form.registrationNumber.trim().toUpperCase(),
+        ...f,
+        modelYear: Number(f.modelYear),
+        fuelEfficiency: Number(f.fuelEfficiency),
+        fuelTankCapacity: Number(f.fuelTankCapacity),
+        registrationNumber: f.registrationNumber.trim().toUpperCase(),
       };
 
       const { data } = isEdit
@@ -101,14 +76,11 @@ function VehicleForm({ vehicle = null, onSave, onCancel }) {
         : await api.post("/vehicles", payload);
 
       onSave(data.vehicle);
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not save vehicle");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    errorMessage: "Could not save vehicle",
+  });
 
-  return (
+  return createPortal(
     <div
       className="modal-backdrop"
       onClick={onCancel}
@@ -147,16 +119,18 @@ function VehicleForm({ vehicle = null, onSave, onCancel }) {
           {Object.entries(form).map(([key, value]) =>
             key === "fuelType" ? (
               <div className="field" key={key}>
-                <label>{labels[key]}</label>
+                <label>{VEHICLE_LABELS[key]}</label>
 
                 <select
                   value={value}
                   className={fieldErrors[key] ? "invalid" : ""}
                   onChange={(e) => updateField(key, e.target.value)}
                 >
-                  <option value="Petrol">Petrol</option>
-                  <option value="Diesel">Diesel</option>
-                  <option value="Electric">Electric</option>
+                  {FUEL_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
                 </select>
 
                 {fieldErrors[key] && (
@@ -165,19 +139,11 @@ function VehicleForm({ vehicle = null, onSave, onCancel }) {
               </div>
             ) : (
               <div className="field" key={key}>
-                <label>{labels[key]}</label>
+                <label>{VEHICLE_LABELS[key]}</label>
 
                 <input
-                  type={
-                    [
-                      "modelYear",
-                      "fuelEfficiency",
-                      "fuelTankCapacity",
-                    ].includes(key)
-                      ? "number"
-                      : "text"
-                  }
-                  placeholder={`Enter ${labels[key].toLowerCase()}`}
+                  type={NUMBER_FIELDS.includes(key) ? "number" : "text"}
+                  placeholder={`Enter ${VEHICLE_LABELS[key].toLowerCase()}`}
                   value={value}
                   className={fieldErrors[key] ? "invalid" : ""}
                   onChange={(e) => updateField(key, e.target.value)}
@@ -204,7 +170,8 @@ function VehicleForm({ vehicle = null, onSave, onCancel }) {
           </button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
