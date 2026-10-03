@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import useAuth from "./hooks/useAuth";
 import Layout from "./components/Layout";
@@ -10,8 +9,7 @@ import Admin from "./components/Admin";
 import "./global.css";
 
 export default function App() {
-  const { user, save, logout } = useAuth();
-  const [currentUser, setCurrentUser] = useState(user);
+  const { user, save, updateUser, logout } = useAuth();
   const location = useLocation();
 
   if (!user && !["/login", "/register"].includes(location.pathname)) {
@@ -30,7 +28,7 @@ export default function App() {
             <Route
               path="/profile"
               element={
-                <Profile user={currentUser || user} saveUser={setCurrentUser} />
+                <Profile key={user.id || user._id} user={user} saveUser={updateUser} />
               }
             />
 

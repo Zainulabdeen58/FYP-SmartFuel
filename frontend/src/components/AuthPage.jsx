@@ -3,10 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
 import useForm from "../hooks/useForm";
 import Icon from "./Icon";
+import { ROLES, ROLE_LABELS } from "../constant";
 import {
   validateContactNumber,
   validateEmail,
   validateFullName,
+  validateOrganizationName,
   validatePassword,
   validateRole,
 } from "../validation";
@@ -21,7 +23,22 @@ function getInitialForm(mode) {
     email: "",
     contactNumber: "",
     role: "Individual",
+    organizationName: "",
     password: "",
+  };
+}
+
+// Only the fields the register endpoint expects; organizationName goes with
+// organizational accounts only.
+function registerPayload(f) {
+  const role = f.role || "Individual";
+  return {
+    fullName: f.fullName,
+    email: f.email,
+    contactNumber: f.contactNumber,
+    role,
+    password: f.password,
+    ...(role === "Organizational" && { organizationName: f.organizationName }),
   };
 }
 
@@ -51,12 +68,16 @@ function AuthPage({ mode, save }) {
             fullName: validateFullName(f.fullName),
             contactNumber: validateContactNumber(f.contactNumber),
             role: validateRole(f.role || "Individual"),
+            organizationName:
+              f.role === "Organizational"
+                ? validateOrganizationName(f.organizationName)
+                : "",
             email: validateEmail(f.email),
             password: validatePassword(f.password),
           },
     onSubmit: async (f) => {
       const endpoint = isLogin ? "/auth/login" : "/auth/register";
-      const payload = isLogin ? f : { ...f, role: f.role || "Individual" };
+      const payload = isLogin ? f : registerPayload(f);
       const { data } = await api.post(endpoint, payload);
       save(data);
       navigate("/dashboard");
@@ -189,42 +210,48 @@ function AuthPage({ mode, save }) {
                 <div className="field">
                   <label>Account type</label>
                   <div className="role-options">
-                    <label
-                      className={`role-option ${
-                        (form.role || "Individual") === "Individual"
-                          ? "active"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="role"
-                        value="Individual"
-                        checked={(form.role || "Individual") === "Individual"}
-                        onChange={(e) => updateField("role", e.target.value)}
-                      />
-                      Individual
-                    </label>
-
-                    <label
-                      className={`role-option ${
-                        form.role === "Admin" ? "active" : ""
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="role"
-                        value="Admin"
-                        checked={form.role === "Admin"}
-                        onChange={(e) => updateField("role", e.target.value)}
-                      />
-                      Admin
-                    </label>
+                    {ROLES.map((role) => {
+                      const selected = (form.role || "Individual") === role;
+                      return (
+                        <label
+                          key={role}
+                          className={`role-option ${selected ? "active" : ""}`}
+                        >
+                          <input
+                            type="radio"
+                            name="role"
+                            value={role}
+                            checked={selected}
+                            onChange={(e) => updateField("role", e.target.value)}
+                          />
+                          {ROLE_LABELS[role]}
+                        </label>
+                      );
+                    })}
                   </div>
                   {fieldErrors.role && (
                     <span className="field-error">{fieldErrors.role}</span>
                   )}
                 </div>
+
+                {form.role === "Organizational" && (
+                  <div className="field">
+                    <label>Organization name</label>
+                    <input
+                      placeholder="e.g. Al-Noor Logistics"
+                      value={form.organizationName || ""}
+                      className={fieldErrors.organizationName ? "invalid" : ""}
+                      onChange={(e) =>
+                        updateField("organizationName", e.target.value)
+                      }
+                    />
+                    {fieldErrors.organizationName && (
+                      <span className="field-error">
+                        {fieldErrors.organizationName}
+                      </span>
+                    )}
+                  </div>
+                )}
               </>
             )}
 

@@ -1,76 +1,70 @@
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import { createToken } from "../utils/token.js";
+import {
+  checkContactNumber,
+  checkEmail,
+  checkFullName,
+  checkOrganizationName,
+  checkPassword,
+  checkRole,
+  firstError
+} from "../utils/validation.js";
 
 export async function register(req, res) {
-  try {
-    const { fullName, email, contactNumber, role, password } = req.body;
+  const { fullName, email, contactNumber, role, organizationName, password } = req.body;
+  const isOrganization = role === "Organizational";
 
-    if (!fullName || !email || !contactNumber || !role || !password) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
-    }
+  const error = firstError(
+    checkFullName(fullName),
+    checkEmail(email),
+    checkContactNumber(contactNumber),
+    checkRole(role),
+    isOrganization ? checkOrganizationName(organizationName) : "",
+    checkPassword(password)
+  );
+  if (error) return res.status(400).json({ success: false, message: error });
 
-    if (!["Individual", "Admin"].includes(role)) {
-      return res.status(400).json({ success: false, message: "Invalid role" });
-    }
-
-    const existing = await User.findOne({ email: email.toLowerCase() });
-    if (existing) {
-      return res.status(409).json({ success: false, message: "Email already registered" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const user = await User.create({
-      fullName,
-      email: email.toLowerCase(),
-      contactNumber,
-      role,
-      password: hashedPassword
-    });
-
-    const token = createToken(user._id.toString());
-    res.status(201).json({
-      success: true,
-      message: "Registration successful",
-      token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        contactNumber: user.contactNumber,
-        role: user.role
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  const normalizedEmail = email.trim().toLowerCase();
+  if (await User.exists({ email: normalizedEmail })) {
+    return res.status(409).json({ success: false, message: "Email already registered" });
   }
+
+  const user = await User.create({
+    fullName: fullName.trim(),
+    email: normalizedEmail,
+    contactNumber: contactNumber.trim(),
+    role,
+    ...(isOrganization && { organizationName: organizationName.trim() }),
+    password: await bcrypt.hash(password, 12)
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Registration successful",
+    token: createToken(user._id.toString()),
+    user: user.toPublic()
+  });
 }
 
 export async function login(req, res) {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email: email?.toLowerCase() });
+  const { email, password } = req.body;
 
-    if (!user || !(await bcrypt.compare(password || "", user.password))) {
-      return res.status(401).json({ success: false, message: "Invalid email or password" });
-    }
-
-    const token = createToken(user._id.toString());
-    res.json({
-      success: true,
-      message: "Login successful",
-      token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        contactNumber: user.contactNumber,
-        role: user.role
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password) {
+    return res.status(400).json({ success: false, message: "Email and password are required" });
   }
+
+  const user = await User.findOne({ email: email.trim().toLowerCase() });
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return res.status(401).json({ success: false, message: "Invalid email or password" });
+  }
+
+  res.json({
+    success: true,
+    message: "Login successful",
+    token: createToken(user._id.toString()),
+    user: user.toPublic()
+  });
 }
 
 export function logout(req, res) {

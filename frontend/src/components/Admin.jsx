@@ -128,7 +128,10 @@ function Admin({ currentUser }) {
                   </div>
                 </div>
 
-                <div className="admin-contact">{u.contactNumber}</div>
+                <div className="admin-contact">
+                  {u.contactNumber}
+                  {u.organizationName ? ` · ${u.organizationName}` : ""}
+                </div>
 
                 <span className="role-badge">{u.role}</span>
 

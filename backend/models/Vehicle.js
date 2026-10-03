@@ -1,15 +1,44 @@
 import mongoose from "mongoose";
 
+const MIN_MODEL_YEAR = 1980;
+const maxModelYear = () => new Date().getFullYear() + 1;
+
+// Fuel estimates divide by efficiency, so zero must never be stored.
+const greaterThanZero = (label) => ({
+  validator: (value) => value > 0,
+  message: `${label} must be greater than 0`,
+});
+
 const vehicleSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    vehicleName: { type: String, required: true, trim: true },
-    registrationNumber: { type: String, required: true, trim: true, uppercase: true },
-    manufacturer: { type: String, required: true, trim: true },
-    modelYear: { type: Number, required: true },
-    fuelType: { type: String, enum: ["Petrol", "Diesel", "Electric"], required: true },
-    fuelEfficiency: { type: Number, required: true, min: 0 },
-    fuelTankCapacity: { type: Number, required: true, min: 0 }
+    vehicleName: { type: String, required: [true, "Vehicle name is required"], trim: true },
+    registrationNumber: {
+      type: String,
+      required: [true, "Registration number is required"],
+      trim: true,
+      uppercase: true,
+    },
+    manufacturer: { type: String, required: [true, "Manufacturer is required"], trim: true },
+    modelYear: {
+      type: Number,
+      required: [true, "Model year is required"],
+      validate: {
+        validator: (value) => Number.isInteger(value) && value >= MIN_MODEL_YEAR && value <= maxModelYear(),
+        message: () => `Model year must be a whole number between ${MIN_MODEL_YEAR} and ${maxModelYear()}`,
+      },
+    },
+    fuelType: { type: String, enum: ["Petrol", "Diesel", "Electric"], required: [true, "Fuel type is required"] },
+    fuelEfficiency: {
+      type: Number,
+      required: [true, "Fuel efficiency is required"],
+      validate: greaterThanZero("Fuel efficiency"),
+    },
+    fuelTankCapacity: {
+      type: Number,
+      required: [true, "Fuel tank capacity is required"],
+      validate: greaterThanZero("Fuel tank capacity"),
+    }
   },
   { timestamps: true }
 );

@@ -1,3 +1,5 @@
+import { FUEL_TYPES, ROLES } from "./constant";
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[+]?[\d\s\-()]{7,20}$/;
 const NAME_REGEX = /^[a-zA-Z\s.'-]{2,60}$/;
@@ -32,9 +34,24 @@ export function validatePassword(value, { required = true } = {}) {
   return "";
 }
 
+// Only needed when the user is setting a new password.
+export function validateCurrentPassword(value, newPassword) {
+  if (newPassword && !value) return "Enter your current password";
+  return "";
+}
+
 export function validateRole(value) {
   if (!value) return "Account type is required";
-  if (!["Individual", "Admin"].includes(value)) return "Select a valid account type";
+  if (!ROLES.includes(value)) return "Select a valid account type";
+  return "";
+}
+
+export function validateOrganizationName(value) {
+  const name = value?.trim() || "";
+  if (!name) return "Organization name is required";
+  if (name.length < 2 || name.length > 100) {
+    return "Organization name must be 2 to 100 characters";
+  }
   return "";
 }
 
@@ -56,19 +73,20 @@ export function validateModelYear(value) {
   return "";
 }
 
+// Fuel estimates divide by these values, so zero is not allowed.
 export function validatePositiveNumber(value, label) {
   if (value === "" || value === null || value === undefined) {
     return `${label} is required`;
   }
   const num = Number(value);
   if (Number.isNaN(num)) return `${label} must be a number`;
-  if (num < 0) return `${label} cannot be negative`;
+  if (num <= 0) return `${label} must be greater than 0`;
   return "";
 }
 
 export function validateFuelType(value) {
   if (!value) return "Fuel type is required";
-  if (!["Petrol", "Diesel", "Electric"].includes(value)) {
+  if (!FUEL_TYPES.includes(value)) {
     return "Select a valid fuel type";
   }
   return "";

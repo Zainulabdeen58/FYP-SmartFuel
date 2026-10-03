@@ -1,11 +1,13 @@
 import { createPortal } from "react-dom";
 import api from "../api";
+import { ROLES, ROLE_LABELS } from "../constant";
 import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
   validateContactNumber,
   validateEmail,
   validateFullName,
+  validateOrganizationName,
   validateRole,
 } from "../validation";
 
@@ -23,15 +25,29 @@ function UserForm({ user, onSave, onCancel, lockRole = false }) {
       email: user.email || "",
       contactNumber: user.contactNumber || "",
       role: user.role || "Individual",
+      organizationName: user.organizationName || "",
     },
     validate: (f) => ({
       fullName: validateFullName(f.fullName),
       email: validateEmail(f.email),
       contactNumber: validateContactNumber(f.contactNumber),
       role: validateRole(f.role),
+      organizationName:
+        f.role === "Organizational"
+          ? validateOrganizationName(f.organizationName)
+          : "",
     }),
     onSubmit: async (f) => {
-      const { data } = await api.put(`/admin/users/${user._id}`, f);
+      const payload = {
+        fullName: f.fullName,
+        email: f.email,
+        contactNumber: f.contactNumber,
+        role: f.role,
+        ...(f.role === "Organizational" && {
+          organizationName: f.organizationName,
+        }),
+      };
+      const { data } = await api.put(`/admin/users/${user._id}`, payload);
       onSave(data.user);
     },
     errorMessage: "Could not update user",
@@ -112,13 +128,32 @@ function UserForm({ user, onSave, onCancel, lockRole = false }) {
               className={fieldErrors.role ? "invalid" : ""}
               onChange={(e) => updateField("role", e.target.value)}
             >
-              <option value="Individual">Individual</option>
-              <option value="Admin">Admin</option>
+              {ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {ROLE_LABELS[role]}
+                </option>
+              ))}
             </select>
             {fieldErrors.role && (
               <span className="field-error">{fieldErrors.role}</span>
             )}
           </div>
+
+          {form.role === "Organizational" && (
+            <div className="field">
+              <label>Organization name</label>
+              <input
+                value={form.organizationName}
+                className={fieldErrors.organizationName ? "invalid" : ""}
+                onChange={(e) => updateField("organizationName", e.target.value)}
+              />
+              {fieldErrors.organizationName && (
+                <span className="field-error">
+                  {fieldErrors.organizationName}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {error && <div className="form-error">{error}</div>}

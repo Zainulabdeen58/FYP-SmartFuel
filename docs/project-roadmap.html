@@ -1,0 +1,1136 @@
+<!doctype html>
+<html lang="ur-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Smart Fuel Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a route sheet. Summary and fuel gauge up top, then roles, the 13 SRS requirements as stops, and the coding phases drawn as a road from Phase 0 to Phase 7. */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #ebeff5;
+  --fg: #18212c;
+  --muted: #536072;
+  --line: #d6dce5;
+  --accent: #c2410c;
+  --accent-soft: #fdeadf;
+  --ok: #16723a;
+  --ok-soft: #e1f2e6;
+  --warn: #946200;
+  --warn-soft: #faf0d6;
+  --bad: #b42318;
+  --bad-soft: #fbe6e4;
+  --todo: #556070;
+  --todo-soft: #e6eaf0;
+  --road: #2c3644;
+  --font-display: "Archivo", "Arial Narrow", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+  --radius: 10px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131a; --surface: #151c25; --surface-2: #1c2531; --fg: #e5eaf1; --muted: #9ba7b6; --line: #2a3443;
+    --accent: #ff8d55; --accent-soft: #3a2115;
+    --ok: #5bd68a; --ok-soft: #12301e; --warn: #f2c14e; --warn-soft: #34290f; --bad: #ff8a80; --bad-soft: #3b1816;
+    --todo: #a6b1bf; --todo-soft: #222b37; --road: #b9c3cf;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131a; --surface: #151c25; --surface-2: #1c2531; --fg: #e5eaf1; --muted: #9ba7b6; --line: #2a3443;
+  --accent: #ff8d55; --accent-soft: #3a2115;
+  --ok: #5bd68a; --ok-soft: #12301e; --warn: #f2c14e; --warn-soft: #34290f; --bad: #ff8a80; --bad-soft: #3b1816;
+  --todo: #a6b1bf; --todo-soft: #222b37; --road: #b9c3cf;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+code { background: var(--surface-2); padding: 0.05em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 1.2em; }
+
+.wrap { max-width: 1080px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 32px); }
+
+/* Header */
+.masthead { padding-block: 40px 28px; }
+.masthead-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 32px; align-items: center; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.masthead h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); font-weight: 800; font-stretch: 112%; letter-spacing: -0.01em; margin-top: 10px; }
+.masthead h1 span { color: var(--accent); }
+.lead { margin-top: 14px; font-size: 1.08rem; color: var(--muted); max-width: 62ch; }
+.basis { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.basis span { font-family: var(--font-mono); font-size: 0.76rem; padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface); }
+
+.gauge { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 16px 14px; text-align: center; }
+.gauge svg { width: 100%; max-width: 228px; height: auto; display: block; margin-inline: auto; }
+.g-track { fill: none; stroke: var(--surface-2); stroke-width: 16; stroke-linecap: round; }
+.g-fill { fill: none; stroke: var(--accent); stroke-width: 16; stroke-linecap: round; }
+.g-tick { stroke: var(--muted); stroke-width: 2; }
+.g-label { fill: var(--muted); font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+.g-needle { stroke: var(--fg); stroke-width: 3; stroke-linecap: round; }
+.g-hub { fill: var(--fg); }
+.gauge-value { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; font-stretch: 110%; margin-top: 2px; }
+.gauge-note { font-size: 0.84rem; color: var(--muted); }
+
+/* Sticky nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
+.nav-inner { display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; scrollbar-width: thin; }
+.nav a { flex: none; font-size: 0.9rem; font-weight: 700; color: var(--fg); text-decoration: none; padding: 6px 12px; border-radius: 999px; }
+.nav a:hover { background: var(--surface-2); }
+
+/* Sections */
+section { padding-block: 44px 8px; }
+.sec-head { display: grid; gap: 8px; margin-bottom: 22px; }
+.sec-head h2 { font-size: clamp(1.6rem, 3.6vw, 2.15rem); font-weight: 800; font-stretch: 108%; }
+.sec-head p { color: var(--muted); max-width: 68ch; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+.stack { display: grid; gap: 16px; }
+
+/* Summary */
+.summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.summary-grid .panel { display: grid; gap: 8px; align-content: start; }
+.summary-grid h3 { font-size: 1.12rem; font-weight: 700; }
+.summary-grid p { color: var(--fg); }
+.count-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+
+/* Pills and chips */
+.pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.03em; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.done { background: var(--ok-soft); color: var(--ok); }
+.pill.partial { background: var(--warn-soft); color: var(--warn); }
+.pill.todo { background: var(--todo-soft); color: var(--todo); }
+.chip { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 600; padding: 1px 7px; border-radius: 5px; margin-left: 6px; white-space: nowrap; vertical-align: 1px; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.miss { background: var(--bad-soft); color: var(--bad); }
+.chip.bug { background: var(--bad-soft); color: var(--bad); }
+.chip.decide { background: var(--warn-soft); color: var(--warn); }
+.chip.fixed { background: var(--ok-soft); color: var(--ok); }
+
+/* Tables */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 0.93rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+td.yes { color: var(--ok); font-weight: 700; }
+td.no { color: var(--muted); }
+td.prop { color: var(--warn); font-weight: 700; }
+.fr-code { font-family: var(--font-mono); font-weight: 600; white-space: nowrap; }
+
+/* Roles */
+.roles-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.role h3 { font-size: 1.2rem; font-weight: 800; font-stretch: 105%; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.role p { margin-top: 8px; }
+.role ul { margin-top: 10px; display: grid; gap: 4px; }
+.note { background: var(--warn-soft); color: var(--fg); border-radius: var(--radius); padding: 14px 16px; font-size: 0.95rem; }
+.note strong { color: var(--warn); }
+.note.ok { background: var(--ok-soft); }
+.note.ok strong { color: var(--ok); }
+.rules { display: grid; gap: 8px; padding-left: 1.3em; }
+
+/* Requirement cards */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.filters button { font: inherit; font-size: 0.9rem; font-weight: 700; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.fr-list { display: grid; gap: 16px; }
+.fr { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: grid; gap: 16px; }
+.fr-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.fr-head .fr-code { color: var(--accent); font-size: 0.9rem; }
+.fr-head h3 { font-size: 1.22rem; font-weight: 800; font-stretch: 104%; flex: 1 1 260px; min-width: 0; }
+.fr-head .phase-link { font-size: 0.86rem; font-weight: 700; white-space: nowrap; }
+.fr-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.fr-body > div { min-width: 0; display: grid; gap: 12px; align-content: start; }
+.srs { margin: 0; background: var(--surface-2); border-radius: 8px; padding: 12px 14px; font-style: italic; font-size: 0.95rem; }
+.srs::before { content: "SRS"; display: block; font-style: normal; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+.label { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.edges { display: grid; gap: 7px; }
+.edges li { padding-left: 2px; }
+.files { font-size: 0.9rem; color: var(--muted); }
+.formula { font-family: var(--font-mono); font-size: 0.88rem; background: var(--accent-soft); border-radius: 8px; padding: 10px 12px; overflow-x: auto; }
+
+/* Phases: the road */
+.progress-panel { display: grid; gap: 10px; margin-bottom: 26px; }
+.progress-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.progress-top strong { font-family: var(--font-display); font-size: 1.15rem; font-stretch: 105%; }
+.bar { height: 12px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+.bar > span { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 999px; transition: width 0.3s ease; }
+@media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } }
+.reset { font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.reset[data-armed="true"] { color: var(--bad); border-color: var(--bad); }
+.small { font-size: 0.85rem; color: var(--muted); }
+
+.road { position: relative; display: grid; gap: 22px; padding-left: 52px; }
+.road::before { content: ""; position: absolute; left: 19px; top: 8px; bottom: 8px; width: 4px; border-radius: 2px;
+  background: repeating-linear-gradient(to bottom, var(--road) 0 14px, transparent 14px 24px); opacity: 0.55; }
+.phase { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: grid; gap: 14px; }
+.stop { position: absolute; left: -52px; top: 16px; width: 42px; height: 42px; border-radius: 50%; background: var(--bg); border: 3px solid var(--road);
+  display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; color: var(--fg); }
+.phase[data-complete="true"] .stop { background: var(--ok); border-color: var(--ok); color: var(--bg); }
+.phase-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 14px; }
+.phase-head h3 { font-size: 1.3rem; font-weight: 800; font-stretch: 106%; min-width: 0; }
+.phase-count { font-family: var(--font-mono); font-size: 0.82rem; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.phase-meta { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; font-size: 0.88rem; color: var(--muted); }
+.tag { font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; padding: 2px 8px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); }
+.tag.dep { background: var(--surface-2); color: var(--muted); }
+.why { font-size: 0.97rem; }
+.tasks { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+.tasks.single { grid-template-columns: minmax(0, 1fr); }
+.tasks > div { min-width: 0; display: grid; gap: 8px; align-content: start; }
+.check { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 0.95rem; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--accent); cursor: pointer; }
+.check input:checked + span { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--muted); }
+.done-when { background: var(--surface-2); border-radius: 8px; padding: 12px 14px; font-size: 0.94rem; display: grid; gap: 6px; }
+.done-when ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+
+/* Questions + tech */
+.qs { display: grid; gap: 12px; counter-reset: q; list-style: none; padding: 0; margin: 0; }
+.qs li { counter-increment: q; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+.qs li::before { content: counter(q); font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: var(--accent); }
+.qs li span.small { display: block; margin-top: 4px; }
+.verdict { font-weight: 700; white-space: nowrap; }
+.verdict.go { color: var(--ok); }
+.verdict.alt { color: var(--warn); }
+.verdict.test { color: var(--muted); }
+.sources { display: grid; gap: 6px; font-size: 0.92rem; padding-left: 1.3em; }
+.sources a { overflow-wrap: anywhere; }
+footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
+
+@media (max-width: 860px) {
+  .masthead-grid { grid-template-columns: minmax(0, 1fr); }
+  .gauge { max-width: 300px; }
+  .summary-grid, .roles-grid { grid-template-columns: minmax(0, 1fr); }
+  .fr-body, .tasks { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .road { padding-left: 40px; }
+  .road::before { left: 14px; }
+  .stop { left: -40px; width: 32px; height: 32px; font-size: 0.9rem; border-width: 2px; }
+  .fr, .phase, .panel { padding: 16px; }
+}
+</style>
+
+<header class="masthead">
+  <div class="wrap masthead-grid">
+    <div>
+      <div class="eyebrow">CS619 · Final Year Project · Development roadmap</div>
+      <h1>Smart <span>Fuel</span> Roadmap</h1>
+      <p class="lead">SRS ki har functionality, roles, edge cases aur coding ke phases ek jagah. Pehle dekhein kya ban chuka hai, phir phase ba phase aage ka kaam. Har phase ke tasks par tick laga kar apni progress yahin track karein.</p>
+      <div class="basis">
+        <span>SRS: 13 functional requirements</span>
+        <span>Code: 085ae03 + Phase 0 fixes</span>
+        <span>Update: 3 Oct 2026</span>
+      </div>
+    </div>
+    <div class="gauge" aria-label="Project progress gauge: 3 requirements mukammal, 10 baqi">
+      <svg viewBox="0 0 200 122" role="img" aria-hidden="true">
+        <path class="g-track" d="M 20 100 A 80 80 0 0 1 180 100"></path>
+        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 40.13 46.94"></path>
+        <line class="g-tick" x1="20" y1="100" x2="34" y2="100"></line>
+        <line class="g-tick" x1="43.43" y1="43.43" x2="53.33" y2="53.33"></line>
+        <line class="g-tick" x1="100" y1="20" x2="100" y2="34"></line>
+        <line class="g-tick" x1="156.57" y1="43.43" x2="146.67" y2="53.33"></line>
+        <line class="g-tick" x1="180" y1="100" x2="166" y2="100"></line>
+        <text class="g-label" x="20" y="118" text-anchor="middle">E</text>
+        <text class="g-label" x="100" y="13" text-anchor="middle">½</text>
+        <text class="g-label" x="180" y="118" text-anchor="middle">F</text>
+        <line class="g-needle" x1="100" y1="100" x2="56.59" y2="61.53"></line>
+        <circle class="g-hub" cx="100" cy="100" r="7"></circle>
+      </svg>
+      <div class="gauge-value">3 / 13</div>
+      <div class="gauge-note">Requirements ka fuel gauge, Phase 0 ke baad.</div>
+    </div>
+  </div>
+</header>
+
+<nav class="nav" aria-label="Sections">
+  <div class="wrap nav-inner">
+    <a href="#khulasa">Khulasa</a>
+    <a href="#roles">Roles</a>
+    <a href="#functionalities">Functionalities</a>
+    <a href="#phases">Coding phases</a>
+    <a href="#sawalat">Supervisor sawalat</a>
+    <a href="#tech">Map aur route tech</a>
+    <a href="#sources">Sources</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <section id="khulasa">
+    <div class="sec-head">
+      <div class="eyebrow">Khulasa</div>
+      <h2>Ab tak kya hua, aage kya hona hai</h2>
+    </div>
+    <div class="summary-grid">
+      <div class="panel">
+        <span class="pill done">Ban chuka</span>
+        <h3>Account aur vehicles</h3>
+        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
+      </div>
+      <div class="panel">
+        <span class="pill todo">Baqi</span>
+        <h3>Asal "Smart Fuel" hissa</h3>
+        <p>Fuel records, trips, route optimization, map, monthly budget, charts, crisis mode aur notifications. Yeh 10 requirements abhi shuru nahi hui. Project ka naam jis kaam par hai, woh yahi hissa hai.</p>
+      </div>
+      <div class="panel">
+        <span class="pill partial">Agla qadam</span>
+        <h3>Phase 1: Fuel records</h3>
+        <p>Phase 0 (buniyad) ka code mukammal ho gaya. Ab fuel purchase records se shuru karein, kyunke budget, charts aur fuel price sab isi data par chalte hain. Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
+      </div>
+    </div>
+    <div class="count-row">
+      <span class="pill done">3 mukammal</span>
+      <span class="pill todo">10 shuru nahi hui</span>
+      <span class="pill done">Phase 0: code mukammal</span>
+      <span class="pill todo">8 coding phases</span>
+    </div>
+    <div class="note ok" style="margin-top:16px"><strong>Update, 3 Oct 2026:</strong> Phase 0 ke saare Missing aur Bug items theek ho gaye. Neeche aise har item par <span class="chip fixed">Fixed</span> laga hai. Backend ko 51 automated checks se test kiya gaya aur sab pass hue. Jin par <span class="chip decide">Decide</span> hai, unka faisla abhi baqi hai.</div>
+  </section>
+
+  <section id="roles">
+    <div class="sec-head">
+      <div class="eyebrow">Roles</div>
+      <h2>Kaun kya kar sakta hai</h2>
+      <p>SRS teen account types ke naam deta hai: individual, organizational aur admin. Lekin har role ki ijazat (permissions) SRS mein nahi likhi. Neeche pehle maujooda haalat hai, phir hamari proposal.</p>
+    </div>
+
+    <div class="stack">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Role</th><th>SRS mein</th><th>Code mein</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Individual</strong></td><td class="yes">Haan</td><td class="yes">Haan</td><td>Sirf apni vehicles dekh aur manage kar sakta hai.</td></tr>
+            <tr><td><strong>Organizational</strong></td><td class="yes">Haan</td><td class="yes">Haan</td><td>Phase 0 mein add ho gaya. Register par organization name zaroori hai. <span class="chip fixed">Fixed</span></td></tr>
+            <tr><td><strong>Admin</strong></td><td class="yes">Haan</td><td class="yes">Haan</td><td>Saare users aur vehicles manage karta hai. Abhi koi bhi register karte waqt Admin chun sakta hai.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="roles-grid">
+        <div class="panel role">
+          <h3>Individual <span class="pill done">Bana hua</span></h3>
+          <p>Aam user jo apni gaari ya gaariyon ka fuel, safar aur budget sambhalta hai.</p>
+          <ul>
+            <li>Apni vehicles, fuel records, trips</li>
+            <li>Apna monthly budget aur dashboard</li>
+            <li>Apne liye crisis mode on/off</li>
+          </ul>
+        </div>
+        <div class="panel role">
+          <h3>Organizational <span class="pill done">Bana hua</span></h3>
+          <p>Chhoti company ya idare ka account. Ek login se poori fleet (kai gaariyan) sambhalta hai.</p>
+          <ul>
+            <li>Organization ka naam register par zaroori</li>
+            <li>Fleet ka ek budget, chahein to har gaari ka alag</li>
+            <li>Gaariyon ka aapas mein muqabla (charts)</li>
+          </ul>
+        </div>
+        <div class="panel role">
+          <h3>Admin <span class="pill done">Bana hua</span></h3>
+          <p>System chalane wala. Saare users aur gaariyan dekh aur theek kar sakta hai.</p>
+          <ul>
+            <li>Users dekhna, edit, delete</li>
+            <li>Saari vehicles search, edit, delete</li>
+            <li>Khud ko delete ya apna Admin role khatam nahi kar sakta</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Feature</th><th>Individual</th><th>Organizational</th><th>Admin</th></tr></thead>
+          <tbody>
+            <tr><td>Register, login, profile, logout</td><td class="yes">Haan</td><td class="yes">Haan</td><td class="yes">Haan</td></tr>
+            <tr><td>Vehicles add, edit, delete</td><td class="yes">Apni</td><td class="yes">Apni fleet</td><td class="yes">Sab ki</td></tr>
+            <tr><td>Fuel purchase records</td><td class="yes">Apne</td><td class="yes">Fleet ke</td><td class="prop">Sab dekh sake (proposal)</td></tr>
+            <tr><td>Trips aur route planning</td><td class="yes">Apne</td><td class="yes">Fleet ke</td><td class="prop">Sirf dekhna (proposal)</td></tr>
+            <tr><td>Monthly budget</td><td class="yes">Personal</td><td class="yes">Fleet + har gaari</td><td class="no">Zaroorat nahi</td></tr>
+            <tr><td>Crisis mode</td><td class="yes">Apne liye</td><td class="yes">Apne liye</td><td class="prop">Poore system ke liye (proposal)</td></tr>
+            <tr><td>Dashboard aur charts</td><td class="yes">Apna data</td><td class="yes">Fleet muqabla</td><td class="prop">System stats (proposal)</td></tr>
+            <tr><td>Notifications</td><td class="yes">Haan</td><td class="yes">Haan</td><td class="yes">Haan</td></tr>
+            <tr><td>Users manage karna</td><td class="no">Nahi</td><td class="no">Nahi</td><td class="yes">Haan</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note"><strong>Proposal hai, faisla nahi.</strong> Peele rang wali cheezen SRS mein nahi likhi. Supervisor se confirm karke hi banayein. Sawalat neeche <a href="#sawalat">Supervisor sawalat</a> mein hain.</div>
+
+      <div class="panel">
+        <div class="label" style="margin-bottom:10px">Zaroori rules (poore system par lagoo)</div>
+        <ol class="rules">
+          <li>Har user sirf apna data dekhe. Doosre ka data sirf Admin dekh sakta hai. <span class="chip ok">Vehicles mein bana hua</span></li>
+          <li>Admin khud ko delete ya apna Admin role khatam nahi kar sakta. <span class="chip ok">Bana hua</span></li>
+          <li>User delete ho to uski gaariyan bhi delete hon. Aage uske fuel records, trips aur budgets bhi saath delete hone chahiye. <span class="chip decide">Aage ke models</span></li>
+          <li>Fuel efficiency aur tank capacity hamesha 0 se zyada hon, warna fuel ka andaza 0 se divide ho jayega. <span class="chip fixed">Fixed</span></li>
+          <li>Mahina Pakistan time (Asia/Karachi) ke hisaab se gina jaye, taake raat ki entry ghalat mahine mein na jaye. <span class="chip decide">Aage ke models</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="functionalities">
+    <div class="sec-head">
+      <div class="eyebrow">Functionalities · 13 requirements</div>
+      <h2>SRS ki har functionality aur uske edge cases</h2>
+      <p>Har card mein SRS ka asal jumla (English), uska matlab, abhi kya bana hai, aur edge cases. Edge case woh ajeeb ya mushkil halat hai jis mein system ko ghalti nahi karni chahiye.</p>
+    </div>
+
+    <div class="table-wrap" style="margin-bottom:20px">
+      <table>
+        <thead><tr><th>#</th><th>Functionality</th><th>Status</th><th>Phase</th></tr></thead>
+        <tbody>
+          <tr><td class="fr-code">FR-01</td><td>Account: register, login, profile, logout</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-0">Phase 0</a> (ho gaya)</td></tr>
+          <tr><td class="fr-code">FR-02</td><td>Vehicle add karna</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-0">Phase 0</a> (fixes ho gaye)</td></tr>
+          <tr><td class="fr-code">FR-03</td><td>Vehicle dekhna, edit, delete</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-0">Phase 0</a> (fixes ho gaye)</td></tr>
+          <tr><td class="fr-code">FR-04</td><td>Fuel purchase records</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-1">Phase 1</a></td></tr>
+          <tr><td class="fr-code">FR-05</td><td>Trips banana</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
+          <tr><td class="fr-code">FR-06</td><td>Fuel ka andaza aur optimized route</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
+          <tr><td class="fr-code">FR-07</td><td>Crisis mode</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-5">Phase 5</a></td></tr>
+          <tr><td class="fr-code">FR-08</td><td>Monthly budget aur alerts</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-2">Phase 2</a></td></tr>
+          <tr><td class="fr-code">FR-09</td><td>Charts aur graphs</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-3">Phase 3</a></td></tr>
+          <tr><td class="fr-code">FR-10</td><td>Dashboard filters</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-3">Phase 3</a></td></tr>
+          <tr><td class="fr-code">FR-11</td><td>Map par route dikhana</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
+          <tr><td class="fr-code">FR-12</td><td>Map zoom, pan, interact</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
+          <tr><td class="fr-code">FR-13</td><td>Notifications</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-6">Phase 6</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="filters" role="group" aria-label="Status filter">
+      <button type="button" id="filter-all" data-filter="all" aria-pressed="true">Sab (13)</button>
+      <button type="button" id="filter-done" data-filter="done" aria-pressed="false">Mukammal (3)</button>
+      <button type="button" id="filter-todo" data-filter="todo" aria-pressed="false">Shuru nahi (10)</button>
+    </div>
+
+    <div class="fr-list">
+
+      <article class="fr" data-status="done" id="fr-01">
+        <div class="fr-head">
+          <span class="fr-code">FR-01</span>
+          <h3>Account: register, login, profile, logout</h3>
+          <span class="pill done">Mukammal</span>
+          <a class="phase-link" href="#phase-0">Phase 0</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall allow users (individual, organizational, and admin) to register an account, log in securely, update their personal profile, and log out.</blockquote>
+            <p><strong>Matlab:</strong> User account bana sake, password ke saath mehfooz login kare, apni profile badal sake aur logout kar sake. Teen qisam ke account hon.</p>
+            <p><strong>Abhi bana hai:</strong> Teeno account types ke saath register, login (JWT token aur bcrypt password), profile update aur logout. Server khud email, phone aur password check karta hai. Login expire hone par app khud logout kar deti hai.</p>
+            <p class="files">Files: <code>backend/controllers/authController.js</code>, <code>userController.js</code>, <code>backend/utils/validation.js</code>, <code>frontend/src/api.js</code>, <code>AuthPage.jsx</code>, <code>Profile.jsx</code></p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Same email dobara, ya capital letters ke saath (Ali@x.com aur ali@x.com). <span class="chip ok">Handled</span></li>
+              <li>Organizational account ka option nahi tha. Ab register par "Organization" option aur organization name hai. <span class="chip fixed">Fixed</span></li>
+              <li>6 se chhota password seedha API se bheja jaye to server ab reject karta hai. <span class="chip fixed">Fixed</span></li>
+              <li>Koi bhi register karte waqt Admin chun kar poore system ka control le sakta hai. <span class="chip decide">Decide</span></li>
+              <li>Token 1 din baad expire ho to app ab khud logout karke login page par le jati hai. <span class="chip fixed">Fixed</span></li>
+              <li>Ek computer par user A ke baad user B login kare to Profile ab B ka data dikhata hai, aur profile badalne par naya naam fori har jagah dikhta hai. <span class="chip fixed">Fixed</span></li>
+              <li>Naya password set karne ke liye ab current password zaroori hai. <span class="chip fixed">Fixed</span></li>
+              <li>Delete ho chuke user ka token use ho to "User no longer exists". <span class="chip ok">Handled</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="done" id="fr-02">
+        <div class="fr-head">
+          <span class="fr-code">FR-02</span>
+          <h3>Vehicle add karna</h3>
+          <span class="pill done">Mukammal</span>
+          <a class="phase-link" href="#phase-0">Phase 0 (fixes)</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall allow users to add new vehicles with attributes including fuel efficiency and tank capacity.</blockquote>
+            <p><strong>Matlab:</strong> Gaari add karna: naam, registration number, company, model year, fuel type, fuel efficiency (km/l) aur tank capacity (litre).</p>
+            <p><strong>Abhi bana hai:</strong> Saari fields ke saath add form aur API.</p>
+            <p class="files">Files: <code>backend/models/Vehicle.js</code>, <code>vehicleController.js</code>, <code>frontend/src/components/VehicleForm.jsx</code></p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Fuel efficiency aur tank capacity ab 0 se zyada lazmi hain, form aur server dono par. <span class="chip fixed">Fixed</span></li>
+              <li>Same registration number dobara add karne par ab "already exists" error aata hai. <span class="chip fixed">Fixed</span></li>
+              <li>Model year ki had (1980 se agle saal tak) ab server bhi check karta hai. <span class="chip fixed">Fixed</span></li>
+              <li>Electric gaari ke liye km/l aur litre tank ka matlab nahi banta (kWh hona chahiye). <span class="chip decide">Decide</span></li>
+              <li>Negative values server par ruk jaati hain. <span class="chip ok">Handled</span></li>
+              <li>Registration number chhote harfon ya space ke saath likha jaye to khud bade harf aur trim. <span class="chip ok">Handled</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="done" id="fr-03">
+        <div class="fr-head">
+          <span class="fr-code">FR-03</span>
+          <h3>Vehicle dekhna, edit, delete</h3>
+          <span class="pill done">Mukammal</span>
+          <a class="phase-link" href="#phase-0">Phase 0 (fixes)</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall allow users to view, update, or delete vehicle information at any time.</blockquote>
+            <p><strong>Matlab:</strong> User apni gaariyon ki list dekhe, kisi bhi waqt badle ya delete kare.</p>
+            <p><strong>Abhi bana hai:</strong> List, edit aur delete. Individual sirf apni gaariyan dekhta hai, Admin sab.</p>
+            <p class="files">Files: <code>backend/controllers/vehicleController.js</code>, <code>frontend/src/components/Vehicles.jsx</code>, <code>Admin.jsx</code></p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Doosre user ki gaari ka ID kholne par "Not authorized". <span class="chip ok">Handled</span></li>
+              <li>Ghalat ID (jaise "abc") par ab saaf JSON error "Invalid id" aata hai. <span class="chip fixed">Fixed</span></li>
+              <li>Edit mein ghalat value (jaise fuel type "Gas") par ab 400 aur saaf message. <span class="chip fixed">Fixed</span></li>
+              <li>Jis gaari ke fuel records ya trips hon, use delete karne par kya ho: saath delete ya delete rok dein. <span class="chip decide">Decide</span></li>
+              <li>Page load par ab "Loading vehicles..." dikhta hai, "No vehicles yet" nahi chamakta. <span class="chip fixed">Fixed</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="todo" id="fr-04">
+        <div class="fr-head">
+          <span class="fr-code">FR-04</span>
+          <h3>Fuel purchase records</h3>
+          <span class="pill todo">Shuru nahi</span>
+          <a class="phase-link" href="#phase-1">Phase 1</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall allow users to create, read, update, and delete fuel purchase records linked to vehicles, including date, quantity, and cost.</blockquote>
+            <p><strong>Matlab:</strong> Jab bhi petrol ya diesel dalwayein, entry karein: kis gaari mein, kab, kitne litre, kitne rupay. Entries dekh, badal aur delete kar saken.</p>
+            <p><strong>Fields (proposal):</strong> gaari, date, quantity (litre), total cost (Rs), price per litre (khud calculate), odometer reading (km, optional), petrol pump (optional).</p>
+            <p class="small">Odometer isliye: khareeda hua fuel aur jala hua fuel ek cheez nahi. Asal km/l nikalne ke liye do refills ke beech ke km chahiye.</p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Quantity tank se zyada (60 L tank mein 80 L) ho to reject ya warning.</li>
+              <li>Quantity ya cost 0 ya negative ho to reject.</li>
+              <li>Aane wali (future) date ho to reject.</li>
+              <li>Price per litre bohat ajeeb ho (Rs 5/L ya Rs 5,000/L) to typing ki ghalti ki warning.</li>
+              <li>Gaari kisi aur user ki ho to "Not authorized".</li>
+              <li>Electric gaari ke liye fuel record block karein ya "charging" record (kWh) banayein.</li>
+              <li>31 tareekh raat 11:30 ki entry server UTC mein save kare to agle mahine mein chali jaati hai. Mahina Pakistan time se ginein.</li>
+              <li>Purani entry edit ya delete ho to us mahine ka budget aur charts dobara hisaab hon.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="todo" id="fr-05">
+        <div class="fr-head">
+          <span class="fr-code">FR-05</span>
+          <h3>Trips banana</h3>
+          <span class="pill todo">Shuru nahi</span>
+          <a class="phase-link" href="#phase-4">Phase 4</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall allow users to create trips by specifying a starting point and destination.</blockquote>
+            <p><strong>Matlab:</strong> Safar plan karna: kahan se kahan, kis gaari se, kis din.</p>
+            <p><strong>Fields (proposal):</strong> gaari, start (naam aur location), destination, date, maqsad, priority (zaroori ya ghair-zaroori), status (planned ya completed).</p>
+            <p class="small">Priority SRS mein nahi likhi, lekin crisis mode (FR-07) ko "ghair-zaroori safar" pehchanne ke liye yahi chahiye.</p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Jagah ka naam na mile, ya kai jagah milen (jaise "Saddar" Karachi aur Rawalpindi dono mein). List dikha kar user se chunwayein.</li>
+              <li>Start aur destination ek hi jagah ho to reject.</li>
+              <li>Sadak ka koi raasta hi na ho to saaf message.</li>
+              <li>Safar tank ki range se lamba ho (distance zyada ho efficiency × tank se) to "raste mein fuel bharna hoga".</li>
+              <li>Map ya route API band ho ya limit khatam ho jaye to trip phir bhi save ho, andaza baad mein.</li>
+              <li>Gaari select na ki ho to fuel ka andaza nahi ho sakta, isliye gaari zaroori.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="todo" id="fr-06">
+        <div class="fr-head">
+          <span class="fr-code">FR-06</span>
+          <h3>Fuel ka andaza aur optimized route</h3>
+          <span class="pill todo">Shuru nahi</span>
+          <a class="phase-link" href="#phase-4">Phase 4</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall calculate the estimated fuel required and suggest optimized routes to minimize fuel consumption.</blockquote>
+            <p><strong>Matlab:</strong> Safar ke liye kitna fuel lagega aur kitne paise, yeh batana. Kai raaston mein se kam fuel wala raasta suggest karna.</p>
+            <div class="formula">fuel (L) = distance (km) ÷ efficiency (km/l)<br>kharcha (Rs) = fuel (L) × price per litre<br>Misaal: 120 km ÷ 12 km/l = 10 L · 10 L × Rs 265 = Rs 2,650</div>
+            <p class="small">Price user ki aakhri fuel entry se. Misaal ka Rs 265 sirf samjhane ke liye hai.</p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Efficiency 0 ya khaali ho to 0 se divide. Isliye FR-02 mein 0 se zyada lazmi.</li>
+              <li>User ki koi fuel entry nahi to price kahan se aaye: default price ya user se poochein.</li>
+              <li>Sirf ek raasta mile to wahi dikhayein aur likhein "alternative nahi mila".</li>
+              <li>Chhota raasta zyada waqt le (traffic) to fuel aur time dono dikhayein, user chune.</li>
+              <li>Yeh andaza hai. Chadhaai, traffic aur AC ka asar shamil nahi, UI mein bhi "andaza" likhein.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="todo" id="fr-07">
+        <div class="fr-head">
+          <span class="fr-code">FR-07</span>
+          <h3>Crisis mode</h3>
+          <span class="pill todo">Shuru nahi</span>
+          <a class="phase-link" href="#phase-5">Phase 5</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall provide a "crisis mode" that recommends strategies such as combining trips or avoiding non-essential travel to conserve fuel.</blockquote>
+            <p><strong>Matlab:</strong> Fuel ki kami ke dino ka mode jo mashware de: safar mila lo, ghair-zaroori safar chhor do.</p>
+            <p><strong>Rules (proposal):</strong></p>
+            <ul>
+              <li>Ek hi din ke trips jinki manzil qareeb ho (jaise 5 km ke andar): "inhein ek safar mein milayein".</li>
+              <li>Ghair-zaroori priority wala trip: "aage karein ya cancel karein".</li>
+              <li>Kitne litre aur rupay bachenge, yeh bhi dikhayein.</li>
+            </ul>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Mode kaun on kare: har user khud, ya Admin poore system ke liye? Supervisor se poochein.</li>
+              <li>Koi trip planned na ho to sirf aam tips dikhayein.</li>
+              <li>Purane trips jinki priority nahi, unhein "unknown" maan kar user se poochein.</li>
+              <li>Sirf ek trip ho to "combine" ka mashwara na dein.</li>
+              <li>Mode band karne par mashware hat jayen, user ka data delete na ho.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="todo" id="fr-08">
+        <div class="fr-head">
+          <span class="fr-code">FR-08</span>
+          <h3>Monthly budget aur alerts</h3>
+          <span class="pill todo">Shuru nahi</span>
+          <a class="phase-link" href="#phase-2">Phase 2</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall allow users to set monthly fuel budgets, track fuel expenses automatically, and display alerts when budgets are exceeded through a user dashboard.</blockquote>
+            <p><strong>Matlab:</strong> Har mahine ka fuel budget set karna (jaise Rs 30,000). Fuel entries ka kharcha khud jud kar dikhe. Budget cross ho to dashboard par alert.</p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Budget set hi nahi kiya to alert nahi, dashboard par "budget set karein" ka button.</li>
+              <li>Budget 0 ya negative ho to reject.</li>
+              <li>Mahine ke beech budget badla to naye budget se dobara hisaab.</li>
+              <li>Alert baar baar na aaye: 80% par ek warning, 100% par ek alert, har mahine ek dafa.</li>
+              <li>Entry delete karne se kharcha budget ke andar aa jaye to alert hat jaye.</li>
+              <li>Mahina Pakistan time ke hisaab se (FR-04 wala timezone case).</li>
+              <li>Organizational: poori fleet ka ek budget, chahein to har gaari ka alag.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="todo" id="fr-09">
+        <div class="fr-head">
+          <span class="fr-code">FR-09</span>
+          <h3>Charts aur graphs</h3>
+          <span class="pill todo">Shuru nahi</span>
+          <a class="phase-link" href="#phase-3">Phase 3</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall provide visual charts and graphs showing total fuel consumption, costs over time, and per-vehicle statistics.</blockquote>
+            <p><strong>Matlab:</strong> Graphs: har mahine kitne litre aur kitne rupay, aur har gaari ka muqabla (litre, kharcha, average km/l).</p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Koi data nahi to khaali chart ki jagah "pehli fuel entry add karein".</li>
+              <li>Sirf ek entry ho to line chart ki jagah seedha number ya bar.</li>
+              <li>Delete ho chuki gaari ka purana data: "Deleted vehicle" naam se dikhayein ya chhupa dein.</li>
+              <li>Electric (kWh) aur petrol (litre) ko ek hi chart mein na milayein.</li>
+              <li>Odometer na ho to chart par "khareeda gaya fuel" likhein, "consumption" nahi.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="todo" id="fr-10">
+        <div class="fr-head">
+          <span class="fr-code">FR-10</span>
+          <h3>Dashboard filters</h3>
+          <span class="pill todo">Shuru nahi</span>
+          <a class="phase-link" href="#phase-3">Phase 3</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall allow users to filter and interact with dashboards to analyze fuel usage patterns.</blockquote>
+            <p><strong>Matlab:</strong> Dashboard par filter: date range, gaari, fuel type. Chart par mouse le jane se values dikhen.</p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Start date end date ke baad ho to error dikhayein.</li>
+              <li>Filter ka koi result na ho to "is filter mein data nahi".</li>
+              <li>Bohat lamba range (5 saal) ho to mahine ki jagah saal ke hisaab se dikhayein.</li>
+              <li>Page refresh par chuna hua filter yaad rahe.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="todo" id="fr-11">
+        <div class="fr-head">
+          <span class="fr-code">FR-11</span>
+          <h3>Map par route dikhana</h3>
+          <span class="pill todo">Shuru nahi</span>
+          <a class="phase-link" href="#phase-4">Phase 4</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall display planned and optimized routes on a map, including distance, estimated fuel consumption, and travel time.</blockquote>
+            <p><strong>Matlab:</strong> Map par raaste ki line, saath mein distance (km), andazan fuel (L) aur waqt (minute).</p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Internet slow ho aur map load na ho to bhi route ki details text mein dikhen.</li>
+              <li>Kai raaste hon to recommended raasta alag rang mein, baqi halke.</li>
+              <li>OpenStreetMap aur route provider ka naam (attribution) map par dikhana zaroori hai.</li>
+              <li>API key frontend code mein na ho. Call backend ke zariye karein.</li>
+              <li>Mobile par map ki height aur controls theek hon.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="todo" id="fr-12">
+        <div class="fr-head">
+          <span class="fr-code">FR-12</span>
+          <h3>Map zoom, pan, interact</h3>
+          <span class="pill todo">Shuru nahi</span>
+          <a class="phase-link" href="#phase-4">Phase 4</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall allow users to zoom, pan, and interact with the map for better trip planning.</blockquote>
+            <p><strong>Matlab:</strong> Map ko zoom in/out karna, khiskana (pan), aur raaste ya marker par click karke details dekhna. Leaflet yeh sab khud deta hai.</p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>Mobile par do ungliyon se zoom, aur page scroll aur map pan aapas mein na takrayein.</li>
+              <li>Bohat zyada zoom out (poori duniya) na ho, Pakistan ke aas paas had lagayein.</li>
+              <li>Keyboard se bhi zoom (+ aur −) chale.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="fr" data-status="todo" id="fr-13">
+        <div class="fr-head">
+          <span class="fr-code">FR-13</span>
+          <h3>Notifications</h3>
+          <span class="pill todo">Shuru nahi</span>
+          <a class="phase-link" href="#phase-6">Phase 6</a>
+        </div>
+        <div class="fr-body">
+          <div>
+            <blockquote class="srs">The system shall notify users of critical events, including budget limits exceeded, inefficient trips, or recommended actions during crisis mode.</blockquote>
+            <p><strong>Matlab:</strong> Zaroori baaton par notification: budget cross, inefficient trip, crisis mode ke mashware.</p>
+            <p><strong>Proposal:</strong> App ke andar bell icon aur list (read/unread). Email baad mein, agar supervisor kahe.</p>
+          </div>
+          <div>
+            <div class="label">Edge cases</div>
+            <ul class="edges">
+              <li>"Inefficient trip" ki tareef SRS mein nahi. Proposal: chuna gaya raasta recommended se 15% ya zyada fuel le.</li>
+              <li>Ek hi baat ki notification baar baar na bane.</li>
+              <li>Notification jis cheez ki taraf le jaye woh delete ho chuki ho to "yeh item ab maujood nahi".</li>
+              <li>Bohat purani notifications 60 din baad saaf ho jayen.</li>
+              <li>Har user ko sirf apni notifications dikhen.</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="phases">
+    <div class="sec-head">
+      <div class="eyebrow">Coding phases · 0 se 7</div>
+      <h2>Coding ka roadmap</h2>
+      <p>Phases is tarteeb mein hain kyunke har phase pichhle phase ke data par chalta hai: pehle buniyad, phir fuel entries, phir un par budget aur charts, phir trips aur map, aur aakhir mein crisis mode aur notifications. Har task par tick lagayein, progress isi browser mein save rehti hai.</p>
+    </div>
+
+    <div class="panel progress-panel">
+      <div class="progress-top">
+        <strong id="overall-label">0 / 0 tasks mukammal</strong>
+        <button type="button" class="reset" id="reset-ticks" data-armed="false">Saare ticks hatayein</button>
+      </div>
+      <div class="bar" role="progressbar" aria-label="Roadmap progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="overall-bar"><span></span></div>
+      <p class="small" id="storage-note">Ticks sirf isi browser mein save hote hain. Doosre computer ya browser mein alag honge.</p>
+    </div>
+
+    <div class="road">
+
+      <article class="phase" id="phase-0" data-phase="0">
+        <div class="stop">0</div>
+        <div class="phase-head"><h3>Buniyad mazboot karna</h3><span class="phase-count" data-count></span></div>
+        <div class="phase-meta"><span class="tag">FR-01</span><span class="tag">FR-02</span><span class="tag">FR-03</span><span class="tag dep">Pehle chahiye: kuch nahi</span></div>
+        <p class="why">Teesra role add karna aur maujooda kamzoriyan theek karna, taake naye features par purane bugs na aayen.</p>
+        <div class="note ok"><strong>Code mukammal, 3 Oct 2026.</strong> 11 kaam ho gaye aur 51 automated checks pass hue. Baqi: Admin aur Electric gaari ke 2 faisle, aur Figma screens.</div>
+        <div class="tasks">
+          <div>
+            <div class="label">Backend</div>
+            <label class="check"><input type="checkbox" id="p0-b1" data-done="true" checked><span>User model mein <code>Organizational</code> role aur <code>organizationName</code> field (sirf Organizational ke liye zaroori). <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-b2" data-done="true" checked><span>Server par validation: password kam az kam 6 characters, email aur phone ka format. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-b3" data-done="true" checked><span>Vehicle: fuel efficiency aur tank 0 se zyada, model year 1980 se agle saal tak. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-b4" data-done="true" checked><span>Error handler middleware: har error JSON mein (ghalat ID aur validation par 400). <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-b5" data-done="true" checked><span>Admin search mein special characters ( "(" ya "[" ) ko escape karna. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-b7" data-done="true" checked><span>Same registration number dobara na ban sake (409 error). <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-b8" data-done="true" checked><span>Password badalne ke liye current password lazmi. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-b6"><span>Faisla: Admin register page se bane ya sirf maujooda Admin naya Admin banaye. <span class="chip decide">Decide</span></span></label>
+          </div>
+          <div>
+            <div class="label">Frontend</div>
+            <label class="check"><input type="checkbox" id="p0-f1" data-done="true" checked><span>Register form mein Organizational option aur organization name field. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-f2" data-done="true" checked><span>Token expire (401) hone par khud logout aur login page. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-f3" data-done="true" checked><span>Profile update ke baad naya naam fori har jagah dikhe; logout par purane user ka data saaf ho. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-f6" data-done="true" checked><span>Vehicles page par loading state, "No vehicles yet" ka chamakna band. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-f4"><span>Electric gaari ke units ka faisla (kWh), ya EV ko fuel features se alag rakhna. <span class="chip decide">Decide</span></span></label>
+            <label class="check"><input type="checkbox" id="p0-f5"><span>Figma mein naye pages ke rough screens: Fuel Records, Budget, Dashboard, Trips. <span class="chip decide">Aapka kaam</span></span></label>
+          </div>
+        </div>
+        <p class="small">Role ka naam kai files mein likha hai (list <code>CLAUDE.md</code> mein hai). Naya role sab jagah add karein.</p>
+        <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Teeno roles register aur login kar saken.</li><li>Ghalat ID par app saaf error dikhaye, crash na ho.</li><li>Token expire hone par app khud login page par le jaye.</li></ol></div>
+      </article>
+
+      <article class="phase" id="phase-1" data-phase="1">
+        <div class="stop">1</div>
+        <div class="phase-head"><h3>Fuel purchase records</h3><span class="phase-count" data-count></span></div>
+        <div class="phase-meta"><span class="tag">FR-04</span><span class="tag dep">Pehle chahiye: Phase 0</span></div>
+        <p class="why">Budget, charts aur fuel price sab isi data se bante hain, isliye yeh pehla naya feature hai.</p>
+        <div class="tasks">
+          <div>
+            <div class="label">Backend</div>
+            <label class="check"><input type="checkbox" id="p1-b1"><span><code>FuelRecord</code> model: user, vehicle, date, quantity (L), totalCost (Rs), pricePerLitre, odometer (optional), station (optional).</span></label>
+            <label class="check"><input type="checkbox" id="p1-b2"><span>Routes <code>/api/fuel-records</code>: add, list (gaari aur date filter), ek record, update, delete.</span></label>
+            <label class="check"><input type="checkbox" id="p1-b3"><span>Ownership check: sirf apni gaari ke records (<code>vehicleController.js</code> jaisa tareeqa).</span></label>
+            <label class="check"><input type="checkbox" id="p1-b4"><span>Validation: quantity 0 se zyada aur tank se kam, cost 0 se zyada, date future mein nahi.</span></label>
+            <label class="check"><input type="checkbox" id="p1-b5"><span>Gaari delete hone par uske records ka rule (saath delete, ya delete rokna).</span></label>
+          </div>
+          <div>
+            <div class="label">Frontend</div>
+            <label class="check"><input type="checkbox" id="p1-f1"><span>"Fuel Records" page aur sidebar link (<code>constant.js</code> ke <code>NAV_LINKS</code>).</span></label>
+            <label class="check"><input type="checkbox" id="p1-f2"><span>Add/Edit form modal (<code>useForm</code> hook, <code>VehicleForm</code> jaisa design).</span></label>
+            <label class="check"><input type="checkbox" id="p1-f3"><span>List: date, gaari, litre, rupay, Rs per litre; gaari ke hisaab se filter.</span></label>
+            <label class="check"><input type="checkbox" id="p1-f4"><span>Khaali list par "Pehli fuel entry add karein".</span></label>
+          </div>
+        </div>
+        <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Entry add, edit aur delete ho.</li><li>Doosre user ki entry na dikhe na khule.</li><li>60 L tank wali gaari par 80 L ki entry reject ho.</li></ol></div>
+      </article>
+
+      <article class="phase" id="phase-2" data-phase="2">
+        <div class="stop">2</div>
+        <div class="phase-head"><h3>Monthly budget aur alerts</h3><span class="phase-count" data-count></span></div>
+        <div class="phase-meta"><span class="tag">FR-08</span><span class="tag dep">Pehle chahiye: Phase 1</span></div>
+        <p class="why">Kharcha fuel entries se khud judta hai, isliye entries ke foran baad budget.</p>
+        <div class="tasks">
+          <div>
+            <div class="label">Backend</div>
+            <label class="check"><input type="checkbox" id="p2-b1"><span><code>Budget</code> model: user, month ("2026-10"), amount (Rs), vehicle (optional, fleet ke liye).</span></label>
+            <label class="check"><input type="checkbox" id="p2-b2"><span>Is mahine ka kharcha = fuel entries ke cost ka jor, mahina Asia/Karachi time se.</span></label>
+            <label class="check"><input type="checkbox" id="p2-b3"><span>Budget status: theek, 80% warning, ya limit cross.</span></label>
+          </div>
+          <div>
+            <div class="label">Frontend</div>
+            <label class="check"><input type="checkbox" id="p2-f1"><span>Dashboard par budget card: kharcha, budget, bacha hua, progress bar.</span></label>
+            <label class="check"><input type="checkbox" id="p2-f2"><span>Budget set aur edit karne ka form.</span></label>
+            <label class="check"><input type="checkbox" id="p2-f3"><span>80% par peela aur 100% par laal alert.</span></label>
+          </div>
+        </div>
+        <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Rs 10,000 budget aur Rs 10,500 kharche par laal alert aaye.</li><li>Ek entry delete karke kharcha budget se kam ho to alert hat jaye.</li></ol></div>
+      </article>
+
+      <article class="phase" id="phase-3" data-phase="3">
+        <div class="stop">3</div>
+        <div class="phase-head"><h3>Dashboard charts aur filters</h3><span class="phase-count" data-count></span></div>
+        <div class="phase-meta"><span class="tag">FR-09</span><span class="tag">FR-10</span><span class="tag dep">Pehle chahiye: Phase 1</span></div>
+        <p class="why">Fuel entries jama hone ke baad unhein graphs mein dikhana.</p>
+        <div class="tasks">
+          <div>
+            <div class="label">Backend</div>
+            <label class="check"><input type="checkbox" id="p3-b1"><span>Stats endpoint (MongoDB aggregation): har mahine ke litre aur rupay.</span></label>
+            <label class="check"><input type="checkbox" id="p3-b2"><span>Har gaari ka total litre, total kharcha, average km/l (odometer ho to).</span></label>
+            <label class="check"><input type="checkbox" id="p3-b3"><span>Filters: from date, to date, vehicle, fuel type.</span></label>
+          </div>
+          <div>
+            <div class="label">Frontend</div>
+            <label class="check"><input type="checkbox" id="p3-f1"><span>Charts library chunna aur install karna (Recharts ya Chart.js).</span></label>
+            <label class="check"><input type="checkbox" id="p3-f2"><span>Teen charts: kharcha over time, litre over time, gaariyon ka muqabla.</span></label>
+            <label class="check"><input type="checkbox" id="p3-f3"><span>Filter bar aur khaali data ka message.</span></label>
+          </div>
+        </div>
+        <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Filter badalne par charts update hon.</li><li>Data na ho to khaali chart ki jagah saaf message aaye.</li></ol></div>
+      </article>
+
+      <article class="phase" id="phase-4" data-phase="4">
+        <div class="stop">4</div>
+        <div class="phase-head"><h3>Trips, fuel ka andaza aur map</h3><span class="phase-count" data-count></span></div>
+        <div class="phase-meta"><span class="tag">FR-05</span><span class="tag">FR-06</span><span class="tag">FR-11</span><span class="tag">FR-12</span><span class="tag dep">Pehle chahiye: Phase 0, Phase 1</span></div>
+        <p class="why">Sab se bada phase. Andaze ke liye efficiency 0 se zyada (Phase 0) aur fuel price (Phase 1) chahiye.</p>
+        <div class="tasks">
+          <div>
+            <div class="label">Backend</div>
+            <label class="check"><input type="checkbox" id="p4-b1"><span>OpenRouteService ki free API key, backend <code>.env</code> mein (frontend mein kabhi nahi).</span></label>
+            <label class="check"><input type="checkbox" id="p4-b2"><span>Geocoding endpoint: jagah ka naam se location (lat/lng); results cache.</span></label>
+            <label class="check"><input type="checkbox" id="p4-b3"><span>Route endpoint: 2-3 raaste, har ek ka km, waqt, litre, rupay; kam fuel wala "Recommended".</span></label>
+            <label class="check"><input type="checkbox" id="p4-b4"><span><code>Trip</code> model aur CRUD: gaari, start, destination, date, priority, status.</span></label>
+          </div>
+          <div>
+            <div class="label">Frontend</div>
+            <label class="check"><input type="checkbox" id="p4-f1"><span>"Trips" page: start/destination search, gaari select, priority.</span></label>
+            <label class="check"><input type="checkbox" id="p4-f2"><span>react-leaflet v5 map: raaston ki lines, recommended alag rang mein, zoom aur pan.</span></label>
+            <label class="check"><input type="checkbox" id="p4-f3"><span>Trip card: km, minute, litre, rupay; tank range se lamba safar ho to warning.</span></label>
+          </div>
+        </div>
+        <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Lahore se Islamabad ke trip par raaste map par dikhen aur recommended highlight ho.</li><li>Route API band ho to bhi trip save ho aur saaf message aaye.</li></ol></div>
+      </article>
+
+      <article class="phase" id="phase-5" data-phase="5">
+        <div class="stop">5</div>
+        <div class="phase-head"><h3>Crisis mode</h3><span class="phase-count" data-count></span></div>
+        <div class="phase-meta"><span class="tag">FR-07</span><span class="tag dep">Pehle chahiye: Phase 2, Phase 4</span></div>
+        <p class="why">Mashware trips aur budget ke data par bante hain, isliye un dono ke baad.</p>
+        <div class="tasks">
+          <div>
+            <div class="label">Backend</div>
+            <label class="check"><input type="checkbox" id="p5-b1"><span>User mein <code>crisisMode</code> on/off (aur Admin ka system-wide switch agar supervisor kahe).</span></label>
+            <label class="check"><input type="checkbox" id="p5-b2"><span>Rules: ek din ke qareebi trips "combine", ghair-zaroori trips "postpone".</span></label>
+            <label class="check"><input type="checkbox" id="p5-b3"><span>Bachat ka andaza: in mashwaron se kitne litre aur rupay bachenge.</span></label>
+          </div>
+          <div>
+            <div class="label">Frontend</div>
+            <label class="check"><input type="checkbox" id="p5-f1"><span>Crisis mode switch (dashboard ya topbar) aur saaf nishani ke mode on hai.</span></label>
+            <label class="check"><input type="checkbox" id="p5-f2"><span>Mashwaron ki list, har ek par "Maan liya" ya "Ignore".</span></label>
+          </div>
+        </div>
+        <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Crisis mode on karne par ek din ke do qareebi trips "combine" mashware mein aayen.</li><li>Mode off karne par mashware hat jayen, data delete na ho.</li></ol></div>
+      </article>
+
+      <article class="phase" id="phase-6" data-phase="6">
+        <div class="stop">6</div>
+        <div class="phase-head"><h3>Notifications</h3><span class="phase-count" data-count></span></div>
+        <div class="phase-meta"><span class="tag">FR-13</span><span class="tag dep">Pehle chahiye: Phase 2, 4, 5</span></div>
+        <p class="why">Notifications in teeno phases ke events (budget, trips, crisis) se aati hain, isliye sab se aakhir mein.</p>
+        <div class="tasks">
+          <div>
+            <div class="label">Backend</div>
+            <label class="check"><input type="checkbox" id="p6-b1"><span><code>Notification</code> model: user, type, message, link, read, date.</span></label>
+            <label class="check"><input type="checkbox" id="p6-b2"><span>Events: budget 80% aur 100%, inefficient trip, crisis mode ke mashware.</span></label>
+            <label class="check"><input type="checkbox" id="p6-b3"><span>Ek hi baat ki dobara notification na bane.</span></label>
+          </div>
+          <div>
+            <div class="label">Frontend</div>
+            <label class="check"><input type="checkbox" id="p6-f1"><span>Topbar par bell icon aur unread ginti.</span></label>
+            <label class="check"><input type="checkbox" id="p6-f2"><span>Notifications list, read mark karna, click se us cheez tak jana.</span></label>
+          </div>
+        </div>
+        <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Budget cross hone par sirf ek notification aaye.</li><li>Padhne ke baad unread ginti kam ho.</li></ol></div>
+      </article>
+
+      <article class="phase" id="phase-7" data-phase="7">
+        <div class="stop">7</div>
+        <div class="phase-head"><h3>Testing aur submission</h3><span class="phase-count" data-count></span></div>
+        <div class="phase-meta"><span class="tag">Sab FRs</span><span class="tag dep">Pehle chahiye: Phase 0 se 6</span></div>
+        <p class="why">Har functionality aur is report ke har edge case ko jaanch kar demo ke liye tayyar karna.</p>
+        <div class="tasks single">
+          <div>
+            <div class="label">Kaam</div>
+            <label class="check"><input type="checkbox" id="p7-1"><span>Postman collection: har API endpoint ki misaal (SRS ke tools mein Postman hai).</span></label>
+            <label class="check"><input type="checkbox" id="p7-2"><span>Is report ke har edge case ko haath se test karna.</span></label>
+            <label class="check"><input type="checkbox" id="p7-3"><span>Demo data: har role ka ek user, gaariyan, fuel entries, trips.</span></label>
+            <label class="check"><input type="checkbox" id="p7-4"><span><code>README.md</code> aur <code>API.md</code> update, screenshots.</span></label>
+            <label class="check"><input type="checkbox" id="p7-5"><span>Supervisor ke saath demo.</span></label>
+          </div>
+        </div>
+        <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Har FR ka demo chal sake aur saare edge cases check ho chuke hon.</li></ol></div>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="sawalat">
+    <div class="sec-head">
+      <div class="eyebrow">Supervisor sawalat</div>
+      <h2>SRS mein jo saaf nahi likha</h2>
+      <p>Yeh baatein code shuru karne se pehle supervisor se poochein. Inke jawab se phases ka kaam badal sakta hai.</p>
+    </div>
+    <ol class="qs">
+      <li><div><strong>Organizational account ka matlab kya hai?</strong><span class="small">Sirf ek login se poori fleet, ya organization ke andar members aur drivers ke alag logins?</span></div></li>
+      <li><div><strong>Admin account kaun bana sakta hai?</strong><span class="small">Register page se koi bhi, ya sirf pehle se maujood Admin?</span></div></li>
+      <li><div><strong>Crisis mode kaun on karta hai?</strong><span class="small">Har user khud, ya Admin poore system ke liye?</span></div></li>
+      <li><div><strong>"Inefficient trip" kis ko kahenge?</strong><span class="small">Hamari proposal: chuna gaya raasta recommended raaste se 15% ya zyada fuel le.</span></div></li>
+      <li><div><strong>Notifications sirf app ke andar kaafi hain?</strong><span class="small">Ya email bhi chahiye?</span></div></li>
+      <li><div><strong>Electric gaariyan fuel features mein shamil hain?</strong><span class="small">Unke liye km/l aur litre theek nahi, kWh chahiye.</span></div></li>
+      <li><div><strong>Fuel ki qeemat kahan se aaye?</strong><span class="small">User ki aakhri entry se, ya user khud set kare?</span></div></li>
+      <li><div><strong>Map ke liye Google Maps zaroori hai?</strong><span class="small">Ya OpenStreetMap chalega? Google ke liye billing account chahiye.</span></div></li>
+    </ol>
+  </section>
+
+  <section id="tech">
+    <div class="sec-head">
+      <div class="eyebrow">Research · Oct 2026</div>
+      <h2>Map aur route ke liye kya use karein</h2>
+      <p>FR-05, 06, 11 aur 12 ke liye map, raasta aur jagah dhoondhne (geocoding) wali service chahiye. Free limits 2026 ki hain, use se pehle official page par dobara check karein.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Option</th><th>Kaam</th><th>Free limit / shart</th><th>Faisla</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Leaflet + react-leaflet v5</strong> (OpenStreetMap tiles)</td><td>Map dikhana, zoom, pan</td><td>Free. react-leaflet v5 React 19 maangta hai, aur project mein React 19 hi hai.</td><td><span class="verdict go">Recommended</span></td></tr>
+          <tr><td><strong>OpenRouteService</strong></td><td>Raasta (directions) aur geocoding</td><td>Free plan: taqreeban 2,000 directions roz, 40 per minute. API key backend mein.</td><td><span class="verdict go">Recommended</span></td></tr>
+          <tr><td><strong>Google Maps Platform</strong></td><td>Map aur raasta</td><td>March 2025 se har API ki free monthly had (jaise Compute Routes Essentials 10,000 per mahina). Billing account zaroori.</td><td><span class="verdict alt">Alternative</span></td></tr>
+          <tr><td><strong>OSRM demo server</strong></td><td>Raasta</td><td>Koi guarantee nahi, zyada use par block, attribution aur User-Agent zaroori.</td><td><span class="verdict test">Sirf testing</span></td></tr>
+          <tr><td><strong>Nominatim</strong> (OSM geocoding)</td><td>Jagah ka naam se location</td><td>1 request per second, autocomplete mana, attribution aur User-Agent zaroori.</td><td><span class="verdict test">Sirf testing</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small" style="margin-top:12px">Charts ke liye Recharts ya Chart.js dono React ke saath chalte hain. Install se pehle uska React 19 support check kar lein.</p>
+  </section>
+
+  <section id="sources">
+    <div class="sec-head">
+      <div class="eyebrow">Sources</div>
+      <h2>Kahan se liya</h2>
+    </div>
+    <ul class="sources">
+      <li>Project SRS: "Smart Fuel Optimization &amp; Resource Management System" (2 pages)</li>
+      <li>Project code: <code>backend/</code> aur <code>frontend/src/</code>, commit 085ae03</li>
+      <li><a href="https://openrouteservice.org/plans/" target="_blank" rel="noopener">openrouteservice.org/plans</a></li>
+      <li><a href="https://ask.openrouteservice.org/t/updated-api-quotas/500" target="_blank" rel="noopener">ask.openrouteservice.org: Updated API quotas</a></li>
+      <li><a href="https://www.woosmap.com/blog/google-maps-api-pricing-breakdown" target="_blank" rel="noopener">woosmap.com: Google Maps API pricing in 2026</a></li>
+      <li><a href="https://mapatlas.eu/blog/google-maps-api-pricing-2026" target="_blank" rel="noopener">mapatlas.eu: Google Maps API pricing 2026</a></li>
+      <li><a href="https://mapsplatform.google.com/pricing/" target="_blank" rel="noopener">mapsplatform.google.com/pricing (official, yahan verify karein)</a></li>
+      <li><a href="https://github.com/Project-OSRM/osrm-backend/wiki/API%20Usage%20Policy" target="_blank" rel="noopener">OSRM API usage policy</a></li>
+      <li><a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank" rel="noopener">Nominatim usage policy (OSM Foundation)</a></li>
+      <li><a href="https://classic.yarnpkg.com/en/package/react-leaflet" target="_blank" rel="noopener">react-leaflet package (v5 aur React 19)</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="wrap">Smart Fuel Optimization &amp; Resource Management System · CS619 · Roadmap 3 October 2026 ko SRS aur code ki buniyad par banaya gaya. Phase 0 ka update bhi 3 October 2026 ko.</footer>
+
+<script>
+(function () {
+  var KEY = "smart-fuel-roadmap-v1";
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; }
+  }
+  function save(state) {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); return true; } catch (e) { return false; }
+  }
+
+  var state = load();
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.phase input[type="checkbox"]'));
+
+  // Tasks marked data-done are already finished in the code. They start ticked
+  // unless this viewer changed them; only differences from that default are saved.
+  function defaultFor(box) { return box.getAttribute("data-done") === "true"; }
+
+  boxes.forEach(function (box) {
+    box.checked = Object.prototype.hasOwnProperty.call(state, box.id) ? Boolean(state[box.id]) : defaultFor(box);
+    box.addEventListener("change", function () {
+      if (box.checked === defaultFor(box)) { delete state[box.id]; } else { state[box.id] = box.checked; }
+      if (!save(state)) {
+        var note = document.getElementById("storage-note");
+        if (note) note.textContent = "Is browser mein ticks save nahi ho rahe. Page band karne par hat jayenge.";
+      }
+      refresh();
+    });
+  });
+
+  function refresh() {
+    var total = boxes.length;
+    var done = boxes.filter(function (b) { return b.checked; }).length;
+    var pct = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById("overall-label").textContent = done + " / " + total + " tasks mukammal (" + pct + "%)";
+    var bar = document.getElementById("overall-bar");
+    bar.setAttribute("aria-valuenow", String(pct));
+    bar.firstElementChild.style.width = pct + "%";
+
+    Array.prototype.forEach.call(document.querySelectorAll(".phase"), function (phase) {
+      var own = phase.querySelectorAll('input[type="checkbox"]');
+      var ownDone = Array.prototype.filter.call(own, function (b) { return b.checked; }).length;
+      var counter = phase.querySelector("[data-count]");
+      if (counter) counter.textContent = ownDone + " / " + own.length + " tasks";
+      phase.setAttribute("data-complete", own.length > 0 && ownDone === own.length ? "true" : "false");
+    });
+  }
+
+  var resetBtn = document.getElementById("reset-ticks");
+  var resetTimer = null;
+  resetBtn.addEventListener("click", function () {
+    if (resetBtn.getAttribute("data-armed") !== "true") {
+      resetBtn.setAttribute("data-armed", "true");
+      resetBtn.textContent = "Pakka? Dobara click karein";
+      resetTimer = setTimeout(function () {
+        resetBtn.setAttribute("data-armed", "false");
+        resetBtn.textContent = "Saare ticks hatayein";
+      }, 4000);
+      return;
+    }
+    clearTimeout(resetTimer);
+    state = {};
+    save(state);
+    boxes.forEach(function (b) { b.checked = defaultFor(b); });
+    resetBtn.setAttribute("data-armed", "false");
+    resetBtn.textContent = "Saare ticks hatayein";
+    refresh();
+  });
+
+  var filterButtons = Array.prototype.slice.call(document.querySelectorAll(".filters button"));
+  var cards = Array.prototype.slice.call(document.querySelectorAll(".fr"));
+  filterButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var f = btn.getAttribute("data-filter");
+      filterButtons.forEach(function (b) { b.setAttribute("aria-pressed", b === btn ? "true" : "false"); });
+      cards.forEach(function (card) { card.hidden = !(f === "all" || card.getAttribute("data-status") === f); });
+    });
+  });
+
+  refresh();
+})();
+</script>
+
+</body>
+</html>

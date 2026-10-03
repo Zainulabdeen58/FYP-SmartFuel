@@ -9,6 +9,7 @@ function Vehicles() {
     data: vehicles,
     error,
     setError,
+    loading,
     reload: load,
   } = useFetch(
     async () => {
@@ -167,7 +168,14 @@ function Vehicles() {
           </div>
         ))}
 
-        {!vehicles.length && (
+        {/* Show the empty state only once loading has finished, so it doesn't flash on every visit. */}
+        {loading && !vehicles.length && (
+          <div className="empty-state">
+            <p>Loading vehicles...</p>
+          </div>
+        )}
+
+        {!loading && !vehicles.length && (
           <div className="empty-state">
             <div className="empty-icon">
               <Icon name="car" size={28} />

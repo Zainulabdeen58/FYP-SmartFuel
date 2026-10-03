@@ -1,5 +1,14 @@
 import User from "../models/User.js";
 import Vehicle from "../models/Vehicle.js";
+import {
+  checkContactNumber,
+  checkEmail,
+  checkFullName,
+  checkOrganizationName,
+  checkRole,
+  escapeRegex,
+  firstError
+} from "../utils/validation.js";
 
 export async function getUsers(req, res) {
   const users = await User.find().select("-password").sort({ createdAt: -1 });
@@ -13,30 +22,42 @@ export async function getUser(req, res) {
 }
 
 export async function updateUser(req, res) {
-  const { fullName, email, contactNumber, role } = req.body;
+  const { fullName, email, contactNumber, role, organizationName } = req.body;
   const user = await User.findById(req.params.id);
   if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-  if (fullName !== undefined) user.fullName = fullName;
-  if (email !== undefined) {
-    const exists = await User.findOne({
-      email: email.toLowerCase(),
-      _id: { $ne: user._id },
+  const nextRole = role ?? user.role;
+  const error = firstError(
+    fullName !== undefined ? checkFullName(fullName) : "",
+    email !== undefined ? checkEmail(email) : "",
+    contactNumber !== undefined ? checkContactNumber(contactNumber) : "",
+    role !== undefined ? checkRole(role) : "",
+    nextRole === "Organizational" ? checkOrganizationName(organizationName ?? user.organizationName) : ""
+  );
+  if (error) return res.status(400).json({ success: false, message: error });
+
+  if (user._id.equals(req.user._id) && nextRole !== "Admin") {
+    return res.status(400).json({
+      success: false,
+      message: "You cannot remove your own admin role",
     });
-    if (exists) {
+  }
+
+  if (email !== undefined) {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (await User.exists({ email: normalizedEmail, _id: { $ne: user._id } })) {
       return res.status(409).json({ success: false, message: "Email already in use" });
     }
-    user.email = email.toLowerCase();
+    user.email = normalizedEmail;
   }
-  if (contactNumber !== undefined) user.contactNumber = contactNumber;
-  if (role !== undefined && ["Individual", "Admin"].includes(role)) {
-    if (user._id.toString() === req.user._id.toString() && role !== "Admin") {
-      return res.status(400).json({
-        success: false,
-        message: "You cannot remove your own admin role",
-      });
-    }
-    user.role = role;
+  if (fullName !== undefined) user.fullName = fullName.trim();
+  if (contactNumber !== undefined) user.contactNumber = contactNumber.trim();
+
+  user.role = nextRole;
+  if (nextRole !== "Organizational") {
+    user.organizationName = undefined;
+  } else if (organizationName !== undefined) {
+    user.organizationName = organizationName.trim();
   }
 
   await user.save();
@@ -59,19 +80,24 @@ export async function deleteUser(req, res) {
   res.json({ success: true, message: "User and their vehicle records deleted" });
 }
 
+// Query values can arrive as arrays (?user=a&user=b); only plain text is searched.
+const searchText = (value) => (typeof value === "string" ? value.trim() : "");
+
 export async function searchVehicles(req, res) {
-  const { user, registrationNumber } = req.query;
+  const user = searchText(req.query.user);
+  const registrationNumber = searchText(req.query.registrationNumber);
   const filter = {};
 
   if (registrationNumber) {
-    filter.registrationNumber = { $regex: registrationNumber, $options: "i" };
+    filter.registrationNumber = { $regex: escapeRegex(registrationNumber), $options: "i" };
   }
 
   if (user) {
+    const pattern = escapeRegex(user);
     const users = await User.find({
       $or: [
-        { fullName: { $regex: user, $options: "i" } },
-        { email: { $regex: user, $options: "i" } }
+        { fullName: { $regex: pattern, $options: "i" } },
+        { email: { $regex: pattern, $options: "i" } }
       ]
     }).select("_id");
     filter.user = { $in: users.map((item) => item._id) };

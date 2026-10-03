@@ -11,6 +11,16 @@ export const ADMIN_LINK = {
   icon: "shield",
 };
 
+// Account types (AuthPage.jsx, UserForm.jsx, validation.js).
+// Keep in step with ROLES in backend/models/User.js.
+export const ROLES = ["Individual", "Organizational", "Admin"];
+
+export const ROLE_LABELS = {
+  Individual: "Individual",
+  Organizational: "Organization",
+  Admin: "Admin",
+};
+
 // Vehicle form (VehicleForm.jsx)
 export const EMPTY_VEHICLE = {
   vehicleName: "",

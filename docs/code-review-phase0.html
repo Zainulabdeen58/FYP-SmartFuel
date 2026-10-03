@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="ur-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Phase 0 Code Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: an inspection sheet. Summary counts first, then a fix-order list, an overview table, and one card per finding grouped by severity. Same tokens as the Smart Fuel Roadmap. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #ebeff5; --fg: #18212c; --muted: #536072; --line: #d6dce5;
+  --accent: #c2410c; --accent-soft: #fdeadf;
+  --ok: #16723a; --ok-soft: #e1f2e6; --warn: #946200; --warn-soft: #faf0d6; --bad: #b42318; --bad-soft: #fbe6e4;
+  --todo: #556070; --todo-soft: #e6eaf0;
+  --font-display: "Archivo", "Arial Narrow", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+  --radius: 10px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131a; --surface: #151c25; --surface-2: #1c2531; --fg: #e5eaf1; --muted: #9ba7b6; --line: #2a3443;
+    --accent: #ff8d55; --accent-soft: #3a2115;
+    --ok: #5bd68a; --ok-soft: #12301e; --warn: #f2c14e; --warn-soft: #34290f; --bad: #ff8a80; --bad-soft: #3b1816;
+    --todo: #a6b1bf; --todo-soft: #222b37;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131a; --surface: #151c25; --surface-2: #1c2531; --fg: #e5eaf1; --muted: #9ba7b6; --line: #2a3443;
+  --accent: #ff8d55; --accent-soft: #3a2115;
+  --ok: #5bd68a; --ok-soft: #12301e; --warn: #f2c14e; --warn-soft: #34290f; --bad: #ff8a80; --bad-soft: #3b1816;
+  --todo: #a6b1bf; --todo-soft: #222b37;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font-family: var(--font-mono); font-size: 0.85em; background: var(--surface-2); padding: 0.05em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+p { margin: 0; }
+.wrap { max-width: 1000px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 32px); }
+
+.masthead { padding-block: 40px 20px; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.masthead h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 800; font-stretch: 112%; margin-top: 10px; }
+.masthead h1 span { color: var(--accent); }
+.lead { margin-top: 14px; font-size: 1.06rem; color: var(--muted); max-width: 64ch; }
+.basis { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.basis span { font-family: var(--font-mono); font-size: 0.76rem; padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface); }
+
+section { padding-block: 28px 8px; }
+.sec-head { display: grid; gap: 8px; margin-bottom: 18px; }
+.sec-head h2 { font-size: clamp(1.5rem, 3.4vw, 2rem); font-weight: 800; font-stretch: 108%; }
+.sec-head p { color: var(--muted); max-width: 66ch; }
+
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; display: grid; gap: 4px; }
+.tile .num { font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; font-stretch: 110%; line-height: 1; font-variant-numeric: tabular-nums; }
+.tile.high .num { color: var(--bad); }
+.tile.mid .num { color: var(--warn); }
+.tile.low .num { color: var(--todo); }
+.tile p { color: var(--muted); font-size: 0.93rem; }
+
+.note { border-radius: var(--radius); padding: 14px 16px; font-size: 0.95rem; background: var(--warn-soft); margin-top: 16px; }
+.note strong { color: var(--warn); }
+
+.order { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px 18px 40px; display: grid; gap: 8px; margin: 0; }
+.order li::marker { font-family: var(--font-display); font-weight: 800; color: var(--accent); }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.03em; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.high { background: var(--bad-soft); color: var(--bad); }
+.pill.mid { background: var(--warn-soft); color: var(--warn); }
+.pill.low { background: var(--todo-soft); color: var(--todo); }
+.pill.open { background: var(--surface-2); color: var(--muted); }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.93rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+.id { font-family: var(--font-mono); font-weight: 600; white-space: nowrap; }
+
+.group-title { display: flex; align-items: center; gap: 10px; margin: 26px 0 14px; }
+.group-title h3 { font-size: 1.25rem; font-weight: 800; font-stretch: 106%; }
+.cards { display: grid; gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; display: grid; gap: 12px; }
+.card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.card-head .id { color: var(--accent); }
+.card-head h4 { font-family: var(--font-display); font-size: 1.12rem; font-weight: 700; font-stretch: 104%; margin: 0; flex: 1 1 280px; min-width: 0; text-wrap: balance; }
+.where { font-size: 0.88rem; color: var(--muted); }
+.rows { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 8px 16px; font-size: 0.96rem; }
+.rows dt { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding-top: 3px; }
+.rows dd { margin: 0; min-width: 0; }
+.rows dd.fix { background: var(--ok-soft); border-radius: 8px; padding: 8px 12px; }
+
+footer { padding-block: 36px 56px; color: var(--muted); font-size: 0.88rem; }
+
+@media (max-width: 760px) {
+  .tiles { grid-template-columns: minmax(0, 1fr); }
+  .rows { grid-template-columns: minmax(0, 1fr); gap: 2px 0; }
+  .rows dd { margin-bottom: 8px; }
+  .card { padding: 16px; }
+}
+</style>
+
+<header class="masthead wrap">
+  <div class="eyebrow">Code review · Phase 0 ki tabdeeliyan · 3 Oct 2026</div>
+  <h1>Phase 0 <span>Code Review</span></h1>
+  <p class="lead">Phase 0 mein jo code badla, us ki jaanch mein 15 baatein milin. Har ek mein likha hai: masla kya hai, kab hota hai, aur kaise theek hoga. Abhi koi bhi theek nahi kiya gaya, sab khule hain.</p>
+  <div class="basis">
+    <span>Review: /code-review (xhigh)</span>
+    <span>Scope: uncommitted changes</span>
+    <span>15 findings · sab Open</span>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="khulasa">
+    <div class="sec-head">
+      <div class="eyebrow">Khulasa</div>
+      <h2>Kitne masle, kis darje ke</h2>
+    </div>
+    <div class="tiles">
+      <div class="tile high"><span class="num">3</span><strong>Zaroori</strong><p>User ko seedha nuqsan: ghalat logout, gaari edit na hona, duplicate plate.</p></div>
+      <div class="tile mid"><span class="num">7</span><strong>Darmiyana</strong><p>Kuch khaas halaat mein ghalat error ya ghalat screen.</p></div>
+      <div class="tile low"><span class="num">5</span><strong>Safai</strong><p>Code dohraya gaya hai ya label adhoore hain. Kuch tootta nahi.</p></div>
+    </div>
+    <div class="note"><strong>Sab se zaroori:</strong> Database ka chhota sa error bhi ab har user ko logout kar deta hai (Z-1). Phase 0 ka naya "token expire par logout" feature aur purana <code>protect</code> middleware mil kar yeh masla banate hain.</div>
+  </section>
+
+  <section id="tarteeb">
+    <div class="sec-head">
+      <div class="eyebrow">Tarteeb</div>
+      <h2>Kis tarteeb mein theek karein</h2>
+    </div>
+    <ol class="order">
+      <li><strong>Z-1, Z-2, Z-3</strong> pehle. Yeh asal users ko seedha nuqsan dete hain.</li>
+      <li><strong>D-1 se D-5</strong> phir. Har ek chhota fix hai, ek ya do lines.</li>
+      <li><strong>D-6</strong> (unique index) tab, jab database ke purane duplicate saaf ho jayen.</li>
+      <li><strong>D-7</strong> se pehle faisla karein: naam ke rules dono jagah strict hon ya dono jagah narm.</li>
+      <li><strong>S-1 se S-5</strong> aakhir mein, aaram se.</li>
+    </ol>
+  </section>
+
+  <section id="list">
+    <div class="sec-head">
+      <div class="eyebrow">Overview</div>
+      <h2>Saari findings ek nazar mein</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Masla</th><th>File</th><th>Darja</th></tr></thead>
+        <tbody>
+          <tr><td class="id"><a href="#z1">Z-1</a></td><td>Database error par har user logout</td><td><code>middleware/auth.js</code>, <code>api.js</code></td><td><span class="pill high">Zaroori</span></td></tr>
+          <tr><td class="id"><a href="#z2">Z-2</a></td><td>Purani duplicate plate wali gaariyan edit nahi hotin</td><td><code>vehicleController.js:72</code></td><td><span class="pill high">Zaroori</span></td></tr>
+          <tr><td class="id"><a href="#z3">Z-3</a></td><td>Number wali plate duplicate check se bach jati hai</td><td><code>vehicleController.js:25</code></td><td><span class="pill high">Zaroori</span></td></tr>
+          <tr><td class="id"><a href="#d1">D-1</a></td><td>organizationName: null par 500 error</td><td><code>adminController.js:60</code></td><td><span class="pill mid">Darmiyana</span></td></tr>
+          <tr><td class="id"><a href="#d2">D-2</a></td><td>Admin apna record badle to Profile purana naam wapas laga deta hai</td><td><code>Admin.jsx:84</code></td><td><span class="pill mid">Darmiyana</span></td></tr>
+          <tr><td class="id"><a href="#d3">D-3</a></td><td>Toota hua URL 400 ki jagah 500 deta hai</td><td><code>errorHandler.js:32</code></td><td><span class="pill mid">Darmiyana</span></td></tr>
+          <tr><td class="id"><a href="#d4">D-4</a></td><td>Load fail ho to "No vehicles yet" dikhta hai</td><td><code>Vehicles.jsx:178</code></td><td><span class="pill mid">Darmiyana</span></td></tr>
+          <tr><td class="id"><a href="#d5">D-5</a></td><td>Browser ka password auto-fill profile save rok deta hai</td><td><code>Profile.jsx:168</code></td><td><span class="pill mid">Darmiyana</span></td></tr>
+          <tr><td class="id"><a href="#d6">D-6</a></td><td>Ek hi waqt do requests se duplicate plate ban sakti hai</td><td><code>vehicleController.js:24</code></td><td><span class="pill mid">Darmiyana</span></td></tr>
+          <tr><td class="id"><a href="#d7">D-7</a></td><td>Naam ke rules form aur server par alag hain</td><td><code>utils/validation.js:12</code></td><td><span class="pill mid">Darmiyana</span></td></tr>
+          <tr><td class="id"><a href="#s1">S-1</a></td><td>organizationName ka logic teen jagah alag alag</td><td><code>adminController.js:35</code></td><td><span class="pill low">Safai</span></td></tr>
+          <tr><td class="id"><a href="#s2">S-2</a></td><td>Profile update mein user database se dobara</td><td><code>userController.js:18</code></td><td><span class="pill low">Safai</span></td></tr>
+          <tr><td class="id"><a href="#s3">S-3</a></td><td>Email duplicate check teen jagah copy</td><td><code>authController.js:29</code></td><td><span class="pill low">Safai</span></td></tr>
+          <tr><td class="id"><a href="#s4">S-4</a></td><td>"Organization" label har screen par nahi lagaya</td><td><code>Layout.jsx:78</code></td><td><span class="pill low">Safai</span></td></tr>
+          <tr><td class="id"><a href="#s5">S-5</a></td><td>Admin search organization name se nahi dhoondta</td><td><code>useAdmin.js:31</code></td><td><span class="pill low">Safai</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="detail">
+    <div class="sec-head">
+      <div class="eyebrow">Tafseel</div>
+      <h2>Har masla tafseel se</h2>
+    </div>
+
+    <div class="group-title"><span class="pill high">Zaroori</span><h3>User ko seedha nuqsan</h3></div>
+    <div class="cards">
+      <article class="card" id="z1">
+        <div class="card-head"><span class="id">Z-1</span><h4>Database ki chhoti si kharabi par har user logout ho jata hai</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>backend/middleware/auth.js:25</code> aur <code>frontend/src/api.js:30</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd><code>protect</code> middleware har error ko 401 "Invalid or expired token" bana deta hai, chahe asal wajah database ka error ho. Phase 0 ka naya frontend code har 401 par user ko logout kar deta hai.</dd>
+          <dt>Kab hota hai</dt><dd>MongoDB connection ek pal ke liye toota, <code>User.findById</code> fail hua, server ne 401 bheja, aur sab signed-in users login page par pahunch gaye.</dd>
+          <dt>Hal</dt><dd class="fix"><code>protect</code> mein sirf token wale errors (<code>JsonWebTokenError</code>, <code>TokenExpiredError</code>) par 401 dein. Baqi errors <code>next(err)</code> se error handler ko bhejein, jo 500 dega aur user logout nahi hoga.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="z2">
+        <div class="card-head"><span class="id">Z-2</span><h4>Purani duplicate plate wali gaariyan ab edit nahi hotin</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>backend/controllers/vehicleController.js:72</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Update par duplicate check har dafa chalta hai jab request mein registration number ho, chahe number badla hi na ho. Edit form hamesha registration number bhejta hai.</dd>
+          <dt>Kab hota hai</dt><dd>Phase 0 se pehle do gaariyan "ABC123" ke saath ban chuki hain. Ek ka sirf naam badlein to "already exists" (409) aata hai. Dono gaariyan edit hi nahi ho saktin.</dd>
+          <dt>Hal</dt><dd class="fix">Check sirf tab chalayein jab naya number (trim aur uppercase karke) gaari ke maujooda number se mukhtalif ho.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="z3">
+        <div class="card-head"><span class="id">Z-3</span><h4>Number ki shakal mein plate bhejne se duplicate check bach jata hai</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>backend/controllers/vehicleController.js:25</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd><code>registrationTaken</code> sirf text (string) check karta hai. Number aaye to "pehle se nahi hai" maan leta hai, phir Mongoose usay text bana kar save kar deta hai.</dd>
+          <dt>Kab hota hai</dt><dd>"1234" pehle se maujood hai. API se <code>registrationNumber: 1234</code> (number) bheja, to doosri "1234" gaari ban gayi.</dd>
+          <dt>Hal</dt><dd class="fix">Check se pehle value ko <code>String()</code> mein badlein, ya jo text na ho usay 400 error se rok dein.</dd>
+        </dl>
+      </article>
+    </div>
+
+    <div class="group-title"><span class="pill mid">Darmiyana</span><h3>Khaas halaat mein ghalat nateeja</h3></div>
+    <div class="cards">
+      <article class="card" id="d1">
+        <div class="card-head"><span class="id">D-1</span><h4>Admin edit mein <code>organizationName: null</code> par 500 error</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>backend/controllers/adminController.js:60</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Validation <code>null</code> par user ka purana naam check kar leti hai aur pass ho jati hai. Lekin save karte waqt <code>null.trim()</code> crash ho jata hai.</dd>
+          <dt>Kab hota hai</dt><dd><code>PUT /admin/users/:id</code> ke saath <code>{"role": "Organizational", "organizationName": null}</code> bhejein to 400 ki jagah 500 "Something went wrong" aata hai.</dd>
+          <dt>Hal</dt><dd class="fix"><code>null</code> ko bhi "nahi bheja" samjhein (<code>organizationName != null</code> check), ya <code>null</code> par saaf 400 error dein.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="d2">
+        <div class="card-head"><span class="id">D-2</span><h4>Admin apna record Admin page se badle to Profile purana naam wapas laga deta hai</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>frontend/src/components/Admin.jsx:84</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Admin page par save karne se sirf users ki list reload hoti hai, signed-in user (<code>useAuth</code>) update nahi hota. Profile purane data se khulta hai.</dd>
+          <dt>Kab hota hai</dt><dd>Admin ne Admin page par apna naam "Old" se "New" kiya. Sidebar abhi bhi "Old" dikhata hai. Phir Profile mein sirf phone badal kar save kiya, to naam wapas "Old" ho gaya.</dd>
+          <dt>Hal</dt><dd class="fix">Jab admin apna hi record save kare to <code>updateUser</code> bhi call karein, taake sidebar, dashboard aur Profile naya data dikhayen.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="d3">
+        <div class="card-head"><span class="id">D-3</span><h4>Toota hua URL 400 ki jagah 500 deta hai</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>backend/middleware/errorHandler.js:32</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Express ka URL error (<code>URIError</code>) status 400 ke saath aata hai, lekin error handler 4xx status sirf tab maanta hai jab <code>expose</code> laga ho. Yahan nahi laga.</dd>
+          <dt>Kab hota hai</dt><dd><code>GET /api/vehicles/%E0%A4</code> par server error log karta hai aur 500 bhejta hai.</dd>
+          <dt>Hal</dt><dd class="fix">4xx range ka <code>err.status</code> seedha istemal karein, ya <code>URIError</code> ko 400 "Invalid URL" banayein.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="d4">
+        <div class="card-head"><span class="id">D-4</span><h4>Gaariyan load na hon to "No vehicles yet" dikhta hai</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>frontend/src/components/Vehicles.jsx:178</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Khaali list ka message sirf yeh dekhta hai ke loading khatam ho gayi. Load fail ho to bhi list khaali hoti hai.</dd>
+          <dt>Kab hota hai</dt><dd>Server 500 de ya internet band ho. Error ke neeche "No vehicles yet, add your first vehicle" aata hai, aur user samajhta hai uski gaariyan gayab ho gayin.</dd>
+          <dt>Hal</dt><dd class="fix">Khaali list ka message dikhane se pehle <code>!error</code> bhi check karein.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="d5">
+        <div class="card-head"><span class="id">D-5</span><h4>Browser ka password auto-fill profile save rok deta hai</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>frontend/src/components/Profile.jsx:168</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>"New password" pehla password box hai aur kisi box par <code>autocomplete</code> nahi laga. Browser saved password usi mein bhar deta hai.</dd>
+          <dt>Kab hota hai</dt><dd>User ne sirf phone number badla aur save kiya, to "Enter your current password" aa gaya aur save nahi hua.</dd>
+          <dt>Hal</dt><dd class="fix">"Current password" ko pehle rakhein, aur <code>autocomplete="current-password"</code> aur <code>autocomplete="new-password"</code> lagayein.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="d6">
+        <div class="card-head"><span class="id">D-6</span><h4>Ek hi waqt do requests se duplicate plate ban sakti hai</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>backend/controllers/vehicleController.js:24</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Pehle "hai ya nahi" check hota hai, phir save. Beech mein doosri request aa jaye to dono check pass kar jati hain.</dd>
+          <dt>Kab hota hai</dt><dd>Do users ek hi second mein same plate save karein, to do gaariyan ek hi number ke saath ban jati hain. Mumkin hai magar kam hota hai.</dd>
+          <dt>Hal</dt><dd class="fix">Database mein <code>registrationNumber</code> par unique index lagayein. Error handler ka 11000 wala hissa phir khud 409 dega. Lekin pehle database ke purane duplicate saaf karne honge.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="d7">
+        <div class="card-head"><span class="id">D-7</span><h4>Naam ke rules form aur server par alag hain</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>backend/utils/validation.js:12</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Form sirf A se Z wale naam qubool karta hai, server koi bhi 2 se 60 characters. <code>CLAUDE.md</code> kehta hai dono rules ek jaise hain.</dd>
+          <dt>Kab hota hai</dt><dd>API se seedha "R2-D2 &lt;3" naam register hua. Baad mein wahi user Profile form save nahi kar pata, kyunke form naam ko ghalat kehta hai.</dd>
+          <dt>Hal</dt><dd class="fix">Faisla karein ke dono jagah ek hi rule ho. Mashwara: dono jagah Urdu aur accent wale naam bhi allow karein, sirf ajeeb symbols rokein.</dd>
+        </dl>
+      </article>
+    </div>
+
+    <div class="group-title"><span class="pill low">Safai</span><h3>Kuch tootta nahi, code behtar hoga</h3></div>
+    <div class="cards">
+      <article class="card" id="s1">
+        <div class="card-head"><span class="id">S-1</span><h4>organizationName ka logic teen jagah alag alag likha hai</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>authController.js:38</code>, <code>userController.js:54</code>, <code>adminController.js:35</code> aur <code>:60</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Teeno jagah thoda mukhtalif bartaao hai. D-1 wala crash isi farq se aaya.</dd>
+          <dt>Hal</dt><dd class="fix"><code>utils/validation.js</code> mein ek helper banayein (jaise <code>resolveOrganizationName</code>) aur teeno jagah wahi istemal karein.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="s2">
+        <div class="card-head"><span class="id">S-2</span><h4>Profile update mein user database se dobara laya jata hai</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>backend/controllers/userController.js:18</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd><code>protect</code> pehle hi user la chuka hota hai. Har profile save par database se do baar ek hi read hota hai.</dd>
+          <dt>Hal</dt><dd class="fix"><code>req.user</code> hi istemal karein, aur password hash sirf password badalte waqt (<code>select("password")</code>) laayein.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="s3">
+        <div class="card-head"><span class="id">S-3</span><h4>Email duplicate check teen jagah copy hai</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>authController.js:29</code>, <code>userController.js:46</code>, <code>adminController.js:48</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Teeno ke message bhi thode alag hain ("already registered" aur "already in use"). Email par unique index aur error handler pehle hi duplicate rok dete hain.</dd>
+          <dt>Hal</dt><dd class="fix">Ek helper banayein, ya index par bharosa karke 11000 error ka email wala message theek karein.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="s4">
+        <div class="card-head"><span class="id">S-4</span><h4>"Organization" label har screen par nahi lagaya</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>Layout.jsx:78</code>, <code>Dashboard.jsx:22</code> aur <code>:37</code>, <code>Profile.jsx:88</code> aur <code>:197</code>, <code>Admin.jsx:136</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Register page "Organization" dikhata hai, lekin sidebar, dashboard, profile aur admin list "Organizational" likhte hain.</dd>
+          <dt>Hal</dt><dd class="fix">In jagahon par bhi <code>ROLE_LABELS[user.role]</code> istemal karein.</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="s5">
+        <div class="card-head"><span class="id">S-5</span><h4>Admin ka user search organization name se nahi dhoondta</h4><span class="pill open">Open</span></div>
+        <div class="where"><code>frontend/src/hooks/useAdmin.js:31</code></div>
+        <dl class="rows">
+          <dt>Masla</dt><dd>Admin list mein "Al-Noor Logistics" nazar aata hai, lekin search mein "Al-Noor" likho to "No users found".</dd>
+          <dt>Hal</dt><dd class="fix">Filter mein <code>u.organizationName?.toLowerCase().includes(q)</code> bhi shamil karein, aur placeholder mein "organization" likhein.</dd>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">Smart Fuel Optimization · Phase 0 code review · 3 October 2026. Sab findings code se mila kar check ki gayin. Abhi koi fix nahi lagaya gaya.</footer>
+
+</body>
+</html>

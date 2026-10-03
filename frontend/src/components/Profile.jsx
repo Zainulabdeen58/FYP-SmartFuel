@@ -4,13 +4,16 @@ import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
   validateContactNumber,
+  validateCurrentPassword,
   validateEmail,
   validateFullName,
+  validateOrganizationName,
   validatePassword,
 } from "../validation";
 
 function Profile({ user, saveUser }) {
   const [message, setMessage] = useState("");
+  const isOrganization = user.role === "Organizational";
 
   const {
     form,
@@ -20,21 +23,41 @@ function Profile({ user, saveUser }) {
     updateField,
     handleSubmit,
   } = useForm({
-    initialValues: { ...user, password: "" },
+    initialValues: {
+      fullName: user.fullName || "",
+      email: user.email || "",
+      contactNumber: user.contactNumber || "",
+      organizationName: user.organizationName || "",
+      currentPassword: "",
+      password: "",
+    },
     validate: (f) => ({
       fullName: validateFullName(f.fullName),
       email: validateEmail(f.email),
       contactNumber: validateContactNumber(f.contactNumber),
+      organizationName: isOrganization
+        ? validateOrganizationName(f.organizationName)
+        : "",
       password: validatePassword(f.password, { required: false }),
+      currentPassword: validateCurrentPassword(f.currentPassword, f.password),
     }),
     onSubmit: async (f, { setForm }) => {
-      const { data } = await api.put("/users/profile", f);
+      const payload = {
+        fullName: f.fullName,
+        email: f.email,
+        contactNumber: f.contactNumber,
+        ...(isOrganization && { organizationName: f.organizationName }),
+        ...(f.password && {
+          password: f.password,
+          currentPassword: f.currentPassword,
+        }),
+      };
 
-      localStorage.setItem("user", JSON.stringify(data.user));
+      const { data } = await api.put("/users/profile", payload);
 
       saveUser(data.user);
       setMessage(data.message);
-      setForm((prev) => ({ ...prev, password: "" }));
+      setForm((prev) => ({ ...prev, password: "", currentPassword: "" }));
     },
     errorMessage: "Could not update profile",
   });
@@ -119,6 +142,25 @@ function Profile({ user, saveUser }) {
               )}
             </div>
 
+            {isOrganization && (
+              <div className="field">
+                <label>Organization name</label>
+
+                <input
+                  value={form.organizationName}
+                  className={fieldErrors.organizationName ? "invalid" : ""}
+                  onChange={(e) =>
+                    updateField("organizationName", e.target.value)
+                  }
+                />
+                {fieldErrors.organizationName && (
+                  <span className="field-error">
+                    {fieldErrors.organizationName}
+                  </span>
+                )}
+              </div>
+            )}
+
             <div className="field">
               <label>New password</label>
 
@@ -131,6 +173,21 @@ function Profile({ user, saveUser }) {
               />
               {fieldErrors.password && (
                 <span className="field-error">{fieldErrors.password}</span>
+              )}
+            </div>
+
+            <div className="field">
+              <label>Current password</label>
+
+              <input
+                type="password"
+                placeholder="Needed only to set a new password"
+                value={form.currentPassword}
+                className={fieldErrors.currentPassword ? "invalid" : ""}
+                onChange={(e) => updateField("currentPassword", e.target.value)}
+              />
+              {fieldErrors.currentPassword && (
+                <span className="field-error">{fieldErrors.currentPassword}</span>
               )}
             </div>
           </div>
