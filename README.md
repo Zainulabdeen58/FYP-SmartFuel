@@ -9,7 +9,7 @@ Prototype for the Spring 2026 CS619 requirements.
 - Authentication: JWT + bcrypt
 
 ## Implemented requirements
-- Individual/Admin registration and login
+- Individual and Organizational registration and login (Admin cannot self-register)
 - JWT authentication and logout
 - Profile viewing/updating
 - Individual users can manage only their own vehicles
@@ -40,5 +40,14 @@ The frontend expects the backend at `http://localhost:5000/api`.
 ## MongoDB
 Use a local MongoDB instance at `mongodb://localhost:27017`.
 
-## Important
-The assignment explicitly asks the registration form to include User type/role (Individual and Admin), so this prototype includes that field.
+## Admin accounts
+The registration form offers only Individual and Organizational accounts, so nobody can make themselves an admin.
+Admins are created by a seeder. Put `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_CONTACT` and `ADMIN_PASSWORD`
+in `backend/.env` (see `.env.example`), then run:
+
+```bash
+cd backend
+npm run seed:admin
+```
+
+Running it again does nothing if that admin already exists. An existing admin can also change any user's role on the Administration page.

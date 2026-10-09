@@ -4,12 +4,13 @@ import Layout from "./components/Layout";
 import AuthPage from "./components/AuthPage";
 import Dashboard from "./components/Dashboard";
 import Vehicles from "./components/Vehicles";
+import FuelRecords from "./components/FuelRecords";
 import Profile from "./components/Profile";
 import Admin from "./components/Admin";
 import "./global.css";
 
 export default function App() {
-  const { user, save, updateUser, logout } = useAuth();
+  const { user, save, updateUser, refreshUser, logout } = useAuth();
   const location = useLocation();
 
   if (!user && !["/login", "/register"].includes(location.pathname)) {
@@ -25,6 +26,8 @@ export default function App() {
 
             <Route path="/vehicles" element={<Vehicles />} />
 
+            <Route path="/fuel-records" element={<FuelRecords />} />
+
             <Route
               path="/profile"
               element={
@@ -36,7 +39,7 @@ export default function App() {
               path="/admin"
               element={
                 user.role === "Admin" ? (
-                  <Admin currentUser={user} />
+                  <Admin currentUser={user} onSelfUpdated={refreshUser} />
                 ) : (
                   <Navigate to="/dashboard" replace />
                 )

@@ -23,13 +23,21 @@ export function errorHandler(err, req, res, next) {
     return fail(400, messages.join(". "));
   }
 
+  // Duplicate value blocked by a unique index (email, registrationNumber).
   if (err.code === 11000) {
-    const field = Object.keys(err.keyValue || {})[0] || "value";
-    return fail(409, `This ${field} is already in use`);
+    const field = Object.keys(err.keyValue || {})[0];
+    if (field === "registrationNumber") {
+      return fail(409, "A vehicle with this registration number already exists");
+    }
+    if (field === "email") return fail(409, "Email already registered");
+    return fail(409, "This value is already in use");
   }
 
-  // Errors from body parsing (e.g. payload too large) carry a safe status and message.
-  if (err.expose && err.status >= 400 && err.status < 500) return fail(err.status, err.message);
+  // Other client errors with a 4xx status, e.g. payload too large or a badly
+  // encoded URL. Only "exposed" errors have a message safe to show.
+  if (err.status >= 400 && err.status < 500) {
+    return fail(err.status, err.expose ? err.message : "Bad request");
+  }
 
   console.error(err);
   return fail(500, "Something went wrong. Please try again.");

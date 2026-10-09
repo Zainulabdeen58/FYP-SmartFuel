@@ -13,11 +13,14 @@ const vehicleSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     vehicleName: { type: String, required: [true, "Vehicle name is required"], trim: true },
+    // unique: the database itself refuses a second vehicle with the same number,
+    // even if two requests arrive at the same moment.
     registrationNumber: {
       type: String,
       required: [true, "Registration number is required"],
       trim: true,
       uppercase: true,
+      unique: true,
     },
     manufacturer: { type: String, required: [true, "Manufacturer is required"], trim: true },
     modelYear: {

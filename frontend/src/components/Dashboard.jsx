@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { ROLE_LABELS } from "../constant";
 import Icon from "./Icon";
 
 function Dashboard({ user }) {
@@ -19,7 +20,7 @@ function Dashboard({ user }) {
 
         <div className="date-card">
           <span>ACCOUNT</span>
-          <strong>{user.role}</strong>
+          <strong>{ROLE_LABELS[user.role]}</strong>
           <small>Active workspace</small>
         </div>
       </div>
@@ -34,7 +35,7 @@ function Dashboard({ user }) {
             </div>
           </div>
 
-          <strong>{user.role}</strong>
+          <strong>{ROLE_LABELS[user.role]}</strong>
 
           <div className="metric-bottom">
             <span className="metric-dot green-dot" />

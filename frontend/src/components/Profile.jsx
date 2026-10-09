@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../api";
+import { ROLE_LABELS } from "../constant";
 import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
@@ -85,7 +86,7 @@ function Profile({ user, saveUser }) {
           </div>
 
           <h3>{user.fullName}</h3>
-          <span>{user.role}</span>
+          <span>{ROLE_LABELS[user.role]}</span>
 
           <div className="profile-status">
             <span className="status-dot" />
@@ -166,6 +167,7 @@ function Profile({ user, saveUser }) {
 
               <input
                 type="password"
+                autoComplete="new-password"
                 placeholder="Leave blank to keep current password"
                 value={form.password}
                 className={fieldErrors.password ? "invalid" : ""}
@@ -181,6 +183,7 @@ function Profile({ user, saveUser }) {
 
               <input
                 type="password"
+                autoComplete="current-password"
                 placeholder="Needed only to set a new password"
                 value={form.currentPassword}
                 className={fieldErrors.currentPassword ? "invalid" : ""}
@@ -194,7 +197,7 @@ function Profile({ user, saveUser }) {
 
           <div className="profile-role">
             <span>ACCOUNT ROLE</span>
-            <strong>{user.role}</strong>
+            <strong>{ROLE_LABELS[user.role]}</strong>
           </div>
 
           {message && (

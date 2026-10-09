@@ -21,12 +21,10 @@ function useFetch(fetcher, deps = [], { immediate = true, initialData = null } =
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   useEffect(() => {
     if (immediate) reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload]);
 
   return { data, setData, error, setError, loading, reload };

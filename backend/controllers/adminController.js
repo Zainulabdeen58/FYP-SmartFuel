@@ -1,3 +1,4 @@
+import FuelRecord from "../models/FuelRecord.js";
 import User from "../models/User.js";
 import Vehicle from "../models/Vehicle.js";
 import {
@@ -32,7 +33,10 @@ export async function updateUser(req, res) {
     email !== undefined ? checkEmail(email) : "",
     contactNumber !== undefined ? checkContactNumber(contactNumber) : "",
     role !== undefined ? checkRole(role) : "",
-    nextRole === "Organizational" ? checkOrganizationName(organizationName ?? user.organizationName) : ""
+    // If a value is sent (even null) check that value, otherwise check the saved one.
+    nextRole === "Organizational"
+      ? checkOrganizationName(organizationName !== undefined ? organizationName : user.organizationName)
+      : ""
   );
   if (error) return res.status(400).json({ success: false, message: error });
 
@@ -75,9 +79,10 @@ export async function deleteUser(req, res) {
     });
   }
 
+  await FuelRecord.deleteMany({ user: user._id });
   await Vehicle.deleteMany({ user: user._id });
   await user.deleteOne();
-  res.json({ success: true, message: "User and their vehicle records deleted" });
+  res.json({ success: true, message: "User and their vehicle and fuel records deleted" });
 }
 
 // Query values can arrive as arrays (?user=a&user=b); only plain text is searched.

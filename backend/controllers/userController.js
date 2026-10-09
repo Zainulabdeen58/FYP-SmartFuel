@@ -10,7 +10,7 @@ import {
 } from "../utils/validation.js";
 
 export async function getProfile(req, res) {
-  res.json({ success: true, user: req.user });
+  res.json({ success: true, user: req.user.toPublic() });
 }
 
 export async function updateProfile(req, res) {

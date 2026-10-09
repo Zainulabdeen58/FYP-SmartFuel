@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { ROLE_LABELS } from "../constant";
 import useAdmin from "../hooks/useAdmin";
 import Icon from "./Icon";
 import VehicleForm from "./VehicleForm";
 import UserForm from "./UserForm";
 
-function Admin({ currentUser }) {
+function Admin({ currentUser, onSelfUpdated }) {
   const {
     users,
     vehicles,
@@ -81,9 +82,13 @@ function Admin({ currentUser }) {
         <UserForm
           user={editingUser}
           lockRole={String(editingUser._id) === String(currentUserId)}
-          onSave={() => {
+          onSave={(savedUser) => {
             setEditingUser(null);
             loadUsers();
+            loadVehicles();
+            // The admin edited their own account: refresh the signed-in user
+            // so the sidebar and profile show the new details.
+            if (String(savedUser?._id) === String(currentUserId)) onSelfUpdated();
           }}
           onCancel={() => setEditingUser(null)}
         />
@@ -133,7 +138,7 @@ function Admin({ currentUser }) {
                   {u.organizationName ? ` · ${u.organizationName}` : ""}
                 </div>
 
-                <span className="role-badge">{u.role}</span>
+                <span className="role-badge">{ROLE_LABELS[u.role]}</span>
 
                 <div className="row-actions">
                   <button

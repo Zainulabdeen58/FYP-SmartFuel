@@ -1,9 +1,8 @@
-import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api";
 import useForm from "../hooks/useForm";
 import Icon from "./Icon";
-import { ROLES, ROLE_LABELS } from "../constant";
+import { REGISTER_ROLES, ROLE_LABELS } from "../constant";
 import {
   validateContactNumber,
   validateEmail,
@@ -48,11 +47,8 @@ function AuthPage({ mode, save }) {
 
   const {
     form,
-    setForm,
     fieldErrors,
-    setFieldErrors,
     error,
-    setError,
     loading,
     updateField,
     handleSubmit: submit,
@@ -62,12 +58,12 @@ function AuthPage({ mode, save }) {
       isLogin
         ? {
             email: validateEmail(f.email),
-            password: validatePassword(f.password),
+            password: f.password ? "" : "Password is required",
           }
         : {
             fullName: validateFullName(f.fullName),
             contactNumber: validateContactNumber(f.contactNumber),
-            role: validateRole(f.role || "Individual"),
+            role: validateRole(f.role || "Individual", REGISTER_ROLES),
             organizationName:
               f.role === "Organizational"
                 ? validateOrganizationName(f.organizationName)
@@ -84,13 +80,6 @@ function AuthPage({ mode, save }) {
     },
     errorMessage: "Something went wrong. Please try again.",
   });
-
-  useEffect(() => {
-    setForm(getInitialForm(mode));
-    setFieldErrors({});
-    setError("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
 
   return (
     <div className="auth-page">
@@ -210,7 +199,7 @@ function AuthPage({ mode, save }) {
                 <div className="field">
                   <label>Account type</label>
                   <div className="role-options">
-                    {ROLES.map((role) => {
+                    {REGISTER_ROLES.map((role) => {
                       const selected = (form.role || "Individual") === role;
                       return (
                         <label
@@ -273,6 +262,7 @@ function AuthPage({ mode, save }) {
               <label>Password</label>
               <input
                 type="password"
+                autoComplete={isLogin ? "current-password" : "new-password"}
                 placeholder="Enter your password"
                 value={form.password || ""}
                 className={fieldErrors.password ? "invalid" : ""}

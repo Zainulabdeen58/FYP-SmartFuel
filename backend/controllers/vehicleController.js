@@ -1,4 +1,6 @@
+import FuelRecord from "../models/FuelRecord.js";
 import Vehicle from "../models/Vehicle.js";
+import { isOwnerOrAdmin } from "../utils/access.js";
 
 const fields = [
   "vehicleName",
@@ -22,18 +24,24 @@ function pickVehicleFields(body) {
 // Registration numbers are stored trimmed and uppercase (see the Vehicle schema),
 // so compare in the same form. excludeId skips the vehicle being updated.
 function registrationTaken(registrationNumber, excludeId) {
-  if (typeof registrationNumber !== "string" || !registrationNumber.trim()) return null;
   return Vehicle.exists({
     registrationNumber: registrationNumber.trim().toUpperCase(),
     ...(excludeId && { _id: { $ne: excludeId } })
   });
 }
 
-const isOwnerOrAdmin = (req, ownerId) =>
-  req.user.role === "Admin" || String(ownerId) === String(req.user._id);
+// Registration number must be text (a number like 123 would skip the duplicate check).
+function isValidRegistration(value) {
+  return typeof value === "string" && value.trim() !== "";
+}
+
+const INVALID_REGISTRATION = { success: false, message: "Registration number is required" };
 
 export async function createVehicle(req, res) {
   const data = pickVehicleFields(req.body);
+  if (!isValidRegistration(data.registrationNumber)) {
+    return res.status(400).json(INVALID_REGISTRATION);
+  }
   if (await registrationTaken(data.registrationNumber)) {
     return res.status(409).json(DUPLICATE_REGISTRATION);
   }
@@ -69,8 +77,13 @@ export async function updateVehicle(req, res) {
   }
 
   const data = pickVehicleFields(req.body);
-  if (data.registrationNumber !== undefined && (await registrationTaken(data.registrationNumber, vehicle._id))) {
-    return res.status(409).json(DUPLICATE_REGISTRATION);
+  if (data.registrationNumber !== undefined) {
+    if (!isValidRegistration(data.registrationNumber)) {
+      return res.status(400).json(INVALID_REGISTRATION);
+    }
+    if (await registrationTaken(data.registrationNumber, vehicle._id)) {
+      return res.status(409).json(DUPLICATE_REGISTRATION);
+    }
   }
 
   Object.assign(vehicle, data);
@@ -86,6 +99,7 @@ export async function deleteVehicle(req, res) {
     return res.status(403).json({ success: false, message: "Not authorized" });
   }
 
+  await FuelRecord.deleteMany({ vehicle: vehicle._id });
   await vehicle.deleteOne();
-  res.json({ success: true, message: "Vehicle deleted" });
+  res.json({ success: true, message: "Vehicle and its fuel records deleted" });
 }

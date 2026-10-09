@@ -24,7 +24,7 @@ function Vehicles() {
   const [showCreate, setShowCreate] = useState(false);
 
   const remove = async (id) => {
-    if (!confirm("Delete this vehicle?")) return;
+    if (!confirm("Delete this vehicle and all its fuel records?")) return;
 
     try {
       await api.delete(`/vehicles/${id}`);
@@ -175,7 +175,7 @@ function Vehicles() {
           </div>
         )}
 
-        {!loading && !vehicles.length && (
+        {!loading && !error && !vehicles.length && (
           <div className="empty-state">
             <div className="empty-icon">
               <Icon name="car" size={28} />

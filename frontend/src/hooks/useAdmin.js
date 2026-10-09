@@ -53,7 +53,6 @@ function useAdmin(currentUser) {
 
   useEffect(() => {
     loadUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -62,7 +61,6 @@ function useAdmin(currentUser) {
     }, 250);
 
     return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.user, search.registrationNumber]);
 
   const openUserDetails = async (id) => {
@@ -81,7 +79,7 @@ function useAdmin(currentUser) {
       return;
     }
 
-    if (!confirm("Delete this user and their vehicles?")) return;
+    if (!confirm("Delete this user with all their vehicles and fuel records?")) return;
 
     try {
       await api.delete(`/admin/users/${id}`);
@@ -93,7 +91,7 @@ function useAdmin(currentUser) {
   };
 
   const deleteVehicle = async (id) => {
-    if (!confirm("Delete this vehicle?")) return;
+    if (!confirm("Delete this vehicle and all its fuel records?")) return;
 
     try {
       await api.delete(`/vehicles/${id}`);

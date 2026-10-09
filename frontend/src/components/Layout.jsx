@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ADMIN_LINK, NAV_LINKS } from "../constant";
+import { ADMIN_LINK, NAV_LINKS, ROLE_LABELS } from "../constant";
 import Icon from "./Icon";
 import useTheme from "../hooks/useTheme";
 
@@ -75,7 +75,7 @@ function Layout({ user, logout, children }) {
 
             <div className="sidebar-user-info">
               <strong>{user.fullName}</strong>
-              <span>{user.role}</span>
+              <span>{ROLE_LABELS[user.role]}</span>
             </div>
           </div>
 

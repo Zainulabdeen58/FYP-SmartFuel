@@ -7,7 +7,7 @@ import {
   checkFullName,
   checkOrganizationName,
   checkPassword,
-  checkRole,
+  checkRegisterRole,
   firstError
 } from "../utils/validation.js";
 
@@ -19,7 +19,7 @@ export async function register(req, res) {
     checkFullName(fullName),
     checkEmail(email),
     checkContactNumber(contactNumber),
-    checkRole(role),
+    checkRegisterRole(role),
     isOrganization ? checkOrganizationName(organizationName) : "",
     checkPassword(password)
   );

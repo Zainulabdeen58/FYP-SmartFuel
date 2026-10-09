@@ -2468,7 +2468,7 @@ html:has(.modal-backdrop) {
 
 .role-options {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -2537,6 +2537,32 @@ html:has(.modal-backdrop) {
 /* =========================
    RESPONSIVE
 ========================= */
+
+/* =========================
+   FUEL RECORDS
+========================= */
+
+.records-filter {
+  max-width: 340px;
+
+  margin-bottom: 14px;
+}
+
+.fuel-price-preview {
+  margin: 14px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+}
+
+.fuel-price-preview strong {
+  color: var(--text);
+}
+
+a.submit-button {
+  text-decoration: none;
+}
 
 @media (max-width: 1050px) {
   :root {

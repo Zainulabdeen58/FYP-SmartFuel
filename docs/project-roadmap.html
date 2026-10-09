@@ -241,14 +241,14 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
       <p class="lead">SRS ki har functionality, roles, edge cases aur coding ke phases ek jagah. Pehle dekhein kya ban chuka hai, phir phase ba phase aage ka kaam. Har phase ke tasks par tick laga kar apni progress yahin track karein.</p>
       <div class="basis">
         <span>SRS: 13 functional requirements</span>
-        <span>Code: 085ae03 + Phase 0 fixes</span>
-        <span>Update: 3 Oct 2026</span>
+        <span>Code: Phase 0 (02bfc1b) + Phase 1</span>
+        <span>Update: 10 Oct 2026</span>
       </div>
     </div>
-    <div class="gauge" aria-label="Project progress gauge: 3 requirements mukammal, 10 baqi">
+    <div class="gauge" aria-label="Project progress gauge: 4 requirements mukammal, 9 baqi">
       <svg viewBox="0 0 200 122" role="img" aria-hidden="true">
         <path class="g-track" d="M 20 100 A 80 80 0 0 1 180 100"></path>
-        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 40.13 46.94"></path>
+        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 54.55 34.16"></path>
         <line class="g-tick" x1="20" y1="100" x2="34" y2="100"></line>
         <line class="g-tick" x1="43.43" y1="43.43" x2="53.33" y2="53.33"></line>
         <line class="g-tick" x1="100" y1="20" x2="100" y2="34"></line>
@@ -257,11 +257,11 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <text class="g-label" x="20" y="118" text-anchor="middle">E</text>
         <text class="g-label" x="100" y="13" text-anchor="middle">½</text>
         <text class="g-label" x="180" y="118" text-anchor="middle">F</text>
-        <line class="g-needle" x1="100" y1="100" x2="56.59" y2="61.53"></line>
+        <line class="g-needle" x1="100" y1="100" x2="67.05" y2="52.27"></line>
         <circle class="g-hub" cx="100" cy="100" r="7"></circle>
       </svg>
-      <div class="gauge-value">3 / 13</div>
-      <div class="gauge-note">Requirements ka fuel gauge, Phase 0 ke baad.</div>
+      <div class="gauge-value">4 / 13</div>
+      <div class="gauge-note">Requirements ka fuel gauge, Phase 1 ke baad.</div>
     </div>
   </div>
 </header>
@@ -288,27 +288,29 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
     <div class="summary-grid">
       <div class="panel">
         <span class="pill done">Ban chuka</span>
-        <h3>Account aur vehicles</h3>
-        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
+        <h3>Account, vehicles aur fuel records</h3>
+        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Fuel purchase records (FR-04) bhi ban gaye. Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
       </div>
       <div class="panel">
         <span class="pill todo">Baqi</span>
         <h3>Asal "Smart Fuel" hissa</h3>
-        <p>Fuel records, trips, route optimization, map, monthly budget, charts, crisis mode aur notifications. Yeh 10 requirements abhi shuru nahi hui. Project ka naam jis kaam par hai, woh yahi hissa hai.</p>
+        <p>Trips, route optimization, map, monthly budget, charts, crisis mode aur notifications. Yeh 9 requirements abhi shuru nahi hui. Project ka naam jis kaam par hai, woh yahi hissa hai.</p>
       </div>
       <div class="panel">
         <span class="pill partial">Agla qadam</span>
-        <h3>Phase 1: Fuel records</h3>
-        <p>Phase 0 (buniyad) ka code mukammal ho gaya. Ab fuel purchase records se shuru karein, kyunke budget, charts aur fuel price sab isi data par chalte hain. Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
+        <h3>Phase 2: Monthly budget</h3>
+        <p>Phase 0 (buniyad) aur Phase 1 (fuel records) ka code mukammal ho gaya. Ab monthly budget aur alerts (FR-08), kyunke kharche ka data ab fuel entries se mil raha hai. Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
       </div>
     </div>
     <div class="count-row">
-      <span class="pill done">3 mukammal</span>
-      <span class="pill todo">10 shuru nahi hui</span>
+      <span class="pill done">4 mukammal</span>
+      <span class="pill todo">9 shuru nahi hui</span>
       <span class="pill done">Phase 0: code mukammal</span>
+      <span class="pill done">Phase 1: code mukammal</span>
       <span class="pill todo">8 coding phases</span>
     </div>
     <div class="note ok" style="margin-top:16px"><strong>Update, 3 Oct 2026:</strong> Phase 0 ke saare Missing aur Bug items theek ho gaye. Neeche aise har item par <span class="chip fixed">Fixed</span> laga hai. Backend ko 51 automated checks se test kiya gaya aur sab pass hue. Jin par <span class="chip decide">Decide</span> hai, unka faisla abhi baqi hai.</div>
+    <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 1 (FR-04 fuel purchase records) ka code mukammal. Sidebar mein "Fuel Records" page: entry add, edit, delete aur gaari ke hisaab se filter. Backend ko 69 naye automated checks se test kiya gaya, sab pass. Phase 0 ke 51 checks bhi dobara pass hue.</div>
   </section>
 
   <section id="roles">
@@ -366,7 +368,7 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
           <tbody>
             <tr><td>Register, login, profile, logout</td><td class="yes">Haan</td><td class="yes">Haan</td><td class="yes">Haan</td></tr>
             <tr><td>Vehicles add, edit, delete</td><td class="yes">Apni</td><td class="yes">Apni fleet</td><td class="yes">Sab ki</td></tr>
-            <tr><td>Fuel purchase records</td><td class="yes">Apne</td><td class="yes">Fleet ke</td><td class="prop">Sab dekh sake (proposal)</td></tr>
+            <tr><td>Fuel purchase records</td><td class="yes">Apne</td><td class="yes">Fleet ke</td><td class="yes">Sab ke</td></tr>
             <tr><td>Trips aur route planning</td><td class="yes">Apne</td><td class="yes">Fleet ke</td><td class="prop">Sirf dekhna (proposal)</td></tr>
             <tr><td>Monthly budget</td><td class="yes">Personal</td><td class="yes">Fleet + har gaari</td><td class="no">Zaroorat nahi</td></tr>
             <tr><td>Crisis mode</td><td class="yes">Apne liye</td><td class="yes">Apne liye</td><td class="prop">Poore system ke liye (proposal)</td></tr>
@@ -384,9 +386,9 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <ol class="rules">
           <li>Har user sirf apna data dekhe. Doosre ka data sirf Admin dekh sakta hai. <span class="chip ok">Vehicles mein bana hua</span></li>
           <li>Admin khud ko delete ya apna Admin role khatam nahi kar sakta. <span class="chip ok">Bana hua</span></li>
-          <li>User delete ho to uski gaariyan bhi delete hon. Aage uske fuel records, trips aur budgets bhi saath delete hone chahiye. <span class="chip decide">Aage ke models</span></li>
+          <li>User delete ho to uski gaariyan aur fuel records bhi delete hon (ho gaya). Aage trips aur budgets bhi saath delete hone chahiye. <span class="chip fixed">Fuel records: Fixed</span></li>
           <li>Fuel efficiency aur tank capacity hamesha 0 se zyada hon, warna fuel ka andaza 0 se divide ho jayega. <span class="chip fixed">Fixed</span></li>
-          <li>Mahina Pakistan time (Asia/Karachi) ke hisaab se gina jaye, taake raat ki entry ghalat mahine mein na jaye. <span class="chip decide">Aage ke models</span></li>
+          <li>Mahina Pakistan time (Asia/Karachi) ke hisaab se gina jaye, taake raat ki entry ghalat mahine mein na jaye. <span class="chip fixed">Fuel records: Fixed</span></li>
         </ol>
       </div>
     </div>
@@ -406,7 +408,7 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
           <tr><td class="fr-code">FR-01</td><td>Account: register, login, profile, logout</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-0">Phase 0</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-02</td><td>Vehicle add karna</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-0">Phase 0</a> (fixes ho gaye)</td></tr>
           <tr><td class="fr-code">FR-03</td><td>Vehicle dekhna, edit, delete</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-0">Phase 0</a> (fixes ho gaye)</td></tr>
-          <tr><td class="fr-code">FR-04</td><td>Fuel purchase records</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-1">Phase 1</a></td></tr>
+          <tr><td class="fr-code">FR-04</td><td>Fuel purchase records</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-1">Phase 1</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-05</td><td>Trips banana</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
           <tr><td class="fr-code">FR-06</td><td>Fuel ka andaza aur optimized route</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
           <tr><td class="fr-code">FR-07</td><td>Crisis mode</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-5">Phase 5</a></td></tr>
@@ -422,8 +424,8 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
 
     <div class="filters" role="group" aria-label="Status filter">
       <button type="button" id="filter-all" data-filter="all" aria-pressed="true">Sab (13)</button>
-      <button type="button" id="filter-done" data-filter="done" aria-pressed="false">Mukammal (3)</button>
-      <button type="button" id="filter-todo" data-filter="todo" aria-pressed="false">Shuru nahi (10)</button>
+      <button type="button" id="filter-done" data-filter="done" aria-pressed="false">Mukammal (4)</button>
+      <button type="button" id="filter-todo" data-filter="todo" aria-pressed="false">Shuru nahi (9)</button>
     </div>
 
     <div class="fr-list">
@@ -506,18 +508,18 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
               <li>Doosre user ki gaari ka ID kholne par "Not authorized". <span class="chip ok">Handled</span></li>
               <li>Ghalat ID (jaise "abc") par ab saaf JSON error "Invalid id" aata hai. <span class="chip fixed">Fixed</span></li>
               <li>Edit mein ghalat value (jaise fuel type "Gas") par ab 400 aur saaf message. <span class="chip fixed">Fixed</span></li>
-              <li>Jis gaari ke fuel records ya trips hon, use delete karne par kya ho: saath delete ya delete rok dein. <span class="chip decide">Decide</span></li>
+              <li>Jis gaari ke fuel records hon, use delete karne par records bhi saath delete hote hain (confirm box mein likha hai). <span class="chip fixed">Fixed</span></li>
               <li>Page load par ab "Loading vehicles..." dikhta hai, "No vehicles yet" nahi chamakta. <span class="chip fixed">Fixed</span></li>
             </ul>
           </div>
         </div>
       </article>
 
-      <article class="fr" data-status="todo" id="fr-04">
+      <article class="fr" data-status="done" id="fr-04">
         <div class="fr-head">
           <span class="fr-code">FR-04</span>
           <h3>Fuel purchase records</h3>
-          <span class="pill todo">Shuru nahi</span>
+          <span class="pill done">Mukammal</span>
           <a class="phase-link" href="#phase-1">Phase 1</a>
         </div>
         <div class="fr-body">
@@ -526,18 +528,19 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
             <p><strong>Matlab:</strong> Jab bhi petrol ya diesel dalwayein, entry karein: kis gaari mein, kab, kitne litre, kitne rupay. Entries dekh, badal aur delete kar saken.</p>
             <p><strong>Fields (proposal):</strong> gaari, date, quantity (litre), total cost (Rs), price per litre (khud calculate), odometer reading (km, optional), petrol pump (optional).</p>
             <p class="small">Odometer isliye: khareeda hua fuel aur jala hua fuel ek cheez nahi. Asal km/l nikalne ke liye do refills ke beech ke km chahiye.</p>
+            <p class="small"><strong>Faisle (10 Oct 2026):</strong> gaari delete ho to us ke records bhi delete. Electric gaari par fuel record nahi banta. Rs 100 se kam ya Rs 1,000 se zyada per litre reject. Date Pakistan time ke din ke hisaab se save hoti hai.</p>
           </div>
           <div>
             <div class="label">Edge cases</div>
             <ul class="edges">
-              <li>Quantity tank se zyada (60 L tank mein 80 L) ho to reject ya warning.</li>
-              <li>Quantity ya cost 0 ya negative ho to reject.</li>
-              <li>Aane wali (future) date ho to reject.</li>
-              <li>Price per litre bohat ajeeb ho (Rs 5/L ya Rs 5,000/L) to typing ki ghalti ki warning.</li>
-              <li>Gaari kisi aur user ki ho to "Not authorized".</li>
-              <li>Electric gaari ke liye fuel record block karein ya "charging" record (kWh) banayein.</li>
-              <li>31 tareekh raat 11:30 ki entry server UTC mein save kare to agle mahine mein chali jaati hai. Mahina Pakistan time se ginein.</li>
-              <li>Purani entry edit ya delete ho to us mahine ka budget aur charts dobara hisaab hon.</li>
+              <li>Quantity tank se zyada (60 L tank mein 80 L) ho to reject. <span class="chip fixed">Fixed</span></li>
+              <li>Quantity ya cost 0 ya negative ho to reject. <span class="chip fixed">Fixed</span></li>
+              <li>Aane wali (future) date ho to reject. <span class="chip fixed">Fixed</span></li>
+              <li>Price per litre Rs 100 se kam ya Rs 1,000 se zyada ho (typing ki ghalti) to reject. <span class="chip fixed">Fixed</span></li>
+              <li>Gaari kisi aur user ki ho to "Not authorized". <span class="chip fixed">Fixed</span></li>
+              <li>Electric gaari par fuel record block (form aur server dono). <span class="chip fixed">Fixed</span></li>
+              <li>31 tareekh raat 11:30 ki entry agle mahine mein na jaye: date sirf din ke taur par (Pakistan time) save hoti hai. <span class="chip fixed">Fixed</span></li>
+              <li>Purani entry edit ya delete ho to us mahine ka budget aur charts dobara hisaab hon. <span class="chip decide">Phase 2 aur 3</span></li>
             </ul>
           </div>
         </div>
@@ -837,21 +840,22 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <div class="phase-head"><h3>Fuel purchase records</h3><span class="phase-count" data-count></span></div>
         <div class="phase-meta"><span class="tag">FR-04</span><span class="tag dep">Pehle chahiye: Phase 0</span></div>
         <p class="why">Budget, charts aur fuel price sab isi data se bante hain, isliye yeh pehla naya feature hai.</p>
+        <div class="note ok"><strong>Code mukammal, 10 Oct 2026.</strong> 9 kaam ho gaye aur 69 automated checks pass hue. Done ki teeno shartein poori: add/edit/delete, doosre user ki entry na dikhe na khule, aur 60 L tank par 80 L reject.</div>
         <div class="tasks">
           <div>
             <div class="label">Backend</div>
-            <label class="check"><input type="checkbox" id="p1-b1"><span><code>FuelRecord</code> model: user, vehicle, date, quantity (L), totalCost (Rs), pricePerLitre, odometer (optional), station (optional).</span></label>
-            <label class="check"><input type="checkbox" id="p1-b2"><span>Routes <code>/api/fuel-records</code>: add, list (gaari aur date filter), ek record, update, delete.</span></label>
-            <label class="check"><input type="checkbox" id="p1-b3"><span>Ownership check: sirf apni gaari ke records (<code>vehicleController.js</code> jaisa tareeqa).</span></label>
-            <label class="check"><input type="checkbox" id="p1-b4"><span>Validation: quantity 0 se zyada aur tank se kam, cost 0 se zyada, date future mein nahi.</span></label>
-            <label class="check"><input type="checkbox" id="p1-b5"><span>Gaari delete hone par uske records ka rule (saath delete, ya delete rokna).</span></label>
+            <label class="check"><input type="checkbox" id="p1-b1" data-done="true" checked><span><code>FuelRecord</code> model: user, vehicle, date, quantity (L), totalCost (Rs), pricePerLitre, odometer (optional), station (optional). <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p1-b2" data-done="true" checked><span>Routes <code>/api/fuel-records</code>: add, list (gaari aur date filter), ek record, update, delete. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p1-b3" data-done="true" checked><span>Ownership check: sirf apni gaari ke records (<code>vehicleController.js</code> jaisa tareeqa). <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p1-b4" data-done="true" checked><span>Validation: quantity 0 se zyada aur tank se kam, cost 0 se zyada, date future mein nahi, Rs per litre 100 se 1,000 tak. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p1-b5" data-done="true" checked><span>Gaari delete hone par uske records bhi delete (user delete par bhi). <span class="chip fixed">Ho gaya</span></span></label>
           </div>
           <div>
             <div class="label">Frontend</div>
-            <label class="check"><input type="checkbox" id="p1-f1"><span>"Fuel Records" page aur sidebar link (<code>constant.js</code> ke <code>NAV_LINKS</code>).</span></label>
-            <label class="check"><input type="checkbox" id="p1-f2"><span>Add/Edit form modal (<code>useForm</code> hook, <code>VehicleForm</code> jaisa design).</span></label>
-            <label class="check"><input type="checkbox" id="p1-f3"><span>List: date, gaari, litre, rupay, Rs per litre; gaari ke hisaab se filter.</span></label>
-            <label class="check"><input type="checkbox" id="p1-f4"><span>Khaali list par "Pehli fuel entry add karein".</span></label>
+            <label class="check"><input type="checkbox" id="p1-f1" data-done="true" checked><span>"Fuel Records" page aur sidebar link (<code>constant.js</code> ke <code>NAV_LINKS</code>). <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p1-f2" data-done="true" checked><span>Add/Edit form modal (<code>useForm</code> hook, <code>VehicleForm</code> jaisa design). <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p1-f3" data-done="true" checked><span>List: date, gaari, litre, rupay, Rs per litre; gaari ke hisaab se filter. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p1-f4" data-done="true" checked><span>Khaali list par "Pehli fuel entry add karein". <span class="chip fixed">Ho gaya</span></span></label>
           </div>
         </div>
         <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Entry add, edit aur delete ho.</li><li>Doosre user ki entry na dikhe na khule.</li><li>60 L tank wali gaari par 80 L ki entry reject ho.</li></ol></div>
