@@ -1,0 +1,14 @@
+{
+  "name": "smart-fuel-optimization",
+  "private": true,
+  "description": "Runs the backend and frontend together from the project root.",
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names api,web --prefix-colors blue,green \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "install:all": "npm install && npm --prefix backend install && npm --prefix frontend install",
+    "build": "npm --prefix frontend run build",
+    "seed:admin": "npm --prefix backend run seed:admin"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

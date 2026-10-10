@@ -5,14 +5,18 @@ import {
   FUEL_TYPES,
   NUMBER_FIELDS,
   VEHICLE_LABELS,
+  VEHICLE_LIMITS,
 } from "../constant";
 import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
-  validateFuelType,
-  validateModelYear,
-  validatePositiveNumber,
-  validateRequired,
+  checkFuelEfficiency,
+  checkFuelTankCapacity,
+  checkFuelType,
+  checkManufacturer,
+  checkModelYear,
+  checkRegistrationNumber,
+  checkVehicleName,
 } from "../validation";
 
 function toFormValues(vehicle) {
@@ -42,25 +46,13 @@ function VehicleForm({ vehicle = null, onSave, onCancel }) {
   } = useForm({
     initialValues: toFormValues(vehicle),
     validate: (f) => ({
-      vehicleName: validateRequired(f.vehicleName, VEHICLE_LABELS.vehicleName),
-      registrationNumber: validateRequired(
-        f.registrationNumber,
-        VEHICLE_LABELS.registrationNumber,
-      ),
-      manufacturer: validateRequired(
-        f.manufacturer,
-        VEHICLE_LABELS.manufacturer,
-      ),
-      modelYear: validateModelYear(f.modelYear),
-      fuelType: validateFuelType(f.fuelType),
-      fuelEfficiency: validatePositiveNumber(
-        f.fuelEfficiency,
-        VEHICLE_LABELS.fuelEfficiency,
-      ),
-      fuelTankCapacity: validatePositiveNumber(
-        f.fuelTankCapacity,
-        VEHICLE_LABELS.fuelTankCapacity,
-      ),
+      vehicleName: checkVehicleName(f.vehicleName),
+      registrationNumber: checkRegistrationNumber(f.registrationNumber),
+      manufacturer: checkManufacturer(f.manufacturer),
+      modelYear: checkModelYear(f.modelYear),
+      fuelType: checkFuelType(f.fuelType),
+      fuelEfficiency: checkFuelEfficiency(f.fuelEfficiency),
+      fuelTankCapacity: checkFuelTankCapacity(f.fuelTankCapacity),
     }),
     onSubmit: async (f) => {
       const payload = {
@@ -145,6 +137,7 @@ function VehicleForm({ vehicle = null, onSave, onCancel }) {
                   type={NUMBER_FIELDS.includes(key) ? "number" : "text"}
                   placeholder={`Enter ${VEHICLE_LABELS[key].toLowerCase()}`}
                   value={value}
+                  maxLength={VEHICLE_LIMITS[key]?.max}
                   className={fieldErrors[key] ? "invalid" : ""}
                   onChange={(e) => updateField(key, e.target.value)}
                 />

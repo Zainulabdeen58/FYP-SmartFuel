@@ -1,3 +1,13 @@
+// Values shared with the backend live in shared/constants.js; they are
+// re-exported here so components import everything from this file.
+export {
+  FUEL_TYPES,
+  MAX_STATION_LENGTH,
+  REGISTER_ROLES,
+  ROLES,
+  VEHICLE_LIMITS,
+} from "../../shared/constants.js";
+
 // Sidebar navigation (Layout.jsx)
 export const NAV_LINKS = [
   { to: "/dashboard", label: "Dashboard", icon: "dashboard" },
@@ -12,14 +22,7 @@ export const ADMIN_LINK = {
   icon: "shield",
 };
 
-// Account types (AuthPage.jsx, UserForm.jsx, validation.js).
-// Keep in step with ROLES in backend/models/User.js.
-export const ROLES = ["Individual", "Organizational", "Admin"];
-
-// Roles a user can pick when registering. Admins are created by another admin.
-// Keep in step with REGISTER_ROLES in backend/utils/validation.js.
-export const REGISTER_ROLES = ["Individual", "Organizational"];
-
+// Display names for the account types (ROLES).
 export const ROLE_LABELS = {
   Individual: "Individual",
   Organizational: "Organization",
@@ -47,8 +50,6 @@ export const VEHICLE_LABELS = {
   fuelTankCapacity: "Fuel tank capacity",
 };
 
-export const FUEL_TYPES = ["Petrol", "Diesel", "Electric"];
-
 export const NUMBER_FIELDS = ["modelYear", "fuelEfficiency", "fuelTankCapacity"];
 
 // Fuel record form (FuelRecordForm.jsx)
@@ -69,8 +70,3 @@ export const FUEL_RECORD_LABELS = {
   odometer: "Odometer reading (km, optional)",
   station: "Fuel station (optional)",
 };
-
-// Price per litre outside this range is treated as a typing mistake.
-// Keep in step with backend/utils/validation.js.
-export const MIN_PRICE_PER_LITRE = 100;
-export const MAX_PRICE_PER_LITRE = 1000;

@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="ur-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"; mermaid.initialize({ startOnLoad: true, theme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default" });</script>
+</head>
+<body>
+<title>Smart Fuel Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: same family as the project roadmap. A blueprint sheet: summary, the 3-tier diagram, folder plan, one row per SRS requirement, data models, API plan, packages, services, flows, rules. */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #ebeff5;
+  --fg: #18212c;
+  --muted: #536072;
+  --line: #d6dce5;
+  --accent: #c2410c;
+  --accent-soft: #fdeadf;
+  --ok: #16723a;
+  --ok-soft: #e1f2e6;
+  --warn: #946200;
+  --warn-soft: #faf0d6;
+  --bad: #b42318;
+  --bad-soft: #fbe6e4;
+  --todo: #556070;
+  --todo-soft: #e6eaf0;
+  --blue: #1d5fa8;
+  --blue-soft: #e3eefa;
+  --font-display: "Archivo", "Arial Narrow", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+  --radius: 10px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131a; --surface: #151c25; --surface-2: #1c2531; --fg: #e5eaf1; --muted: #9ba7b6; --line: #2a3443;
+    --accent: #ff8d55; --accent-soft: #3a2115;
+    --ok: #5bd68a; --ok-soft: #12301e; --warn: #f2c14e; --warn-soft: #34290f; --bad: #ff8a80; --bad-soft: #3b1816;
+    --todo: #a6b1bf; --todo-soft: #222b37; --blue: #7db4f0; --blue-soft: #14263a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131a; --surface: #151c25; --surface-2: #1c2531; --fg: #e5eaf1; --muted: #9ba7b6; --line: #2a3443;
+  --accent: #ff8d55; --accent-soft: #3a2115;
+  --ok: #5bd68a; --ok-soft: #12301e; --warn: #f2c14e; --warn-soft: #34290f; --bad: #ff8a80; --bad-soft: #3b1816;
+  --todo: #a6b1bf; --todo-soft: #222b37; --blue: #7db4f0; --blue-soft: #14263a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--surface-2); padding: 0.05em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 1.2em; }
+
+.wrap { max-width: 1080px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 32px); }
+
+.masthead { padding-block: 40px 26px; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.masthead h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 800; font-stretch: 112%; margin-top: 10px; }
+.masthead h1 span { color: var(--accent); }
+.lead { margin-top: 14px; font-size: 1.08rem; color: var(--muted); max-width: 66ch; }
+.basis { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.basis span { font-family: var(--font-mono); font-size: 0.76rem; padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface); }
+
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
+.nav-inner { display: flex; gap: 4px; overflow-x: auto; padding-block: 8px; }
+.nav a { flex: none; font-size: 0.9rem; font-weight: 700; color: var(--fg); text-decoration: none; padding: 6px 12px; border-radius: 999px; }
+.nav a:hover { background: var(--surface-2); }
+
+section { padding-block: 42px 6px; }
+.sec-head { display: grid; gap: 8px; margin-bottom: 20px; }
+.sec-head h2 { font-size: clamp(1.55rem, 3.6vw, 2.1rem); font-weight: 800; font-stretch: 108%; }
+.sec-head p { color: var(--muted); max-width: 70ch; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; min-width: 0; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.panel h3 { font-size: 1.12rem; font-weight: 700; margin-bottom: 8px; }
+.panel ul { display: grid; gap: 5px; }
+.stack { display: grid; gap: 16px; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.done { background: var(--ok-soft); color: var(--ok); }
+.pill.todo { background: var(--todo-soft); color: var(--todo); }
+.pill.need { background: var(--accent-soft); color: var(--accent); }
+.pill.opt { background: var(--blue-soft); color: var(--blue); }
+.pill.no { background: var(--bad-soft); color: var(--bad); }
+.pill.have { background: var(--ok-soft); color: var(--ok); }
+
+.note { background: var(--warn-soft); border-radius: var(--radius); padding: 14px 16px; font-size: 0.95rem; }
+.note strong { color: var(--warn); }
+.note.ok { background: var(--ok-soft); }
+.note.ok strong { color: var(--ok); }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 0.92rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+td.code, .fr { font-family: var(--font-mono); font-weight: 600; white-space: nowrap; }
+.fr { color: var(--accent); }
+.ver { font-family: var(--font-mono); font-size: 0.85rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.tree { font-family: var(--font-mono); font-size: 0.84rem; line-height: 1.55; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; overflow-x: auto; white-space: pre; margin: 0; }
+.tree .new { color: var(--accent); font-weight: 600; }
+.tree .c { color: var(--muted); }
+
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; overflow-x: auto; }
+.diagram pre.mermaid { margin: 0; text-align: center; background: transparent; }
+.caption { font-size: 0.86rem; color: var(--muted); margin-top: 8px; }
+
+.formula { font-family: var(--font-mono); font-size: 0.88rem; background: var(--accent-soft); border-radius: 8px; padding: 10px 12px; overflow-x: auto; }
+.model h3 { font-family: var(--font-mono); font-size: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.model dl { margin: 10px 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: 0.9rem; }
+.model dt { font-family: var(--font-mono); font-size: 0.84rem; color: var(--fg); }
+.model dd { margin: 0; color: var(--muted); }
+
+.steps { display: grid; gap: 10px; counter-reset: s; list-style: none; padding: 0; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; }
+.steps li::before { content: counter(s); font-family: var(--font-display); font-weight: 800; color: var(--accent); font-size: 1.05rem; }
+.sources { display: grid; gap: 6px; font-size: 0.92rem; padding-left: 1.3em; }
+.sources a { overflow-wrap: anywhere; }
+footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
+
+@media (max-width: 860px) {
+  .grid-3, .grid-2 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .panel { padding: 16px; }
+  .model dl { grid-template-columns: minmax(0, 1fr); }
+  .model dd { margin-bottom: 6px; }
+}
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">CS619 · Final Year Project · Architecture report</div>
+    <h1>Smart <span>Fuel</span> Architecture</h1>
+    <p class="lead">SRS ki 13 functionalities ke liye system ka design: kaun sa hissa kahan rahega, data kaise judega, aur kaun se tools aur packages lagenge. Har faisla <a href="https://claude.ai/artifact/2XvUSr2jhg2ZaoYyNsvh5g">project roadmap</a> ke phases ke hisaab se hai, aur code ko simple rakhne ki koshish ki gayi hai.</p>
+    <div class="basis">
+      <span>SRS: 13 functional requirements</span>
+      <span>Code: Phase 0 + Phase 1 (FR-01 se FR-04)</span>
+      <span>Package versions: npm, 10 Oct 2026</span>
+    </div>
+  </div>
+</header>
+
+<nav class="nav" aria-label="Sections">
+  <div class="wrap nav-inner">
+    <a href="#khulasa">Khulasa</a>
+    <a href="#layers">Architecture</a>
+    <a href="#folders">Folders</a>
+    <a href="#fr">Har functionality</a>
+    <a href="#data">Data models</a>
+    <a href="#api">API plan</a>
+    <a href="#packages">Packages</a>
+    <a href="#services">Map services</a>
+    <a href="#flows">Flows</a>
+    <a href="#rules">Rules</a>
+    <a href="#tools">Dev tools</a>
+    <a href="#sources">Sources</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <section id="khulasa">
+    <div class="sec-head">
+      <div class="eyebrow">Khulasa</div>
+      <h2>Ek nazar mein</h2>
+    </div>
+    <div class="grid-3">
+      <div class="panel">
+        <span class="pill done">Architecture</span>
+        <h3 style="margin-top:10px">MERN, 3 hisse</h3>
+        <p>React (browser) → Express API (Node.js) → MongoDB. Yahi SRS mein likha hai aur yahi abhi bana hai. Koi naya framework nahi chahiye; bas backend mein ek <strong>services</strong> layer add karni hai jahan hisaab kitaab (fuel ka andaza, budget, crisis) rahega.</p>
+      </div>
+      <div class="panel">
+        <span class="pill need">Naye packages</span>
+        <h3 style="margin-top:10px">Sirf 3 zaroori</h3>
+        <p><code>leaflet</code> aur <code>react-leaflet</code> map ke liye (FR-11, 12), <code>recharts</code> charts ke liye (FR-09, 10). Baqi sab maujooda packages aur Node ke built-in <code>fetch</code> se ho jayega.</p>
+      </div>
+      <div class="panel">
+        <span class="pill opt">Bahar ki service</span>
+        <h3 style="margin-top:10px">OpenRouteService</h3>
+        <p>Raasta, doori, waqt aur jagah dhoondhna (FR-05, 06, 11). Free, API key backend ki <code>.env</code> mein. Map ki tiles OpenStreetMap se. Google Maps ki zaroorat nahi (billing account maangta hai).</p>
+      </div>
+    </div>
+    <div class="note" style="margin-top:16px"><strong>Ahem had:</strong> OpenRouteService alternative raaste sirf 100 km se chhote safar ke liye deta hai. Lambe safar (jaise Lahore se Islamabad) ke liye do request bhejein: <em>fastest</em> aur <em>shortest</em>, phir jis mein kam fuel lage use "Recommended" kahein. Tafseel <a href="#services">Map services</a> mein.</div>
+  </section>
+
+  <section id="layers">
+    <div class="sec-head">
+      <div class="eyebrow">Architecture</div>
+      <h2>System ke hisse aur un ka rishta</h2>
+      <p>Browser sirf hamare backend se baat karta hai. Backend database aur OpenRouteService se baat karta hai. Is tarah API key aur hisaab kitaab dono server par mehfooz rehte hain.</p>
+    </div>
+    <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  subgraph B["Browser: React 19 + Vite"]
+    P["Pages aur components"] --> H["Hooks: useAuth, useFetch, useForm"]
+    H --> AX["api.js (axios + JWT token)"]
+    MAP["Leaflet map"]
+    CH["Recharts charts"]
+  end
+  subgraph S["Server: Node.js + Express 5"]
+    MW["Middleware: helmet, cors, rate limit, protect, adminOnly"] --> R["Routes"]
+    R --> C["Controllers"]
+    C --> SV["Services: estimate, budget, crisis, notifications, routes"]
+    C --> M["Mongoose models"]
+    SV --> M
+    EH["errorHandler"]
+  end
+  AX -- "REST /api/* (JSON)" --> MW
+  M --> DB[("MongoDB Atlas")]
+  SV -- "HTTPS + API key" --> ORS["OpenRouteService"]
+  MAP -- "map tiles" --> OSM["OpenStreetMap tiles"]
+</pre>
+    </div>
+    <p class="caption">Teer ka matlab: kaun kis ko request bhejta hai. Browser kabhi seedha database ya OpenRouteService ko call nahi karta.</p>
+
+    <div class="grid-3" style="margin-top:16px">
+      <div class="panel">
+        <h3>Frontend (browser)</h3>
+        <ul>
+          <li>Screens dikhana, forms, validation ka pehla check.</li>
+          <li>Token <code>localStorage</code> mein, har request ke saath bheja jata hai.</li>
+          <li>Map aur charts sirf data <em>dikhate</em> hain; hisaab backend karta hai.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Backend (server)</h3>
+        <ul>
+          <li><strong>Routes:</strong> URL ko controller se jodna.</li>
+          <li><strong>Controllers:</strong> request padhna, check karna, jawab dena.</li>
+          <li><strong>Services (naya):</strong> hisaab aur bahar ki API. Ek hi hisaab kai jagah kaam aata hai.</li>
+          <li><strong>Models:</strong> database ka shape aur aakhri checks.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Database aur shared</h3>
+        <ul>
+          <li>MongoDB Atlas: 6 collections (3 bane hue, 3 naye).</li>
+          <li><code>shared/</code> folder: roles, fuel types, limits aur validation dono taraf ek hi jagah se.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="folders">
+    <div class="sec-head">
+      <div class="eyebrow">Folder structure</div>
+      <h2>Aakhir mein project aisa dikhega</h2>
+      <p>Naranji rang wali files naye phases mein banengi. Baqi sab abhi maujood hai. Har nayi feature ka wahi pattern: model → service (agar hisaab ho) → controller → route → frontend page.</p>
+    </div>
+<pre class="tree">smart-fuel-optimization/
+├─ shared/                     <span class="c"># backend + frontend dono ke constants aur validation</span>
+│  ├─ constants.js
+│  └─ validation.js
+├─ backend/
+│  ├─ server.js                <span class="c"># helmet, cors, routes, errorHandler</span>
+│  ├─ config/                  <span class="c"># db.js, env.js (JWT_SECRET check)</span>
+│  ├─ middleware/              <span class="c"># auth.js, rateLimit.js, errorHandler.js</span>
+│  ├─ models/
+│  │  ├─ User.js  Vehicle.js  FuelRecord.js
+│  │  └─ <span class="new">Budget.js  Trip.js  Notification.js</span>
+│  ├─ services/                <span class="c"># <span class="new">NAYA folder</span>: hisaab aur bahar ki API</span>
+│  │  ├─ <span class="new">routeService.js</span>         <span class="c"># OpenRouteService: jagah aur raasta</span>
+│  │  ├─ <span class="new">fuelEstimate.js</span>         <span class="c"># litre aur rupay ka andaza</span>
+│  │  ├─ <span class="new">budgetService.js</span>        <span class="c"># mahine ka kharcha aur status</span>
+│  │  ├─ <span class="new">crisisService.js</span>        <span class="c"># combine / postpone mashware</span>
+│  │  └─ <span class="new">notificationService.js</span>  <span class="c"># notification banana, dobara na banana</span>
+│  ├─ controllers/
+│  │  ├─ auth  user  vehicle  fuelRecord  admin
+│  │  └─ <span class="new">budget  stats  trip  place  crisis  notification</span>
+│  ├─ routes/                  <span class="c"># har controller ki ek route file</span>
+│  ├─ utils/                   <span class="c"># token.js, access.js, validation.js</span>
+│  └─ seeders/adminSeeder.js
+└─ frontend/src/
+   ├─ api.js  constant.js  validation.js  App.jsx
+   ├─ hooks/                   <span class="c"># useAuth, useFetch, useForm, useAdmin, useTheme</span>
+   │  └─ <span class="new">useNotifications.js</span>
+   └─ components/
+      ├─ Layout  Dashboard  Vehicles  FuelRecords  Profile  Admin ...
+      └─ <span class="new">BudgetCard  StatsCharts  Trips  TripForm  TripMap  CrisisPanel  NotificationBell</span></pre>
+    <div class="note ok" style="margin-top:16px"><strong>Services layer kyun?</strong> Budget ka hisaab do jagah chahiye: dashboard par dikhane ke liye, aur fuel entry save hone par alert ke liye. Agar yeh controller mein likha ho to copy karna padega. Service mein ek dafa likh kar dono jagah use hota hai, aur controller chhota aur saaf rehta hai.</div>
+  </section>
+
+  <section id="fr">
+    <div class="sec-head">
+      <div class="eyebrow">13 functionalities</div>
+      <h2>Har functionality ka architecture</h2>
+      <p>Har SRS requirement ke liye: backend mein kya, frontend mein kya, kaun sa package, aur roadmap ka kaun sa phase.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Functionality</th><th>Backend</th><th>Frontend</th><th>Package / service</th><th>Phase</th></tr></thead>
+        <tbody>
+          <tr><td class="fr">FR-01</td><td>Register, login, profile, logout</td><td><code>authController</code>, <code>userController</code>, <code>User</code>; JWT, rate limit, admin seeder</td><td><code>AuthPage</code>, <code>Profile</code>, <code>useAuth</code></td><td>jsonwebtoken, bcryptjs, helmet, express-rate-limit</td><td><span class="pill done">Ban chuka</span></td></tr>
+          <tr><td class="fr">FR-02</td><td>Vehicle add</td><td><code>vehicleController</code>, <code>Vehicle</code></td><td><code>VehicleForm</code></td><td>Maujood</td><td><span class="pill done">Ban chuka</span></td></tr>
+          <tr><td class="fr">FR-03</td><td>Vehicle dekhna, edit, delete</td><td>Same; delete par fuel records bhi</td><td><code>Vehicles</code>, <code>Admin</code></td><td>Maujood</td><td><span class="pill done">Ban chuka</span></td></tr>
+          <tr><td class="fr">FR-04</td><td>Fuel purchase records</td><td><code>fuelRecordController</code>, <code>FuelRecord</code></td><td><code>FuelRecords</code>, <code>FuelRecordForm</code></td><td>Maujood</td><td><span class="pill done">Ban chuka</span></td></tr>
+          <tr><td class="fr">FR-08</td><td>Monthly budget aur alerts</td><td><code>Budget</code> model, <code>budgetService</code> (mahine ka jor MongoDB aggregation se)</td><td><code>BudgetCard</code> dashboard par, set budget form</td><td>Koi naya nahi</td><td><span class="pill todo">Phase 2</span></td></tr>
+          <tr><td class="fr">FR-09</td><td>Charts aur graphs</td><td><code>statsController</code>: mahine aur gaari ke hisaab se <code>$group</code></td><td><code>StatsCharts</code>: line, bar charts</td><td><strong>recharts</strong></td><td><span class="pill todo">Phase 3</span></td></tr>
+          <tr><td class="fr">FR-10</td><td>Dashboard filters</td><td>Stats par <code>from</code>, <code>to</code>, <code>vehicle</code>, <code>fuelType</code></td><td>Filter bar; filter URL mein (<code>useSearchParams</code>) taake refresh par yaad rahe</td><td>react-router (maujood)</td><td><span class="pill todo">Phase 3</span></td></tr>
+          <tr><td class="fr">FR-05</td><td>Trip banana (start, destination)</td><td><code>Trip</code> model, <code>tripController</code>, <code>placeController</code> (jagah dhoondhna)</td><td><code>Trips</code>, <code>TripForm</code> (search box)</td><td>OpenRouteService geocode</td><td><span class="pill todo">Phase 4</span></td></tr>
+          <tr><td class="fr">FR-06</td><td>Fuel ka andaza, optimized raasta</td><td><code>routeService</code> + <code>fuelEstimate</code></td><td>Har raaste ka card: km, minute, litre, rupay</td><td>OpenRouteService directions</td><td><span class="pill todo">Phase 4</span></td></tr>
+          <tr><td class="fr">FR-11</td><td>Map par raasta</td><td>Raaste ki line (GeoJSON) API jawab mein</td><td><code>TripMap</code>: <code>MapContainer</code>, <code>TileLayer</code>, <code>GeoJSON</code></td><td><strong>leaflet</strong>, <strong>react-leaflet</strong></td><td><span class="pill todo">Phase 4</span></td></tr>
+          <tr><td class="fr">FR-12</td><td>Zoom, pan, interact</td><td>Kuch nahi</td><td>Leaflet mein khud se; <code>fitBounds</code>, Pakistan ki had, popup</td><td>leaflet</td><td><span class="pill todo">Phase 4</span></td></tr>
+          <tr><td class="fr">FR-07</td><td>Crisis mode</td><td><code>User.crisisMode</code>, <code>crisisService</code> (rules), <code>crisisController</code></td><td><code>CrisisPanel</code> aur on/off switch</td><td>Koi naya nahi</td><td><span class="pill todo">Phase 5</span></td></tr>
+          <tr><td class="fr">FR-13</td><td>Notifications</td><td><code>Notification</code> model, <code>notificationService</code>; events par banti hai</td><td><code>NotificationBell</code>, <code>useNotifications</code> (har minute check)</td><td>Koi naya nahi</td><td><span class="pill todo">Phase 6</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Tarteeb roadmap ke phases ke mutabiq hai: pehle jo data deta hai (budget, stats), phir trips aur map, aakhir mein crisis aur notifications jo un sab ke data par chalte hain.</p>
+
+    <div class="grid-2" style="margin-top:16px">
+      <div class="panel">
+        <h3>FR-06: andaza kaise banega</h3>
+        <div class="formula">litre = raaste ke km ÷ gaari ki km/l<br>rupay = litre × aakhri fuel entry ka Rs/L<br>Recommended = jis raaste par sab se kam litre</div>
+        <p style="margin-top:10px">Price user ki aakhri <code>FuelRecord</code> ke <code>pricePerLitre</code> se. Koi entry na ho to user se price poochein. UI mein "andaza" likhein, kyunke traffic aur chadhaai shamil nahi.</p>
+      </div>
+      <div class="panel">
+        <h3>FR-13: notification kab banegi</h3>
+        <ul>
+          <li>Fuel entry save hui → budget 80% ya 100% cross hua → notification.</li>
+          <li>Trip save hua aur chuna hua raasta recommended se 15%+ zyada fuel wala hai → "inefficient trip".</li>
+          <li>Crisis mode on hua → har naye mashware par notification.</li>
+          <li>Har notification ki ek <code>key</code> (jaise <code>budget-2026-10-100</code>) unique hai, is liye ek baat do dafa nahi aati.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="data">
+    <div class="sec-head">
+      <div class="eyebrow">Data models</div>
+      <h2>Database ke collections</h2>
+      <p>Har record ka <code>user</code> field hai, taake "sirf apna data" wala rule har jagah ek hi tareeqe se lage. Tareekhen Pakistan time ke din ke hisaab se (FR-04 wala tareeqa).</p>
+    </div>
+    <div class="diagram">
+<pre class="mermaid">
+erDiagram
+  USER ||--o{ VEHICLE : owns
+  USER ||--o{ FUEL_RECORD : owns
+  VEHICLE ||--o{ FUEL_RECORD : "fuel purchases"
+  USER ||--o{ BUDGET : sets
+  VEHICLE |o--o{ BUDGET : "optional per vehicle"
+  USER ||--o{ TRIP : plans
+  VEHICLE ||--o{ TRIP : "used for"
+  USER ||--o{ NOTIFICATION : receives
+</pre>
+    </div>
+    <div class="grid-3" style="margin-top:16px">
+      <div class="panel model">
+        <h3>User <span class="pill done">Bana hua</span></h3>
+        <dl>
+          <dt>role</dt><dd>Individual, Organizational, Admin</dd>
+          <dt>organizationName</dt><dd>sirf Organizational</dd>
+          <dt>crisisMode</dt><dd><strong>naya</strong>: true / false (Phase 5)</dd>
+        </dl>
+      </div>
+      <div class="panel model">
+        <h3>Vehicle <span class="pill done">Bana hua</span></h3>
+        <dl>
+          <dt>fuelEfficiency</dt><dd>km/l, 0 se zyada (andaze ke liye)</dd>
+          <dt>fuelTankCapacity</dt><dd>litre</dd>
+          <dt>registrationNumber</dt><dd>unique index</dd>
+        </dl>
+      </div>
+      <div class="panel model">
+        <h3>FuelRecord <span class="pill done">Bana hua</span></h3>
+        <dl>
+          <dt>date</dt><dd>din, UTC midnight par</dd>
+          <dt>quantity, totalCost</dt><dd>litre, rupay</dd>
+          <dt>pricePerLitre</dt><dd>server khud nikalta hai</dd>
+        </dl>
+      </div>
+      <div class="panel model">
+        <h3>Budget <span class="pill todo">Phase 2</span></h3>
+        <dl>
+          <dt>user</dt><dd>malik</dd>
+          <dt>month</dt><dd><code>"2026-10"</code></dd>
+          <dt>amount</dt><dd>Rs, 0 se zyada</dd>
+          <dt>vehicle</dt><dd>optional (fleet mein har gaari ka alag)</dd>
+          <dt>index</dt><dd>unique: user + month + vehicle</dd>
+        </dl>
+      </div>
+      <div class="panel model">
+        <h3>Trip <span class="pill todo">Phase 4</span></h3>
+        <dl>
+          <dt>user, vehicle</dt><dd>malik aur gaari</dd>
+          <dt>start, destination</dt><dd>{ name, lat, lng }</dd>
+          <dt>date</dt><dd>din</dd>
+          <dt>priority</dt><dd>essential / non-essential (crisis mode ke liye)</dd>
+          <dt>status</dt><dd>planned / completed</dd>
+          <dt>route</dt><dd>{ distanceKm, durationMin, litres, cost, geometry }</dd>
+        </dl>
+      </div>
+      <div class="panel model">
+        <h3>Notification <span class="pill todo">Phase 6</span></h3>
+        <dl>
+          <dt>user</dt><dd>kis ke liye</dd>
+          <dt>type</dt><dd>budget, trip, crisis</dd>
+          <dt>message, link</dt><dd>kya hua, kahan jayein</dd>
+          <dt>read</dt><dd>true / false</dd>
+          <dt>key</dt><dd>unique: dobara na bane</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="api">
+    <div class="sec-head">
+      <div class="eyebrow">API plan</div>
+      <h2>Naye endpoints</h2>
+      <p>Sab <code>protect</code> ke peeche (login zaroori), aur sab maujooda jawab ke shape mein: <code>{ success, message?, data }</code>.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Phase</th><th>Method aur URL</th><th>Kaam</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill todo">2</span></td><td class="code">GET /api/budgets?month=2026-10</td><td>Is mahine ka budget, kharcha, bacha hua aur status (theek, 80%, cross)</td></tr>
+          <tr><td><span class="pill todo">2</span></td><td class="code">PUT /api/budgets/2026-10</td><td>Mahine ka budget set ya badalna</td></tr>
+          <tr><td><span class="pill todo">3</span></td><td class="code">GET /api/stats/monthly?from=&amp;to=&amp;vehicle=&amp;fuelType=</td><td>Har mahine ke litre aur rupay (charts)</td></tr>
+          <tr><td><span class="pill todo">3</span></td><td class="code">GET /api/stats/vehicles?from=&amp;to=</td><td>Har gaari ka total litre, kharcha, average km/l</td></tr>
+          <tr><td><span class="pill todo">4</span></td><td class="code">GET /api/places?text=Lahore</td><td>Jagah dhoondhna (Pakistan tak mehdood), jawab cache</td></tr>
+          <tr><td><span class="pill todo">4</span></td><td class="code">POST /api/trips/plan</td><td>Start, destination, gaari → raaste, har ek ka km, minute, litre, rupay, recommended</td></tr>
+          <tr><td><span class="pill todo">4</span></td><td class="code">GET · POST · PUT · DELETE /api/trips</td><td>Trips ka CRUD</td></tr>
+          <tr><td><span class="pill todo">5</span></td><td class="code">PUT /api/users/crisis-mode</td><td>Crisis mode on ya off</td></tr>
+          <tr><td><span class="pill todo">5</span></td><td class="code">GET /api/crisis/suggestions</td><td>Combine aur postpone mashware, bachat ka andaza</td></tr>
+          <tr><td><span class="pill todo">6</span></td><td class="code">GET /api/notifications · GET /api/notifications/unread-count</td><td>List aur bell ki ginti</td></tr>
+          <tr><td><span class="pill todo">6</span></td><td class="code">PUT /api/notifications/:id/read · PUT /api/notifications/read-all</td><td>Parh liya mark karna</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="packages">
+    <div class="sec-head">
+      <div class="eyebrow">Packages</div>
+      <h2>Kaun se packages, aur kaun se nahi</h2>
+      <p>Versions 10 Oct 2026 ko npm se check kiye. Install karte waqt yahi version ya us ka naya patch lein. Kam packages ka matlab: kam cheezein seekhni, kam cheezein toot sakti hain.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Package</th><th>Version</th><th>Kahan</th><th>Kis liye</th><th>Faisla</th></tr></thead>
+        <tbody>
+          <tr><td class="code">leaflet</td><td class="ver">1.9.4</td><td>frontend</td><td>Map, zoom, pan (FR-11, FR-12). Is ki CSS bhi import karni hoti hai.</td><td><span class="pill need">Zaroori</span></td></tr>
+          <tr><td class="code">react-leaflet</td><td class="ver">5.0.0</td><td>frontend</td><td>Leaflet ke React components. v5 React 19 maangta hai, jo project mein hai.</td><td><span class="pill need">Zaroori</span></td></tr>
+          <tr><td class="code">recharts</td><td class="ver">3.10.1</td><td>frontend</td><td>Line aur bar charts (FR-09, FR-10). React 19 support karta hai, React components ki shakal mein likha jata hai.</td><td><span class="pill need">Zaroori</span></td></tr>
+          <tr><td class="code">chart.js + react-chartjs-2</td><td class="ver">4.5.1 · 5.3.1</td><td>frontend</td><td>Recharts ka mutabadil. Dono kaam karte hain; ek hi chunein.</td><td><span class="pill opt">Mutabadil</span></td></tr>
+          <tr><td class="code">vitest + supertest</td><td class="ver">5.0.3 · 7.3.1</td><td>backend (dev)</td><td>Automated API tests, taake har phase ke baad purana kaam check ho sake.</td><td><span class="pill opt">Behtar hai</span></td></tr>
+          <tr><td class="code">mongodb-memory-server</td><td class="ver">11.3.0</td><td>backend (dev)</td><td>Tests ke liye nakli database, asal data ko chhuye baghair.</td><td><span class="pill opt">Behtar hai</span></td></tr>
+          <tr><td class="code">morgan</td><td class="ver">1.12.1</td><td>backend</td><td>Har request terminal mein dikhana (debugging).</td><td><span class="pill opt">Optional</span></td></tr>
+          <tr><td class="code">socket.io</td><td class="ver">4.8.4</td><td>—</td><td>Live notifications. Har minute ginti check karna kaafi hai aur bohat simple.</td><td><span class="pill no">Nahi chahiye</span></td></tr>
+          <tr><td class="code">node-cron</td><td class="ver">4.6.0</td><td>—</td><td>Waqt par chalne wale kaam. Notifications events par ban jati hain, schedule ki zaroorat nahi.</td><td><span class="pill no">Nahi chahiye</span></td></tr>
+          <tr><td class="code">nodemailer</td><td class="ver">10.0.16</td><td>—</td><td>Email. Prototype mein in-app notifications kaafi hain.</td><td><span class="pill no">Nahi chahiye</span></td></tr>
+          <tr><td class="code">date-fns / dayjs</td><td class="ver">4.4.0 · 1.11.23</td><td>—</td><td>Dates din ki shakal mein save hain; mahine ka hisaab plain JavaScript se ho jata hai.</td><td><span class="pill no">Nahi chahiye</span></td></tr>
+          <tr><td class="code">zod / express-validator</td><td class="ver">4.6.5 · 7.3.2</td><td>—</td><td>Validation <code>shared/validation.js</code> mein pehle se hai.</td><td><span class="pill no">Nahi chahiye</span></td></tr>
+          <tr><td class="code">Redux / React Query</td><td class="ver">—</td><td>—</td><td>Maujooda hooks (<code>useFetch</code>, <code>useAuth</code>) is size ke project ke liye kaafi hain.</td><td><span class="pill no">Nahi chahiye</span></td></tr>
+          <tr><td class="code">openrouteservice-js</td><td class="ver">—</td><td>—</td><td>Node 22 ka built-in <code>fetch</code> do chhoti calls ke liye kaafi hai.</td><td><span class="pill no">Nahi chahiye</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <h3>Pehle se install (badalne ki zaroorat nahi)</h3>
+      <p><strong>Backend:</strong> express 5, mongoose 8, jsonwebtoken 9, bcryptjs 3, cors 2, helmet 8, express-rate-limit 8. <strong>Frontend:</strong> react 19, react-dom 19, react-router-dom 7, axios 1, vite 7. Yeh SRS ke "React.js, Node.js, Express.js, MongoDB" se poora milta hai.</p>
+    </div>
+  </section>
+
+  <section id="services">
+    <div class="sec-head">
+      <div class="eyebrow">Map aur route services</div>
+      <h2>Bahar ki services</h2>
+      <p>Free limits Oct 2026 ki hain. Istemal se pehle official page par dobara dekh lein.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Service</th><th>Kaam</th><th>Free limit / shart</th><th>Faisla</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OpenRouteService</strong></td><td>Raasta (directions), jagah dhoondhna (geocode, autocomplete)</td><td>Directions: 2,000 roz, 40 per minute. Geocode aur autocomplete: 1,000 roz har ek, 100 per minute. Alternative raaste sirf 100 km se chhote safar par.</td><td><span class="pill need">Recommended</span></td></tr>
+          <tr><td><strong>OpenStreetMap tiles</strong></td><td>Map ki tasveer</td><td>Free; map par "© OpenStreetMap contributors" likhna zaroori; bohat zyada traffic mana.</td><td><span class="pill need">Recommended</span></td></tr>
+          <tr><td><strong>Google Maps Platform</strong></td><td>Map aur raasta</td><td>Har API ki monthly free had, lekin billing account (card) zaroori.</td><td><span class="pill opt">Mutabadil</span></td></tr>
+          <tr><td><strong>OSRM demo, Nominatim</strong></td><td>Raasta, jagah</td><td>Koi guarantee nahi; Nominatim 1 request per second, autocomplete mana.</td><td><span class="pill no">Sirf testing</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid-2" style="margin-top:16px">
+      <div class="panel">
+        <h3>"Optimized raasta" kaise nikalein</h3>
+        <ul>
+          <li><strong>100 km se kam:</strong> ek request, <code>alternative_routes</code> ke saath (2-3 raaste).</li>
+          <li><strong>100 km se zyada:</strong> do request, <code>preference: "fastest"</code> aur <code>"shortest"</code>.</li>
+          <li>Har raaste par FR-06 wala formula; sab se kam litre wala "Recommended".</li>
+          <li>Jawab <code>geojson</code> format mein mangwayein, taake Leaflet seedha line bana de.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Quota bachana</h3>
+        <ul>
+          <li>API key sirf backend <code>.env</code> mein (<code>ORS_API_KEY</code>), kabhi frontend mein nahi.</li>
+          <li>Jagah ki search tab bhejein jab user 3+ letter likh kar ruke (300 ms).</li>
+          <li>Ek hi jagah ka jawab server ki memory mein yaad rakhein (simple <code>Map</code> cache).</li>
+          <li>Trip save karte waqt raasta bhi save karein, taake dekhne par dobara call na ho.</li>
+          <li>ORS band ho to trip phir bhi save ho, aur saaf message aaye.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="flows">
+    <div class="sec-head">
+      <div class="eyebrow">Flows</div>
+      <h2>Do ahem flows qadam ba qadam</h2>
+    </div>
+    <div class="diagram">
+<pre class="mermaid">
+sequenceDiagram
+  actor U as User
+  participant F as React (Trips page)
+  participant A as Express API
+  participant O as OpenRouteService
+  participant D as MongoDB
+  U->>F: "Lahore" likha
+  F->>A: GET /api/places?text=Lahore
+  A->>O: geocode autocomplete
+  O-->>A: jagahein (lat, lng)
+  A-->>F: list
+  U->>F: start, destination, gaari chuni
+  F->>A: POST /api/trips/plan
+  A->>D: gaari ki km/l, aakhri Rs/L
+  A->>O: directions (fastest + shortest)
+  O-->>A: raaste: km, minute, line
+  A-->>F: har raaste ke litre, rupay, Recommended
+  F->>U: map par lines, cards
+  U->>F: Save trip
+  F->>A: POST /api/trips
+  A->>D: Trip save
+</pre>
+    </div>
+    <p class="caption">Trip planning (FR-05, 06, 11, 12): browser kabhi OpenRouteService ko seedha call nahi karta.</p>
+
+    <div class="panel" style="margin-top:16px">
+      <h3>Budget alert (FR-08 + FR-13)</h3>
+      <ol class="steps">
+        <li><span>User fuel entry save karta hai (<code>POST /api/fuel-records</code>).</span></li>
+        <li><span><code>budgetService</code> us mahine (Pakistan time) ka kharcha jodta hai aur budget se milata hai.</span></li>
+        <li><span>80% ya 100% cross hua to <code>notificationService</code> notification banata hai, key <code>budget-2026-10-80</code> ya <code>-100</code>; key unique hai, is liye dobara nahi banti.</span></li>
+        <li><span>Frontend ki bell har minute aur tab par wapas aane par ginti check karti hai; dashboard ka budget card laal ho jata hai.</span></li>
+        <li><span>Entry delete ho aur kharcha budget se kam ho jaye to card wapas theek dikhta hai (status har dafa naye sire se nikalta hai).</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="rules">
+    <div class="sec-head">
+      <div class="eyebrow">Poore system ke rules</div>
+      <h2>Har nayi feature mein yeh rules</h2>
+    </div>
+    <div class="grid-2">
+      <div class="panel">
+        <h3>Security</h3>
+        <ul>
+          <li>Har naya route <code>protect</code> ke peeche; ownership check <code>isOwnerOrAdmin</code> se.</li>
+          <li>Secrets (<code>JWT_SECRET</code>, <code>ORS_API_KEY</code>) sirf backend <code>.env</code> mein.</li>
+          <li>Client se aaye fields whitelist se (<code>pick</code> jaisa), jaise <code>pricePerLitre</code> aur <code>user</code> kabhi client se nahi.</li>
+          <li>Admin sirf seeder ya doosre Admin se banta hai.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Data aur code</h3>
+        <ul>
+          <li>Validation ek jagah: <code>shared/validation.js</code> (form aur server dono).</li>
+          <li>Mahina aur "aaj" Pakistan time (<code>Asia/Karachi</code>) se.</li>
+          <li>Errors hamesha JSON; user ki ghalti par 400, kabhi 401 nahi (401 logout karta hai).</li>
+          <li>Har cascade delete: user → gaariyan → fuel records, trips, budgets, notifications.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="tools">
+    <div class="sec-head">
+      <div class="eyebrow">SRS ke development tools</div>
+      <h2>Tools ka istemal</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tool (SRS)</th><th>Kaise istemal karein</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Visual Studio Code</strong></td><td>Code likhna; Prettier extension se formatting ek jaisi rahe.</td></tr>
+          <tr><td><strong>Figma</strong></td><td>Har phase se pehle us ki screens: budget card, charts, trips page aur map, crisis panel, notification bell.</td></tr>
+          <tr><td><strong>Postman</strong></td><td>Har module ka ek folder (Auth, Vehicles, Fuel, Budget, Trips...). Login ka token ek environment variable mein, taake har request khud use kare.</td></tr>
+          <tr><td><strong>GitHub</strong></td><td>Har phase ki alag branch (jaise <code>phase-2-budget</code>), kaam pura hone par <code>master</code> mein merge. <code>.env</code> kabhi commit nahi.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note" style="margin-top:16px"><strong>Supervisor se poochne wali baatein:</strong> crisis mode har user khud on kare ya Admin poore system ke liye? Notifications sirf app ke andar kaafi hain ya email bhi? Electric gaariyon ke liye kWh records chahiye? Trip ki "priority" (zaroori ya nahi) SRS mein nahi, lekin crisis mode ke liye zaroori hai; kya yeh theek hai?</div>
+  </section>
+
+  <section id="sources">
+    <div class="sec-head">
+      <div class="eyebrow">Sources</div>
+      <h2>Hawale</h2>
+    </div>
+    <ol class="sources">
+      <li>SRS: <code>docs/SRS in pdf.pdf</code> (13 functional requirements, tools, supervisor)</li>
+      <li>Project roadmap: <code>docs/project-roadmap.html</code> (phases 0 se 7)</li>
+      <li><a href="https://openrouteservice.org/plans/">OpenRouteService plans (quotas)</a></li>
+      <li><a href="https://openrouteservice.org/restrictions/">OpenRouteService API restrictions (alternative routes 100 km)</a></li>
+      <li><a href="https://ask.openrouteservice.org/t/maximum-distance-for-alternative-route-configuration/6153">ORS forum: maximum distance for alternative routes</a></li>
+      <li><a href="https://mapsplatform.google.com/pricing/">Google Maps Platform pricing</a></li>
+      <li><a href="https://operations.osmfoundation.org/policies/nominatim/">Nominatim usage policy</a></li>
+      <li><a href="https://github.com/Project-OSRM/osrm-backend/wiki/API%20Usage%20Policy">OSRM demo server usage policy</a></li>
+      <li>Package versions aur peer dependencies: <code>npm view</code>, 10 Oct 2026</li>
+    </ol>
+  </section>
+
+</main>
+
+<footer class="wrap">Smart Fuel Optimization and Resource Management System · CS619 · Supervisor: Muhammad Kamran Qureshi</footer>
+
+</body>
+</html>

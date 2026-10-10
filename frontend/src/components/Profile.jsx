@@ -4,12 +4,12 @@ import { ROLE_LABELS } from "../constant";
 import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
-  validateContactNumber,
-  validateCurrentPassword,
-  validateEmail,
-  validateFullName,
-  validateOrganizationName,
-  validatePassword,
+  checkContactNumber,
+  checkCurrentPassword,
+  checkEmail,
+  checkFullName,
+  checkOrganizationName,
+  checkPassword,
 } from "../validation";
 
 function Profile({ user, saveUser }) {
@@ -33,14 +33,14 @@ function Profile({ user, saveUser }) {
       password: "",
     },
     validate: (f) => ({
-      fullName: validateFullName(f.fullName),
-      email: validateEmail(f.email),
-      contactNumber: validateContactNumber(f.contactNumber),
+      fullName: checkFullName(f.fullName),
+      email: checkEmail(f.email),
+      contactNumber: checkContactNumber(f.contactNumber),
       organizationName: isOrganization
-        ? validateOrganizationName(f.organizationName)
+        ? checkOrganizationName(f.organizationName)
         : "",
-      password: validatePassword(f.password, { required: false }),
-      currentPassword: validateCurrentPassword(f.currentPassword, f.password),
+      password: checkPassword(f.password, { required: false }),
+      currentPassword: checkCurrentPassword(f.currentPassword, f.password),
     }),
     onSubmit: async (f, { setForm }) => {
       const payload = {

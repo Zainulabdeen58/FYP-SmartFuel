@@ -8,6 +8,7 @@ import {
   checkPositiveNumber,
   checkPricePerLitre,
   checkStation,
+  checkTankCapacity,
   firstError,
   parseFuelDate
 } from "../utils/validation.js";
@@ -48,15 +49,8 @@ function checkRecord(record) {
     checkPositiveNumber(record.totalCost, "Total cost"),
     checkOdometer(record.odometer),
     checkStation(record.station),
-    // Only meaningful once quantity and cost are both valid numbers.
-    record.quantity > 0 && record.totalCost > 0 ? checkPricePerLitre(record.quantity, record.totalCost) : ""
+    checkPricePerLitre(record.quantity, record.totalCost)
   );
-}
-
-function checkTankCapacity(quantity, vehicle) {
-  return quantity > vehicle.fuelTankCapacity
-    ? `Quantity cannot be more than the vehicle's tank capacity (${vehicle.fuelTankCapacity} L)`
-    : "";
 }
 
 // Empty optional fields clear the stored value.
@@ -81,7 +75,7 @@ export async function createFuelRecord(req, res) {
   const { vehicle, status, message } = await findFuelVehicle(req, data.vehicle);
   if (!vehicle) return res.status(status).json({ success: false, message });
 
-  const tankError = checkTankCapacity(data.quantity, vehicle);
+  const tankError = checkTankCapacity(data.quantity, vehicle.fuelTankCapacity);
   if (tankError) return res.status(400).json({ success: false, message: tankError });
 
   const record = new FuelRecord({ user: vehicle.user, vehicle: vehicle._id });
@@ -161,7 +155,7 @@ export async function updateFuelRecord(req, res) {
     const { vehicle, status, message } = await findFuelVehicle(req, vehicleChanged ? data.vehicle : String(record.vehicle));
     if (!vehicle) return res.status(status).json({ success: false, message });
 
-    const tankError = checkTankCapacity(data.quantity ?? record.quantity, vehicle);
+    const tankError = checkTankCapacity(data.quantity ?? record.quantity, vehicle.fuelTankCapacity);
     if (tankError) return res.status(400).json({ success: false, message: tankError });
 
     record.vehicle = vehicle._id;

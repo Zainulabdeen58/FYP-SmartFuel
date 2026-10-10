@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { REGISTER_ROLES } from "../../shared/constants.js";
 import User from "../models/User.js";
 import { createToken } from "../utils/token.js";
 import {
@@ -7,7 +8,7 @@ import {
   checkFullName,
   checkOrganizationName,
   checkPassword,
-  checkRegisterRole,
+  checkRole,
   firstError
 } from "../utils/validation.js";
 
@@ -19,7 +20,7 @@ export async function register(req, res) {
     checkFullName(fullName),
     checkEmail(email),
     checkContactNumber(contactNumber),
-    checkRegisterRole(role),
+    checkRole(role, REGISTER_ROLES),
     isOrganization ? checkOrganizationName(organizationName) : "",
     checkPassword(password)
   );

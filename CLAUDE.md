@@ -10,9 +10,13 @@ Registration offers only **Individual** and **Organizational** (`REGISTER_ROLES`
 
 ## Commands
 
-There are two independent npm projects with no root `package.json`, so run commands inside `backend/` or `frontend/`.
+`backend/` and `frontend/` are two independent npm projects. The root `package.json` only runs them together (`concurrently`): `npm run dev` in the root starts both, with output prefixed `[api]` and `[web]`; `npm run install:all` installs root, backend and frontend; `npm run build` and `npm run seed:admin` forward to the frontend and backend. Both also import from the root `shared/` folder (see "Shared code" below), so deploy the whole repo, not one folder alone.
 
 ```bash
+# From the project root: both servers in one terminal
+npm run install:all   # first time only
+npm run dev
+
 # Backend: Express API on http://localhost:5000 (Node >= 20.6 for --env-file)
 cd backend
 npm install
@@ -29,7 +33,7 @@ npm run preview
 ```
 
 - `backend/.env` is required (copy from `backend/.env.example`). It needs `MONGODB_URI` and `JWT_SECRET`. The server exits on startup if `MONGODB_URI` is missing, or if `JWT_SECRET` is missing, shorter than 32 characters or still the `.env.example` placeholder (`config/env.js`, called first in `server.js`).
-- `server.js` listens on `PORT` from `.env` (default 5000), but `frontend/src/api.js` hard-codes `http://localhost:5000/api`, so change both together. CORS only allows `CLIENT_URL` (default `http://localhost:5173`); `helmet` adds security headers.
+- `server.js` listens on `PORT` from `.env` (default 5000), but `frontend/src/api.js` hard-codes `http://localhost:5000/api`, so change both together. CORS only allows the origins in `CLIENT_URL` (comma-separated; default `http://localhost:5173,http://localhost:4173`, the dev and preview servers); `helmet` adds security headers.
 - Health check: `GET http://localhost:5000/api/health`.
 - There is **no test framework and no linter** configured. `npm run build` in `frontend/` is the only automated check for frontend changes.
 - `frontend/dist/` is tracked in git, because `frontend/.gitignore` is a Visual Studio template that doesn't ignore it. Rebuilding changes the hashed asset filenames, so only commit `dist/` changes deliberately.
@@ -52,7 +56,7 @@ Both projects use ES modules (`"type": "module"`) and plain JavaScript (no TypeS
   - `/api/vehicles` and `/api/fuel-records` are shared by all roles. Controllers branch on `req.user.role`: Admins see and edit every record; Individual and Organizational users only see and edit their own (`isOwnerOrAdmin` in `utils/access.js`).
   - `/api/admin/*` applies `router.use(protect, adminOnly)`.
   - The admin UI edits and deletes vehicles through the regular `/api/vehicles/:id` endpoints; only listing/search uses `/api/admin/vehicles?user=&registrationNumber=`. Both search params are case-insensitive `$regex` matches on regex-escaped text (`escapeRegex`); non-string query values are ignored. `user` matches the owner's name or email.
-- **Input validation** runs in the controllers via `utils/validation.js` (rules mirror `frontend/src/validation.js`; each check returns `""` or a message, combined with `firstError`), plus schema validators: vehicle `fuelEfficiency`/`fuelTankCapacity` must be > 0 and `modelYear` 1980 to next year. Registration numbers are unique across all users: `registrationTaken` gives a clear 409, and a unique index on `registrationNumber` blocks simultaneous duplicates (mapped to 409 in `errorHandler`). Non-text registration numbers get a 400.
+- **Input validation** runs in the controllers via `utils/validation.js`, which re-exports the rules in `shared/validation.js` (the same ones the forms use; each check returns `""` or a message, combined with `firstError`). Vehicle create/update checks every field (`vehicleError`; on update only the fields sent). Schema validators stay as a last guard: vehicle `fuelEfficiency`/`fuelTankCapacity` > 0, `modelYear` 1980 to next year. Registration numbers are unique across all users: `registrationTaken` gives a clear 409, and a unique index on `registrationNumber` blocks simultaneous duplicates (mapped to 409 in `errorHandler`). Non-text registration numbers get a 400.
 - **Fuel records** (`models/FuelRecord.js`, `controllers/fuelRecordController.js`):
   - `date` is a calendar day sent as `"YYYY-MM-DD"` and stored as **UTC midnight of that day** (`parseFuelDate`), so the UTC date of a stored value is the day the user picked; "today" and "future" are judged in Pakistan time (`todayInPakistan`, `Asia/Karachi`). Format stored dates with `timeZone: "UTC"` and group months by UTC month, never by the server's or browser's local time.
   - `user` is the **vehicle's owner** (also when an admin adds the record), and moves with the record if it is moved to another vehicle.
@@ -61,7 +65,7 @@ Both projects use ES modules (`"type": "module"`) and plain JavaScript (no TypeS
   - Deleting a vehicle deletes its fuel records; deleting a user deletes their vehicles and fuel records.
 - **Organizational accounts** need `organizationName` (schema `required` function on `User`). When an admin moves a user to another role, `adminController.updateUser` clears it.
 - **Login and register are rate limited** (`middleware/rateLimit.js`, express-rate-limit): 10 failed logins per IP per 15 minutes (successful ones don't count) and 10 registrations per IP per hour, answered with 429. `NODE_ENV=test` turns the limits off for automated API tests.
-- **Password rule** for new passwords (register, profile change, admin seeder): 8 to 64 characters with letters and numbers (`checkPassword` / `validatePassword`). Login only requires a non-empty password, so accounts made under the old 6-character rule can still sign in.
+- **Password rule** for new passwords (register, profile change, admin seeder): 8 to 64 characters with letters and numbers (`checkPassword` in `shared/validation.js`). Login only requires a non-empty password, so accounts made under the old 6-character rule can still sign in.
 - **Passwords** are hashed with `bcrypt.hash(pw, 12)` inside the controllers (`authController.register`, `userController.updateProfile`). There is no pre-save hook and no schema length rule (the field holds the hash), so any new code path that sets a password must call `checkPassword` and hash it. Changing a password through `PUT /users/profile` requires `currentPassword`; a wrong one returns **400, not 401**, because the frontend treats every 401 as an expired session and signs the user out.
 - **User object shape:**
   - Login, register and profile-update return `user.toPublic()`: `{ id, fullName, email, contactNumber, role, organizationName }`.
@@ -87,22 +91,21 @@ Both projects use ES modules (`"type": "module"`) and plain JavaScript (no TypeS
     - The user search filters client-side.
     - The vehicle search is server-side with a 250 ms debounce.
   - `useTheme` sets `data-theme` on `<html>` and stores it in `localStorage` as `theme`. An inline script in `index.html` applies the saved theme before first paint.
-- **Form validation** is in `validation.js`. Each validator returns `""` or an error message. The backend repeats the same rules (`backend/utils/validation.js`), so change both together.
+- **Form validation:** `validation.js` re-exports the shared `check*` rules and adds frontend-only helpers (`checkCurrentPassword`, `hasErrors`). Each check returns `""` or an error message. `constant.js` likewise re-exports the shared constants next to UI-only ones (labels, nav links, empty forms).
 - Edit modals (`VehicleForm`, `UserForm`) render through `createPortal(…, document.body)`. Pages show them by setting an "editing" state to a record.
 - Styling is one global stylesheet, `global.css`, imported in `App.jsx`. It uses plain class names, with light/dark themes switched by `[data-theme]`. Icons are inline SVGs looked up by name in `components/Icon.jsx`; add new icons there.
 
-### Values duplicated across backend and frontend (keep in sync)
+### Shared code (`shared/`): used by both backend and frontend
 
-- **Roles `"Individual"` / `"Organizational"` / `"Admin"`:**
-  - The list lives in `ROLES` in `backend/models/User.js` and `ROLES` (plus display names in `ROLE_LABELS`) in `frontend/src/constant.js`. The roles allowed at registration are `REGISTER_ROLES` in `backend/utils/validation.js` and `frontend/src/constant.js`.
-  - `"Admin"` and `"Organizational"` are still checked as string literals in `middleware/auth.js`, `vehicleController`, `adminController`, `authController`, `userController`, `App.jsx`, `Layout`, `Dashboard`, `AuthPage`, `UserForm` and `Profile`.
-- **Fuel types `"Petrol"`, `"Diesel"`, `"Electric"`:**
-  - Backend: `models/Vehicle.js`.
-  - Frontend: `FUEL_TYPES` in `constant.js` (also used by `validateFuelType`).
-- **Validation rules** (email, phone, password length, organization name, vehicle numbers, fuel record date/quantity/price-per-litre range): `backend/utils/validation.js` plus the schema validators, and `frontend/src/validation.js`.
+- `shared/constants.js` (`ROLES`, `REGISTER_ROLES`, `FUEL_TYPES`, password/model-year limits, `VEHICLE_LIMITS`, price-per-litre range, station length) and `shared/validation.js` (every `check*` rule, `firstError`, `parseFuelDate`, `todayInPakistan`). Change a rule or value here only.
+- Import them with plain relative paths (`import { ROLES } from "../../shared/constants.js"`); no alias or build setup is needed. The backend imports them directly (models, `authController`) or through `utils/validation.js`; the frontend only through `src/constant.js` and `src/validation.js`, so components keep importing from those two files. Inside `shared/` itself, files import each other as `./constants.js`.
+- `frontend/vite.config.js` lists `../shared` in `server.fs.allow`, because the Vite dev server only serves files inside `frontend/` by default.
+- Rules for these files: plain JavaScript only (no npm packages, nothing browser- or Node-only), and always write the `.js` extension in imports (Node needs it). `shared/package.json` marks the folder as ES modules for Node.
+- Number checks accept both form text (`"15"`) and JSON numbers (`15`); `true`, arrays and objects are refused.
+- `"Admin"` and `"Organizational"` are still checked as string literals in `shared/validation.js` (`checkRole`), `middleware/auth.js`, `vehicleController`, `adminController`, `authController`, `userController`, `App.jsx`, `Layout`, `Dashboard`, `AuthPage`, `UserForm` and `Profile`. Role display names are `ROLE_LABELS` in `frontend/src/constant.js`.
 - **Adding a vehicle field** requires touching all of these:
   1. `models/Vehicle.js`.
-  2. The `fields` whitelist in `controllers/vehicleController.js`. Fields not listed are silently dropped on create and update.
+  2. The `fields` whitelist and `vehicleError` in `controllers/vehicleController.js`. Fields not listed are silently dropped on create and update. Put its check in `shared/validation.js`.
   3. `EMPTY_VEHICLE`, `VEHICLE_LABELS` and (if numeric) `NUMBER_FIELDS` in `frontend/src/constant.js`.
   4. `toFormValues`, `validate` and the numeric coercion in `onSubmit` in `components/VehicleForm.jsx`. The form renders fields by iterating `Object.entries(form)`, so field order follows `EMPTY_VEHICLE`.
   5. The display in `components/Vehicles.jsx` and `components/Admin.jsx`.

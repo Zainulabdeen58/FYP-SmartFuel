@@ -4,12 +4,12 @@ import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import { REGISTER_ROLES, ROLE_LABELS } from "../constant";
 import {
-  validateContactNumber,
-  validateEmail,
-  validateFullName,
-  validateOrganizationName,
-  validatePassword,
-  validateRole,
+  checkContactNumber,
+  checkEmail,
+  checkFullName,
+  checkOrganizationName,
+  checkPassword,
+  checkRole,
 } from "../validation";
 
 function getInitialForm(mode) {
@@ -57,19 +57,19 @@ function AuthPage({ mode, save }) {
     validate: (f) =>
       isLogin
         ? {
-            email: validateEmail(f.email),
+            email: checkEmail(f.email),
             password: f.password ? "" : "Password is required",
           }
         : {
-            fullName: validateFullName(f.fullName),
-            contactNumber: validateContactNumber(f.contactNumber),
-            role: validateRole(f.role || "Individual", REGISTER_ROLES),
+            fullName: checkFullName(f.fullName),
+            contactNumber: checkContactNumber(f.contactNumber),
+            role: checkRole(f.role || "Individual", REGISTER_ROLES),
             organizationName:
               f.role === "Organizational"
-                ? validateOrganizationName(f.organizationName)
+                ? checkOrganizationName(f.organizationName)
                 : "",
-            email: validateEmail(f.email),
-            password: validatePassword(f.password),
+            email: checkEmail(f.email),
+            password: checkPassword(f.password),
           },
     onSubmit: async (f) => {
       const endpoint = isLogin ? "/auth/login" : "/auth/register";

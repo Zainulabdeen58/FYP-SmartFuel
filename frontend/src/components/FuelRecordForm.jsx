@@ -1,16 +1,16 @@
 import { createPortal } from "react-dom";
 import api from "../api";
-import { EMPTY_FUEL_RECORD, FUEL_RECORD_LABELS } from "../constant";
+import { EMPTY_FUEL_RECORD, FUEL_RECORD_LABELS, MAX_STATION_LENGTH } from "../constant";
 import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
+  checkFuelDate,
+  checkOdometer,
+  checkPositiveNumber,
+  checkPricePerLitre,
+  checkStation,
+  checkTankCapacity,
   todayInPakistan,
-  validateFuelDate,
-  validateFuelQuantity,
-  validateOdometer,
-  validatePositiveNumber,
-  validatePricePerLitre,
-  validateStation,
 } from "../validation";
 
 function toFormValues(record, defaultVehicle) {
@@ -51,23 +51,27 @@ function FuelRecordForm({ record = null, vehicles, defaultVehicle = "", onSave, 
     handleSubmit: submit,
   } = useForm({
     initialValues: toFormValues(record, defaultVehicle || options[0]?._id || ""),
-    validate: (f) => ({
-      vehicle: f.vehicle ? "" : "Select a vehicle",
-      date: validateFuelDate(f.date),
-      quantity: validateFuelQuantity(
-        f.quantity,
-        // Same as the server: the tank limit is checked only for a new entry or
-        // when the vehicle or quantity is changed.
+    validate: (f) => {
+      // Same as the server: the tank limit is checked only for a new entry or
+      // when the vehicle or quantity is changed.
+      const tankVehicle =
         isEdit && f.vehicle === currentVehicleId && Number(f.quantity) === record.quantity
           ? null
-          : vehicles.find((v) => v._id === f.vehicle),
-      ),
-      totalCost:
-        validatePositiveNumber(f.totalCost, "Total cost") ||
-        validatePricePerLitre(f.quantity, f.totalCost),
-      odometer: validateOdometer(f.odometer),
-      station: validateStation(f.station),
-    }),
+          : vehicles.find((v) => v._id === f.vehicle);
+
+      return {
+        vehicle: f.vehicle ? "" : "Select a vehicle",
+        date: checkFuelDate(f.date),
+        quantity:
+          checkPositiveNumber(f.quantity, "Quantity") ||
+          (tankVehicle ? checkTankCapacity(f.quantity, tankVehicle.fuelTankCapacity) : ""),
+        totalCost:
+          checkPositiveNumber(f.totalCost, "Total cost") ||
+          checkPricePerLitre(f.quantity, f.totalCost),
+        odometer: checkOdometer(f.odometer),
+        station: checkStation(f.station),
+      };
+    },
     onSubmit: async (f) => {
       const payload = {
         vehicle: f.vehicle,
@@ -160,7 +164,7 @@ function FuelRecordForm({ record = null, vehicles, defaultVehicle = "", onSave, 
           {renderInput("quantity", "number", { min: "0", step: "0.01", placeholder: "e.g. 30" })}
           {renderInput("totalCost", "number", { min: "0", step: "0.01", placeholder: "e.g. 8000" })}
           {renderInput("odometer", "number", { min: "0", placeholder: "e.g. 45210" })}
-          {renderInput("station", "text", { placeholder: "e.g. PSO, Main Boulevard" })}
+          {renderInput("station", "text", { maxLength: MAX_STATION_LENGTH, placeholder: "e.g. PSO, Main Boulevard" })}
         </div>
 
         <p className="fuel-price-preview">

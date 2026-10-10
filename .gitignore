@@ -1,3 +1,7 @@
 # Personal Claude Code files (shared config lives in .claude/settings.json and CLAUDE.md)
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Root dependencies (concurrently)
+node_modules/
+SKILL.md

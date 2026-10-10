@@ -16,7 +16,7 @@ with status 400 (invalid input or id), 401 (missing/expired token), 403 (not all
 - `PUT /users/profile` — any of `fullName`, `email`, `contactNumber`, `organizationName` (organizational accounts). To change the password send `password` and `currentPassword`.
 
 ## Vehicles
-- `POST /vehicles` — `fuelEfficiency` and `fuelTankCapacity` must be greater than 0, `modelYear` between 1980 and next year, `registrationNumber` unique.
+- `POST /vehicles` — `vehicleName` and `manufacturer` 2 to 50 characters (manufacturer starts with a letter); `registrationNumber` 3 to 15 characters, letters and numbers (both required) joined by single spaces or hyphens, unique; `fuelEfficiency` 1 to 100 km/l; `fuelTankCapacity` 1 to 1000 litres; `modelYear` between 1980 and next year. `PUT /vehicles/:id` applies the same rules to the fields it receives.
 - `GET /vehicles`
 - `GET /vehicles/:id`
 - `PUT /vehicles/:id`

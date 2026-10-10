@@ -21,6 +21,15 @@ Prototype for the Spring 2026 CS619 requirements.
 
 ## Run
 
+From the project root, one command starts both the backend and the frontend:
+
+```bash
+npm run install:all   # first time only
+npm run dev
+```
+
+Or run each one separately:
+
 ### Backend
 ```bash
 cd backend

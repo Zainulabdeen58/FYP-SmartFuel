@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { MAX_STATION_LENGTH } from "../../shared/constants.js";
 
 const greaterThanZero = (label) => ({
   validator: (value) => value > 0,
@@ -6,7 +7,7 @@ const greaterThanZero = (label) => ({
 });
 
 // One fuel purchase. `date` is a calendar day stored as UTC midnight
-// (see parseFuelDate in utils/validation.js), so its UTC year/month/day are
+// (see parseFuelDate in shared/validation.js), so its UTC year/month/day are
 // the Pakistan-time date the user picked and month totals never shift.
 const fuelRecordSchema = new mongoose.Schema(
   {
@@ -20,7 +21,7 @@ const fuelRecordSchema = new mongoose.Schema(
     // Derived from totalCost / quantity on every save; never taken from the request.
     pricePerLitre: { type: Number },
     odometer: { type: Number, min: [0, "Odometer reading cannot be negative"] },
-    station: { type: String, trim: true, maxlength: [100, "Station name must be at most 100 characters"] },
+    station: { type: String, trim: true, maxlength: [MAX_STATION_LENGTH, `Station name must be at most ${MAX_STATION_LENGTH} characters`] },
   },
   { timestamps: true }
 );

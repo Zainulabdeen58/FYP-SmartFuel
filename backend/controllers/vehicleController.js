@@ -1,6 +1,16 @@
 import FuelRecord from "../models/FuelRecord.js";
 import Vehicle from "../models/Vehicle.js";
 import { isOwnerOrAdmin } from "../utils/access.js";
+import {
+  checkFuelEfficiency,
+  checkFuelTankCapacity,
+  checkFuelType,
+  checkManufacturer,
+  checkModelYear,
+  checkRegistrationNumber,
+  checkVehicleName,
+  firstError
+} from "../utils/validation.js";
 
 const fields = [
   "vehicleName",
@@ -30,18 +40,25 @@ function registrationTaken(registrationNumber, excludeId) {
   });
 }
 
-// Registration number must be text (a number like 123 would skip the duplicate check).
-function isValidRegistration(value) {
-  return typeof value === "string" && value.trim() !== "";
+// Same checks as the vehicle form (shared/validation.js).
+// On update (partial = true) only the fields that were sent are checked.
+function vehicleError(data, partial = false) {
+  const check = (key, fn) => (partial && data[key] === undefined ? "" : fn(data[key]));
+  return firstError(
+    check("vehicleName", checkVehicleName),
+    check("registrationNumber", checkRegistrationNumber),
+    check("manufacturer", checkManufacturer),
+    check("modelYear", checkModelYear),
+    check("fuelType", checkFuelType),
+    check("fuelEfficiency", checkFuelEfficiency),
+    check("fuelTankCapacity", checkFuelTankCapacity)
+  );
 }
-
-const INVALID_REGISTRATION = { success: false, message: "Registration number is required" };
 
 export async function createVehicle(req, res) {
   const data = pickVehicleFields(req.body);
-  if (!isValidRegistration(data.registrationNumber)) {
-    return res.status(400).json(INVALID_REGISTRATION);
-  }
+  const error = vehicleError(data);
+  if (error) return res.status(400).json({ success: false, message: error });
   if (await registrationTaken(data.registrationNumber)) {
     return res.status(409).json(DUPLICATE_REGISTRATION);
   }
@@ -77,13 +94,13 @@ export async function updateVehicle(req, res) {
   }
 
   const data = pickVehicleFields(req.body);
-  if (data.registrationNumber !== undefined) {
-    if (!isValidRegistration(data.registrationNumber)) {
-      return res.status(400).json(INVALID_REGISTRATION);
-    }
-    if (await registrationTaken(data.registrationNumber, vehicle._id)) {
-      return res.status(409).json(DUPLICATE_REGISTRATION);
-    }
+  const error = vehicleError(data, true);
+  if (error) return res.status(400).json({ success: false, message: error });
+  if (
+    data.registrationNumber !== undefined &&
+    (await registrationTaken(data.registrationNumber, vehicle._id))
+  ) {
+    return res.status(409).json(DUPLICATE_REGISTRATION);
   }
 
   Object.assign(vehicle, data);

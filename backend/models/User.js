@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-
-// Account types from the SRS. Keep in step with ROLES in frontend/src/constant.js.
-export const ROLES = ["Individual", "Organizational", "Admin"];
+import { ROLES } from "../../shared/constants.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -20,7 +18,7 @@ const userSchema = new mongoose.Schema(
       ],
     },
     // Holds the bcrypt hash. Plain-password rules (minimum length) are checked
-    // in utils/validation.js before hashing.
+    // with checkPassword (shared/validation.js) before hashing.
     password: { type: String, required: true }
   },
   { timestamps: true }

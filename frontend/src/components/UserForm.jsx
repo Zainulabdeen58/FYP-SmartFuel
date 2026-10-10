@@ -4,11 +4,11 @@ import { ROLES, ROLE_LABELS } from "../constant";
 import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
-  validateContactNumber,
-  validateEmail,
-  validateFullName,
-  validateOrganizationName,
-  validateRole,
+  checkContactNumber,
+  checkEmail,
+  checkFullName,
+  checkOrganizationName,
+  checkRole,
 } from "../validation";
 
 function UserForm({ user, onSave, onCancel, lockRole = false }) {
@@ -28,13 +28,13 @@ function UserForm({ user, onSave, onCancel, lockRole = false }) {
       organizationName: user.organizationName || "",
     },
     validate: (f) => ({
-      fullName: validateFullName(f.fullName),
-      email: validateEmail(f.email),
-      contactNumber: validateContactNumber(f.contactNumber),
-      role: validateRole(f.role),
+      fullName: checkFullName(f.fullName),
+      email: checkEmail(f.email),
+      contactNumber: checkContactNumber(f.contactNumber),
+      role: checkRole(f.role),
       organizationName:
         f.role === "Organizational"
-          ? validateOrganizationName(f.organizationName)
+          ? checkOrganizationName(f.organizationName)
           : "",
     }),
     onSubmit: async (f) => {

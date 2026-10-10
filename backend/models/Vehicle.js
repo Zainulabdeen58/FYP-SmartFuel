@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
+import { FUEL_TYPES, MIN_MODEL_YEAR, maxModelYear } from "../../shared/constants.js";
 
-const MIN_MODEL_YEAR = 1980;
-const maxModelYear = () => new Date().getFullYear() + 1;
+// The controller checks every field first (shared/validation.js); these schema
+// rules are a last guard for code paths that skip the controller.
 
 // Fuel estimates divide by efficiency, so zero must never be stored.
 const greaterThanZero = (label) => ({
@@ -31,7 +32,7 @@ const vehicleSchema = new mongoose.Schema(
         message: () => `Model year must be a whole number between ${MIN_MODEL_YEAR} and ${maxModelYear()}`,
       },
     },
-    fuelType: { type: String, enum: ["Petrol", "Diesel", "Electric"], required: [true, "Fuel type is required"] },
+    fuelType: { type: String, enum: FUEL_TYPES, required: [true, "Fuel type is required"] },
     fuelEfficiency: {
       type: Number,
       required: [true, "Fuel efficiency is required"],
