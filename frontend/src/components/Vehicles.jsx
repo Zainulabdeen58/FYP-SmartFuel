@@ -24,7 +24,7 @@ function Vehicles() {
   const [showCreate, setShowCreate] = useState(false);
 
   const remove = async (id) => {
-    if (!confirm("Delete this vehicle and all its fuel records?")) return;
+    if (!confirm("Delete this vehicle with all its fuel records and budgets?")) return;
 
     try {
       await api.delete(`/vehicles/${id}`);

@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
+import { formatNumber } from "../format";
+import useMonthlyBudgetSummary from "../hooks/useMonthlyBudgetSummary";
 import useFetch from "../hooks/useFetch";
+import { currentMonthInPakistan } from "../validation";
+import BudgetAlerts from "./BudgetAlerts";
 import FuelRecordForm from "./FuelRecordForm";
 import Icon from "./Icon";
 
@@ -14,10 +18,9 @@ const formatDate = (value) =>
     year: "numeric",
   });
 
-const formatNumber = (value) =>
-  Number(value).toLocaleString("en-US", { maximumFractionDigits: 2 });
-
-function FuelRecords() {
+function FuelRecords({ user }) {
+  // Admins have no budgets, so they get no budget alerts.
+  const canHaveBudget = user.role !== "Admin";
   const [vehicleFilter, setVehicleFilter] = useState("");
   const [editingRecord, setEditingRecord] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -52,6 +55,17 @@ function FuelRecords() {
     { initialData: [] },
   );
 
+  // This month's budget alerts; reloaded after every change to the records.
+  const { data: budgetSummary, reload: reloadBudgetSummary } = useMonthlyBudgetSummary(
+    currentMonthInPakistan(),
+    { enabled: canHaveBudget },
+  );
+
+  const reloadRecordsAndBudget = () => {
+    load();
+    if (canHaveBudget) reloadBudgetSummary();
+  };
+
   const fuelVehicles = vehicles.filter((v) => v.fuelType !== "Electric");
   const totalLitres = records.reduce((sum, r) => sum + r.quantity, 0);
   const totalCost = records.reduce((sum, r) => sum + r.totalCost, 0);
@@ -61,7 +75,7 @@ function FuelRecords() {
 
     try {
       await api.delete(`/fuel-records/${id}`);
-      load();
+      reloadRecordsAndBudget();
     } catch (err) {
       setError(err.response?.data?.message || "Could not delete fuel entry");
     }
@@ -101,6 +115,13 @@ function FuelRecords() {
       </div>
 
       {pageError && <div className="form-error page-error">{pageError}</div>}
+
+      {canHaveBudget && (
+        <BudgetAlerts
+          summary={budgetSummary}
+          isOrganizationAccount={user.role === "Organizational"}
+        />
+      )}
 
       <div className="vehicle-summary">
         <div>
@@ -159,7 +180,7 @@ function FuelRecords() {
           defaultVehicle={vehicleFilter}
           onSave={() => {
             closeForm();
-            load();
+            reloadRecordsAndBudget();
           }}
           onCancel={closeForm}
         />

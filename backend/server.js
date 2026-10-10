@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoutes.js";
 import vehicleRoutes from "./routes/vehicleRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import fuelRecordRoutes from "./routes/fuelRecordRoutes.js";
+import budgetRoutes from "./routes/budgetRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 checkEnv();
@@ -37,6 +38,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/fuel-records", fuelRecordRoutes);
+app.use("/api/budgets", budgetRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.use((req, res) => {

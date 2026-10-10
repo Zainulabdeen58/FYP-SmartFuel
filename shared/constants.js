@@ -32,3 +32,10 @@ export const MIN_PRICE_PER_LITRE = 100;
 export const MAX_PRICE_PER_LITRE = 1000;
 
 export const MAX_STATION_LENGTH = 100;
+
+// Monthly budgets (FR-08). The upper limit catches typing mistakes (extra zeros).
+export const MAX_BUDGET_AMOUNT = 10000000; // Rs 1 crore
+// Spending at or above this share of the budget shows a warning; 100% or more is over budget.
+export const BUDGET_WARNING_PERCENT = 80;
+// Budgets can be set for the current month and up to this many months ahead.
+export const MAX_BUDGET_MONTHS_AHEAD = 12;

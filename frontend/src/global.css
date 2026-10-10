@@ -2564,6 +2564,256 @@ a.submit-button {
   text-decoration: none;
 }
 
+/* =========================
+   BUDGET
+   ok = green, warning (80%+) = amber, over (100%+) = red
+========================= */
+
+.budget-heading {
+  margin-top: 34px;
+}
+
+.budget-month {
+  width: 220px;
+}
+
+.budget-panel {
+  margin-bottom: 34px;
+
+  padding: 20px 22px;
+
+  background: linear-gradient(145deg, var(--elev-1), var(--elev-2));
+
+  border: 1px solid var(--border);
+
+  border-radius: 15px;
+}
+
+.budget-numbers {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 34px;
+}
+
+.budget-numbers > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.budget-numbers span {
+  color: var(--text-muted);
+
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: 1.3px;
+}
+
+.budget-numbers strong {
+  color: var(--text);
+
+  font-size: 18px;
+}
+
+.budget-numbers .over-text {
+  color: var(--red);
+}
+
+.budget-bar {
+  height: 8px;
+
+  margin-top: 14px;
+
+  overflow: hidden;
+
+  background: var(--fill-2);
+
+  border-radius: 99px;
+}
+
+.budget-bar span {
+  display: block;
+
+  height: 100%;
+
+  background: var(--success);
+
+  border-radius: inherit;
+
+  transition: width 0.3s ease;
+}
+
+.budget-bar span.warning {
+  background: var(--green);
+}
+
+.budget-bar span.over {
+  background: var(--red);
+}
+
+.budget-note {
+  margin: 9px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 10px;
+}
+
+.budget-actions {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 16px;
+}
+
+.budget-alerts {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin-bottom: 16px;
+}
+
+.budget-alert {
+  padding: 10px 12px;
+
+  border-radius: 9px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.budget-alert.warning {
+  color: var(--green);
+
+  background: rgba(245, 177, 60, 0.08);
+
+  border: 1px solid rgba(245, 177, 60, 0.25);
+}
+
+.budget-alert.over {
+  color: var(--red);
+
+  background: rgba(255, 102, 125, 0.07);
+
+  border: 1px solid rgba(255, 102, 125, 0.22);
+}
+
+.budget-vehicles {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  margin-top: 24px;
+  padding-top: 20px;
+
+  border-top: 1px solid var(--border);
+}
+
+.budget-vehicles h3 {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 13px;
+}
+
+/* The actions column has a fixed width so every row's progress bar lines up,
+   whether a row shows two buttons, one or none. */
+.budget-vehicle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) 170px;
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 12px 14px;
+
+  background: var(--fill);
+
+  border: 1px solid var(--border);
+
+  border-radius: 12px;
+}
+
+.budget-vehicle-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.budget-vehicle-name strong {
+  color: var(--text);
+
+  font-size: 12px;
+}
+
+.budget-vehicle-progress p {
+  margin: 0;
+
+  color: var(--text-soft);
+
+  font-size: 10px;
+}
+
+.budget-vehicle-progress .budget-bar {
+  height: 6px;
+
+  margin-top: 8px;
+}
+
+.budget-vehicle .row-actions {
+  justify-content: flex-end;
+}
+
+.budget-modal {
+  width: min(440px, 100%);
+}
+
+.budget-hint {
+  margin: 12px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+@media (max-width: 650px) {
+  .budget-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .budget-month {
+    width: 100%;
+  }
+
+  .budget-numbers {
+    gap: 20px;
+  }
+
+  /* Keep Edit and Remove side by side (delete buttons are full width on phones elsewhere). */
+  .budget-actions .delete-button {
+    width: auto;
+  }
+
+  .budget-vehicle {
+    grid-template-columns: 1fr;
+
+    gap: 10px;
+  }
+}
+
 @media (max-width: 1050px) {
   :root {
     --sidebar: 220px;

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Smart Fuel Optimization and Resource Management System: a MERN prototype built for the Spring 2026 CS619 final-project requirements. Users register as **Individual**, **Organizational** or **Admin** (the three account types in the SRS), manage vehicles, and admins manage all users and vehicles. There is no fuel-optimization logic yet; the current scope is auth, profile, vehicle CRUD, fuel purchase records (FR-04) and admin management. `docs/project-roadmap.html` maps all 13 SRS requirements, their edge cases and the planned coding phases.
+Smart Fuel Optimization and Resource Management System: a MERN prototype built for the Spring 2026 CS619 final-project requirements. Users register as **Individual**, **Organizational** or **Admin** (the three account types in the SRS), manage vehicles, and admins manage all users and vehicles. There is no fuel-optimization logic yet; the current scope is auth, profile, vehicle CRUD, fuel purchase records (FR-04), monthly budgets with alerts (FR-08) and admin management. `docs/project-roadmap.html` maps all 13 SRS requirements, their edge cases and the planned coding phases.
 
 Registration offers only **Individual** and **Organizational** (`REGISTER_ROLES`); the server rejects `role: "Admin"` at `/auth/register`. Admins are created by the seeder `seeders/adminSeeder.js` (`npm run seed:admin`, reads `ADMIN_NAME`/`ADMIN_EMAIL`/`ADMIN_CONTACT`/`ADMIN_PASSWORD` from `.env`; idempotent, never resets an existing admin's password, refuses an email that belongs to a non-admin), or by an existing admin on the Administration page.
 
@@ -50,11 +50,12 @@ Both projects use ES modules (`"type": "module"`) and plain JavaScript (no TypeS
 - **Auth flow:**
   - `utils/token.js` signs `{ userId }` with a 1-day expiry.
   - `middleware/auth.js` `protect` verifies the Bearer token and **re-loads the user from MongoDB on every request** into `req.user` (password excluded), so role changes take effect immediately. Only token errors return 401; a database error goes to the error handler (500), so users are not signed out during a database problem.
-  - `adminOnly` checks `req.user.role === "Admin"`.
+  - `adminOnly` checks `req.user.role === "Admin"`; `nonAdminOnly` is its opposite (used by `/api/budgets`).
   - Logout is a server-side no-op; the client just discards the token.
 - **Authorization lives in controllers, not routes:**
   - `/api/vehicles` and `/api/fuel-records` are shared by all roles. Controllers branch on `req.user.role`: Admins see and edit every record; Individual and Organizational users only see and edit their own (`isOwnerOrAdmin` in `utils/access.js`).
   - `/api/admin/*` applies `router.use(protect, adminOnly)`.
+  - `/api/budgets` applies `router.use(protect, nonAdminOnly)`: admins have no budgets and don't see other users' budgets, so every budget query is limited to `req.user`.
   - The admin UI edits and deletes vehicles through the regular `/api/vehicles/:id` endpoints; only listing/search uses `/api/admin/vehicles?user=&registrationNumber=`. Both search params are case-insensitive `$regex` matches on regex-escaped text (`escapeRegex`); non-string query values are ignored. `user` matches the owner's name or email.
 - **Input validation** runs in the controllers via `utils/validation.js`, which re-exports the rules in `shared/validation.js` (the same ones the forms use; each check returns `""` or a message, combined with `firstError`). Vehicle create/update checks every field (`vehicleError`; on update only the fields sent). Schema validators stay as a last guard: vehicle `fuelEfficiency`/`fuelTankCapacity` > 0, `modelYear` 1980 to next year. Registration numbers are unique across all users: `registrationTaken` gives a clear 409, and a unique index on `registrationNumber` blocks simultaneous duplicates (mapped to 409 in `errorHandler`). Non-text registration numbers get a 400.
 - **Fuel records** (`models/FuelRecord.js`, `controllers/fuelRecordController.js`):
@@ -62,7 +63,14 @@ Both projects use ES modules (`"type": "module"`) and plain JavaScript (no TypeS
   - `user` is the **vehicle's owner** (also when an admin adds the record), and moves with the record if it is moved to another vehicle.
   - `pricePerLitre` is computed in a `pre("validate")` hook from `totalCost / quantity`; never accept it from the request. It must be Rs 100 to 1,000 (`MIN/MAX_PRICE_PER_LITRE`), to catch typing mistakes.
   - Electric vehicles can't have fuel records, and quantity can't exceed the tank. On update these two vehicle rules run only when the vehicle or quantity changes, so old records stay editable after the vehicle is edited.
-  - Deleting a vehicle deletes its fuel records; deleting a user deletes their vehicles and fuel records.
+  - Deleting a vehicle deletes its fuel records and budgets; deleting a user deletes their vehicles, fuel records and budgets.
+- **Monthly budgets (FR-08)** (`models/Budget.js`, `controllers/budgetController.js`):
+  - One document per user, `month` (`"YYYY-MM"`, Pakistan time) and `vehicle`. `vehicle: null` is the month's overall budget (the fleet budget for an Organizational account); a vehicle id is that vehicle's budget (Organizational only, petrol/diesel only). A unique index on `{ user, month, vehicle }` keeps one of each.
+  - Budgets are set per month and do not carry over. Only the current month and up to `MAX_BUDGET_MONTHS_AHEAD` (12) months ahead can be set or removed (`checkBudgetMonth`); past months are view-only.
+  - A vehicle budget needs the month's fleet budget first; vehicle budgets may not add up to more than the fleet budget, and the fleet budget can't be lowered below them or removed while they exist.
+  - **Spending is never stored**: `GET /budgets` (`getMonthlyBudgetSummary`) adds up `totalCost` of the user's fuel records in the month's UTC date range on every request, so editing or deleting a record, or changing a budget, updates the status at once. Status: `ok`, `warning` from `BUDGET_WARNING_PERCENT` (80%), `over` from 100%. Alerts are "live" (shown while the status holds); one-time notifications are planned for FR-13.
+  - `PUT /budgets` (`createOrUpdateBudget`) upserts by `{ user, month, vehicle }`, so setting and editing are the same call.
+  - When an admin changes a user's role, `adminController.updateUser` deletes the budgets the new role can't have (all for Admin, the vehicle budgets for Individual).
 - **Organizational accounts** need `organizationName` (schema `required` function on `User`). When an admin moves a user to another role, `adminController.updateUser` clears it.
 - **Login and register are rate limited** (`middleware/rateLimit.js`, express-rate-limit): 10 failed logins per IP per 15 minutes (successful ones don't count) and 10 registrations per IP per hour, answered with 429. `NODE_ENV=test` turns the limits off for automated API tests.
 - **Password rule** for new passwords (register, profile change, admin seeder): 8 to 64 characters with letters and numbers (`checkPassword` in `shared/validation.js`). Login only requires a non-empty password, so accounts made under the old 6-character rule can still sign in.
@@ -72,7 +80,7 @@ Both projects use ES modules (`"type": "module"`) and plain JavaScript (no TypeS
   - `GET /users/profile` also returns `toPublic()`; `useAuth` calls it when the app opens and on window focus (`refreshUser`) so a role or detail change made by an admin shows up without signing in again.
   - The admin endpoints return Mongoose documents with `_id`.
   - The frontend handles both (`currentUser?.id || currentUser?._id`).
-- Deleting a user (`adminController.deleteUser`) manually cascades to their fuel records and vehicles. Admins cannot delete themselves or remove their own Admin role, and this is enforced on both server and client.
+- Deleting a user (`adminController.deleteUser`) manually cascades to their fuel records, budgets and vehicles. Admins cannot delete themselves or remove their own Admin role, and this is enforced on both server and client.
 
 ### Frontend (`frontend/src/`): React 19 + Vite 7 + React Router 7 + Axios
 
@@ -87,17 +95,19 @@ Both projects use ES modules (`"type": "module"`) and plain JavaScript (no TypeS
     - `onSubmit(form, { setForm, setFieldErrors, setError })` may throw; the hook shows `err.response.data.message` or the fallback `errorMessage`.
     - `initialValues` are read only on mount.
   - `useFetch(fetcher, deps, { immediate, initialData })` returns `{ data, setData, error, setError, loading, reload }`.
+  - `useMonthlyBudgetSummary(month, { enabled })` fetches `GET /budgets` for one month. `components/BudgetCard.jsx` (on the Dashboard for non-admins) shows the month picker, overall budget, per-vehicle budgets and `BudgetForm`; `BudgetAlerts` renders the amber/red alerts and is reused at the top of Fuel Records, which reloads it after every record change.
   - `useAdmin(currentUser)` holds all admin-page state:
     - The user search filters client-side.
     - The vehicle search is server-side with a 250 ms debounce.
   - `useTheme` sets `data-theme` on `<html>` and stores it in `localStorage` as `theme`. An inline script in `index.html` applies the saved theme before first paint.
 - **Form validation:** `validation.js` re-exports the shared `check*` rules and adds frontend-only helpers (`checkCurrentPassword`, `hasErrors`). Each check returns `""` or an error message. `constant.js` likewise re-exports the shared constants next to UI-only ones (labels, nav links, empty forms).
-- Edit modals (`VehicleForm`, `UserForm`) render through `createPortal(…, document.body)`. Pages show them by setting an "editing" state to a record.
+- Number, Rs and month display helpers (`formatNumber`, `formatRupees`, `formatMonthLabel`) live in `format.js`.
+- Edit modals (`VehicleForm`, `UserForm`, `FuelRecordForm`, `BudgetForm`) render through `createPortal(…, document.body)`. Pages show them by setting an "editing" state to a record.
 - Styling is one global stylesheet, `global.css`, imported in `App.jsx`. It uses plain class names, with light/dark themes switched by `[data-theme]`. Icons are inline SVGs looked up by name in `components/Icon.jsx`; add new icons there.
 
 ### Shared code (`shared/`): used by both backend and frontend
 
-- `shared/constants.js` (`ROLES`, `REGISTER_ROLES`, `FUEL_TYPES`, password/model-year limits, `VEHICLE_LIMITS`, price-per-litre range, station length) and `shared/validation.js` (every `check*` rule, `firstError`, `parseFuelDate`, `todayInPakistan`). Change a rule or value here only.
+- `shared/constants.js` (`ROLES`, `REGISTER_ROLES`, `FUEL_TYPES`, password/model-year limits, `VEHICLE_LIMITS`, price-per-litre range, station length, budget limits) and `shared/validation.js` (every `check*` rule, `firstError`, `parseFuelDate`, `todayInPakistan`, `currentMonthInPakistan`, `addMonths`). Change a rule or value here only.
 - Import them with plain relative paths (`import { ROLES } from "../../shared/constants.js"`); no alias or build setup is needed. The backend imports them directly (models, `authController`) or through `utils/validation.js`; the frontend only through `src/constant.js` and `src/validation.js`, so components keep importing from those two files. Inside `shared/` itself, files import each other as `./constants.js`.
 - `frontend/vite.config.js` lists `../shared` in `server.fs.allow`, because the Vite dev server only serves files inside `frontend/` by default.
 - Rules for these files: plain JavaScript only (no npm packages, nothing browser- or Node-only), and always write the `.js` extension in imports (Node needs it). `shared/package.json` marks the folder as ES modules for Node.

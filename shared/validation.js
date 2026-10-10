@@ -3,6 +3,8 @@
 // Each check returns "" when the value is valid, otherwise an error message.
 import {
   FUEL_TYPES,
+  MAX_BUDGET_AMOUNT,
+  MAX_BUDGET_MONTHS_AHEAD,
   MAX_PASSWORD_LENGTH,
   MAX_PRICE_PER_LITRE,
   MAX_STATION_LENGTH,
@@ -25,6 +27,7 @@ const REGISTRATION_REGEX = /^[A-Z0-9]+([ -][A-Z0-9]+)*$/i;
 // Must start with a letter, e.g. Toyota, Mercedes-Benz, MG.
 const MANUFACTURER_REGEX = /^\p{L}[\p{L}\p{N}\s.'&-]*$/u;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const MONTH_REGEX = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 const isText = (value) => typeof value === "string" && value.trim() !== "";
 const isEmpty = (value) => value === undefined || value === null || value === "";
@@ -236,6 +239,45 @@ export function checkStation(value) {
   if (typeof value !== "string") return "Station name must be text";
   if (value.trim().length > MAX_STATION_LENGTH) {
     return `Station name must be at most ${MAX_STATION_LENGTH} characters`;
+  }
+  return "";
+}
+
+// Budgets (FR-08). A budget month is text like "2026-10".
+
+// The current month in Pakistan as "YYYY-MM".
+export function currentMonthInPakistan() {
+  return todayInPakistan().slice(0, 7);
+}
+
+// addMonths("2026-11", 2) → "2027-01".
+export function addMonths(month, monthsToAdd) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  return new Date(Date.UTC(year, monthNumber - 1 + monthsToAdd, 1)).toISOString().slice(0, 7);
+}
+
+export function isValidMonth(value) {
+  return typeof value === "string" && MONTH_REGEX.test(value);
+}
+
+// Past months are view-only, so only the current month and the next
+// MAX_BUDGET_MONTHS_AHEAD months can be set or changed.
+export function checkBudgetMonth(value) {
+  if (isEmpty(value)) return "Month is required";
+  if (!isValidMonth(value)) return "Enter a valid month (YYYY-MM)";
+  const current = currentMonthInPakistan();
+  if (value < current) return "Budgets for past months cannot be changed";
+  if (value > addMonths(current, MAX_BUDGET_MONTHS_AHEAD)) {
+    return `Budgets can be set at most ${MAX_BUDGET_MONTHS_AHEAD} months ahead`;
+  }
+  return "";
+}
+
+export function checkBudgetAmount(value) {
+  const error = checkPositiveNumber(value, "Budget");
+  if (error) return error;
+  if (toNumber(value) > MAX_BUDGET_AMOUNT) {
+    return `Budget cannot be more than Rs ${MAX_BUDGET_AMOUNT.toLocaleString("en-US")}`;
   }
   return "";
 }

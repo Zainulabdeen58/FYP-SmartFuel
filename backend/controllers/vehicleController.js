@@ -1,3 +1,4 @@
+import Budget from "../models/Budget.js";
 import FuelRecord from "../models/FuelRecord.js";
 import Vehicle from "../models/Vehicle.js";
 import { isOwnerOrAdmin } from "../utils/access.js";
@@ -117,6 +118,7 @@ export async function deleteVehicle(req, res) {
   }
 
   await FuelRecord.deleteMany({ vehicle: vehicle._id });
+  await Budget.deleteMany({ vehicle: vehicle._id });
   await vehicle.deleteOne();
-  res.json({ success: true, message: "Vehicle and its fuel records deleted" });
+  res.json({ success: true, message: "Vehicle, its fuel records and budgets deleted" });
 }

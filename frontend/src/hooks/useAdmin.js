@@ -79,7 +79,7 @@ function useAdmin(currentUser) {
       return;
     }
 
-    if (!confirm("Delete this user with all their vehicles and fuel records?")) return;
+    if (!confirm("Delete this user with all their vehicles, fuel records and budgets?")) return;
 
     try {
       await api.delete(`/admin/users/${id}`);
@@ -91,7 +91,7 @@ function useAdmin(currentUser) {
   };
 
   const deleteVehicle = async (id) => {
-    if (!confirm("Delete this vehicle and all its fuel records?")) return;
+    if (!confirm("Delete this vehicle with all its fuel records and budgets?")) return;
 
     try {
       await api.delete(`/vehicles/${id}`);

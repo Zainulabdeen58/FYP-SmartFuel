@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ROLE_LABELS } from "../constant";
+import BudgetCard from "./BudgetCard";
 import Icon from "./Icon";
 
 function Dashboard({ user }) {
@@ -77,6 +78,8 @@ function Dashboard({ user }) {
           </div>
         </div>
       </div>
+
+      {user.role !== "Admin" && <BudgetCard user={user} />}
 
       <div className="section-heading">
         <div>

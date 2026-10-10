@@ -2,6 +2,7 @@
 // re-exported here so components import everything from this file.
 export {
   FUEL_TYPES,
+  MAX_BUDGET_MONTHS_AHEAD,
   MAX_STATION_LENGTH,
   REGISTER_ROLES,
   ROLES,

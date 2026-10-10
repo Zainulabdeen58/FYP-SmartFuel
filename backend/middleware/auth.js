@@ -33,6 +33,17 @@ export async function protect(req, res, next) {
   next();
 }
 
+// The opposite of adminOnly: for features only Individual and Organizational
+// accounts have (monthly budgets).
+export function nonAdminOnly(req, res, next) {
+  if (req.user?.role === "Admin") {
+    return res
+      .status(403)
+      .json({ success: false, message: "Admin accounts do not have budgets" });
+  }
+  next();
+}
+
 export function adminOnly(req, res, next) {
   if (req.user?.role !== "Admin") {
     return res

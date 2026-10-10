@@ -26,7 +26,7 @@ export default function App() {
 
             <Route path="/vehicles" element={<Vehicles />} />
 
-            <Route path="/fuel-records" element={<FuelRecords />} />
+            <Route path="/fuel-records" element={<FuelRecords user={user} />} />
 
             <Route
               path="/profile"

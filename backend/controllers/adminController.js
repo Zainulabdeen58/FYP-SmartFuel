@@ -1,3 +1,4 @@
+import Budget from "../models/Budget.js";
 import FuelRecord from "../models/FuelRecord.js";
 import User from "../models/User.js";
 import Vehicle from "../models/Vehicle.js";
@@ -65,6 +66,15 @@ export async function updateUser(req, res) {
   }
 
   await user.save();
+
+  // Remove budgets the new role cannot have: admins have none, and only
+  // Organizational accounts have budgets per vehicle.
+  if (nextRole === "Admin") {
+    await Budget.deleteMany({ user: user._id });
+  } else if (nextRole !== "Organizational") {
+    await Budget.deleteMany({ user: user._id, vehicle: { $ne: null } });
+  }
+
   res.json({ success: true, message: "User updated", user: { ...user.toObject(), password: undefined } });
 }
 
@@ -80,9 +90,10 @@ export async function deleteUser(req, res) {
   }
 
   await FuelRecord.deleteMany({ user: user._id });
+  await Budget.deleteMany({ user: user._id });
   await Vehicle.deleteMany({ user: user._id });
   await user.deleteOne();
-  res.json({ success: true, message: "User and their vehicle and fuel records deleted" });
+  res.json({ success: true, message: "User and their vehicles, fuel records and budgets deleted" });
 }
 
 // Query values can arrive as arrays (?user=a&user=b); only plain text is searched.

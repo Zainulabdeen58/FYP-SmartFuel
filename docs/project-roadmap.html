@@ -241,14 +241,14 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
       <p class="lead">SRS ki har functionality, roles, edge cases aur coding ke phases ek jagah. Pehle dekhein kya ban chuka hai, phir phase ba phase aage ka kaam. Har phase ke tasks par tick laga kar apni progress yahin track karein.</p>
       <div class="basis">
         <span>SRS: 13 functional requirements</span>
-        <span>Code: Phase 0 (02bfc1b) + Phase 1</span>
+        <span>Code: Phase 0 (02bfc1b) + Phase 1 (f05e116) + Phase 2</span>
         <span>Update: 10 Oct 2026</span>
       </div>
     </div>
-    <div class="gauge" aria-label="Project progress gauge: 4 requirements mukammal, 9 baqi">
+    <div class="gauge" aria-label="Project progress gauge: 5 requirements mukammal, 8 baqi">
       <svg viewBox="0 0 200 122" role="img" aria-hidden="true">
         <path class="g-track" d="M 20 100 A 80 80 0 0 1 180 100"></path>
-        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 54.55 34.16"></path>
+        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 71.63 25.20"></path>
         <line class="g-tick" x1="20" y1="100" x2="34" y2="100"></line>
         <line class="g-tick" x1="43.43" y1="43.43" x2="53.33" y2="53.33"></line>
         <line class="g-tick" x1="100" y1="20" x2="100" y2="34"></line>
@@ -257,11 +257,11 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <text class="g-label" x="20" y="118" text-anchor="middle">E</text>
         <text class="g-label" x="100" y="13" text-anchor="middle">½</text>
         <text class="g-label" x="180" y="118" text-anchor="middle">F</text>
-        <line class="g-needle" x1="100" y1="100" x2="67.05" y2="52.27"></line>
+        <line class="g-needle" x1="100" y1="100" x2="79.43" y2="45.77"></line>
         <circle class="g-hub" cx="100" cy="100" r="7"></circle>
       </svg>
-      <div class="gauge-value">4 / 13</div>
-      <div class="gauge-note">Requirements ka fuel gauge, Phase 1 ke baad.</div>
+      <div class="gauge-value">5 / 13</div>
+      <div class="gauge-note">Requirements ka fuel gauge, Phase 2 ke baad.</div>
     </div>
   </div>
 </header>
@@ -288,29 +288,31 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
     <div class="summary-grid">
       <div class="panel">
         <span class="pill done">Ban chuka</span>
-        <h3>Account, vehicles aur fuel records</h3>
-        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Fuel purchase records (FR-04) bhi ban gaye. Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
+        <h3>Account, vehicles, fuel records aur budget</h3>
+        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Fuel purchase records (FR-04) aur monthly budget aur alerts (FR-08) bhi ban gaye. Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
       </div>
       <div class="panel">
         <span class="pill todo">Baqi</span>
         <h3>Asal "Smart Fuel" hissa</h3>
-        <p>Trips, route optimization, map, monthly budget, charts, crisis mode aur notifications. Yeh 9 requirements abhi shuru nahi hui. Project ka naam jis kaam par hai, woh yahi hissa hai.</p>
+        <p>Trips, route optimization, map, charts, crisis mode aur notifications. Yeh 8 requirements abhi shuru nahi hui. Project ka naam jis kaam par hai, woh yahi hissa hai.</p>
       </div>
       <div class="panel">
         <span class="pill partial">Agla qadam</span>
-        <h3>Phase 2: Monthly budget</h3>
-        <p>Phase 0 (buniyad) aur Phase 1 (fuel records) ka code mukammal ho gaya. Ab monthly budget aur alerts (FR-08), kyunke kharche ka data ab fuel entries se mil raha hai. Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
+        <h3>Phase 3: Dashboard charts aur filters</h3>
+        <p>Phase 0 (buniyad), Phase 1 (fuel records) aur Phase 2 (budget) ka code mukammal ho gaya. Ab dashboard charts aur filters (FR-09, FR-10), fuel entries aur budget ke data se. Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
       </div>
     </div>
     <div class="count-row">
-      <span class="pill done">4 mukammal</span>
-      <span class="pill todo">9 shuru nahi hui</span>
+      <span class="pill done">5 mukammal</span>
+      <span class="pill todo">8 shuru nahi hui</span>
       <span class="pill done">Phase 0: code mukammal</span>
       <span class="pill done">Phase 1: code mukammal</span>
+      <span class="pill done">Phase 2: code mukammal</span>
       <span class="pill todo">8 coding phases</span>
     </div>
     <div class="note ok" style="margin-top:16px"><strong>Update, 3 Oct 2026:</strong> Phase 0 ke saare Missing aur Bug items theek ho gaye. Neeche aise har item par <span class="chip fixed">Fixed</span> laga hai. Backend ko 51 automated checks se test kiya gaya aur sab pass hue. Jin par <span class="chip decide">Decide</span> hai, unka faisla abhi baqi hai.</div>
     <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 1 (FR-04 fuel purchase records) ka code mukammal. Sidebar mein "Fuel Records" page: entry add, edit, delete aur gaari ke hisaab se filter. Backend ko 69 naye automated checks se test kiya gaya, sab pass. Phase 0 ke 51 checks bhi dobara pass hue.</div>
+    <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 2 (FR-08 monthly budget aur alerts) ka code mukammal. Dashboard par "Fuel budget" card (mahina chunein, budget set/edit/remove, progress bar) aur Fuel Records page par alert. Organizational account ke liye fleet budget aur har gaari ka budget. Backend ko 61 naye automated checks se test kiya gaya, sab pass, aur browser mein bhi chala kar dekha gaya.</div>
   </section>
 
   <section id="roles">
@@ -386,7 +388,7 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <ol class="rules">
           <li>Har user sirf apna data dekhe. Doosre ka data sirf Admin dekh sakta hai. <span class="chip ok">Vehicles mein bana hua</span></li>
           <li>Admin khud ko delete ya apna Admin role khatam nahi kar sakta. <span class="chip ok">Bana hua</span></li>
-          <li>User delete ho to uski gaariyan aur fuel records bhi delete hon (ho gaya). Aage trips aur budgets bhi saath delete hone chahiye. <span class="chip fixed">Fuel records: Fixed</span></li>
+          <li>User delete ho to uski gaariyan aur fuel records bhi delete hon (ho gaya). Budgets bhi saath delete hote hain (ho gaya). Aage trips bhi saath delete hone chahiye. <span class="chip fixed">Fuel records aur budgets: Fixed</span></li>
           <li>Fuel efficiency aur tank capacity hamesha 0 se zyada hon, warna fuel ka andaza 0 se divide ho jayega. <span class="chip fixed">Fixed</span></li>
           <li>Mahina Pakistan time (Asia/Karachi) ke hisaab se gina jaye, taake raat ki entry ghalat mahine mein na jaye. <span class="chip fixed">Fuel records: Fixed</span></li>
         </ol>
@@ -412,7 +414,7 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
           <tr><td class="fr-code">FR-05</td><td>Trips banana</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
           <tr><td class="fr-code">FR-06</td><td>Fuel ka andaza aur optimized route</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
           <tr><td class="fr-code">FR-07</td><td>Crisis mode</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-5">Phase 5</a></td></tr>
-          <tr><td class="fr-code">FR-08</td><td>Monthly budget aur alerts</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-2">Phase 2</a></td></tr>
+          <tr><td class="fr-code">FR-08</td><td>Monthly budget aur alerts</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-2">Phase 2</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-09</td><td>Charts aur graphs</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-3">Phase 3</a></td></tr>
           <tr><td class="fr-code">FR-10</td><td>Dashboard filters</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-3">Phase 3</a></td></tr>
           <tr><td class="fr-code">FR-11</td><td>Map par route dikhana</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
@@ -540,7 +542,7 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
               <li>Gaari kisi aur user ki ho to "Not authorized". <span class="chip fixed">Fixed</span></li>
               <li>Electric gaari par fuel record block (form aur server dono). <span class="chip fixed">Fixed</span></li>
               <li>31 tareekh raat 11:30 ki entry agle mahine mein na jaye: date sirf din ke taur par (Pakistan time) save hoti hai. <span class="chip fixed">Fixed</span></li>
-              <li>Purani entry edit ya delete ho to us mahine ka budget aur charts dobara hisaab hon. <span class="chip decide">Phase 2 aur 3</span></li>
+              <li>Purani entry edit ya delete ho to us mahine ka budget aur charts dobara hisaab hon. <span class="chip fixed">Budget: Fixed</span> <span class="chip decide">Charts: Phase 3</span></li>
             </ul>
           </div>
         </div>
@@ -632,28 +634,32 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         </div>
       </article>
 
-      <article class="fr" data-status="todo" id="fr-08">
+      <article class="fr" data-status="done" id="fr-08">
         <div class="fr-head">
           <span class="fr-code">FR-08</span>
           <h3>Monthly budget aur alerts</h3>
-          <span class="pill todo">Shuru nahi</span>
+          <span class="pill done">Mukammal</span>
           <a class="phase-link" href="#phase-2">Phase 2</a>
         </div>
         <div class="fr-body">
           <div>
             <blockquote class="srs">The system shall allow users to set monthly fuel budgets, track fuel expenses automatically, and display alerts when budgets are exceeded through a user dashboard.</blockquote>
             <p><strong>Matlab:</strong> Har mahine ka fuel budget set karna (jaise Rs 30,000). Fuel entries ka kharcha khud jud kar dikhe. Budget cross ho to dashboard par alert.</p>
+            <p class="small"><strong>Faisle (10 Oct 2026):</strong> budget har mahine naya set hota hai (agle mahine khud nahi chalta). Individual ka ek budget; Organizational ka fleet budget aur chahein to har gaari ka. Gaari ka budget fleet budget ke baad, aur gaariyon ka jor fleet budget se zyada ho to reject. Sirf is mahine aur agle 12 mahinon ka budget set ho sakta hai, pichhle mahine sirf dekhne ke liye. Alert live hai (jab tak kharcha zyada hai), ek dafa wali notification Phase 6 mein. Admin ka budget nahi.</p>
           </div>
           <div>
             <div class="label">Edge cases</div>
             <ul class="edges">
-              <li>Budget set hi nahi kiya to alert nahi, dashboard par "budget set karein" ka button.</li>
-              <li>Budget 0 ya negative ho to reject.</li>
-              <li>Mahine ke beech budget badla to naye budget se dobara hisaab.</li>
-              <li>Alert baar baar na aaye: 80% par ek warning, 100% par ek alert, har mahine ek dafa.</li>
-              <li>Entry delete karne se kharcha budget ke andar aa jaye to alert hat jaye.</li>
-              <li>Mahina Pakistan time ke hisaab se (FR-04 wala timezone case).</li>
-              <li>Organizational: poori fleet ka ek budget, chahein to har gaari ka alag.</li>
+              <li>Budget set hi nahi kiya to alert nahi, dashboard par "budget set karein" ka button. <span class="chip fixed">Fixed</span></li>
+              <li>Budget 0 ya negative ho to reject (aur Rs 1 crore se zyada bhi). <span class="chip fixed">Fixed</span></li>
+              <li>Mahine ke beech budget badla to naye budget se dobara hisaab. <span class="chip fixed">Fixed</span></li>
+              <li>Alert baar baar na aaye: 80% par ek warning, 100% par ek alert, har mahine ek dafa. <span class="chip decide">Phase 6 (notifications)</span></li>
+              <li>Entry delete karne se kharcha budget ke andar aa jaye to alert hat jaye. <span class="chip fixed">Fixed</span></li>
+              <li>Mahina Pakistan time ke hisaab se (FR-04 wala timezone case). <span class="chip fixed">Fixed</span></li>
+              <li>Organizational: poori fleet ka ek budget, chahein to har gaari ka alag. <span class="chip fixed">Fixed</span></li>
+              <li>Gaariyon ke budgets ka jor fleet budget se zyada ho to reject; fleet budget bhi un se kam nahi ho sakta. <span class="chip fixed">Fixed</span></li>
+              <li>Pichhle mahine ka budget badla ya hataya na ja sake. <span class="chip fixed">Fixed</span></li>
+              <li>Gaari ya user delete ho to us ke budgets bhi delete; role badle to woh budgets hat jayein jo naye role mein nahi hote. <span class="chip fixed">Fixed</span></li>
             </ul>
           </div>
         </div>
@@ -866,18 +872,19 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <div class="phase-head"><h3>Monthly budget aur alerts</h3><span class="phase-count" data-count></span></div>
         <div class="phase-meta"><span class="tag">FR-08</span><span class="tag dep">Pehle chahiye: Phase 1</span></div>
         <p class="why">Kharcha fuel entries se khud judta hai, isliye entries ke foran baad budget.</p>
+        <div class="note ok"><strong>Code mukammal, 10 Oct 2026.</strong> 6 kaam ho gaye aur 61 automated checks pass hue. Done ki dono shartein poori: Rs 10,000 budget aur Rs 10,500 kharche par laal alert, aur entry delete karne par alert hat gaya.</div>
         <div class="tasks">
           <div>
             <div class="label">Backend</div>
-            <label class="check"><input type="checkbox" id="p2-b1"><span><code>Budget</code> model: user, month ("2026-10"), amount (Rs), vehicle (optional, fleet ke liye).</span></label>
-            <label class="check"><input type="checkbox" id="p2-b2"><span>Is mahine ka kharcha = fuel entries ke cost ka jor, mahina Asia/Karachi time se.</span></label>
-            <label class="check"><input type="checkbox" id="p2-b3"><span>Budget status: theek, 80% warning, ya limit cross.</span></label>
+            <label class="check"><input type="checkbox" id="p2-b1" data-done="true" checked><span><code>Budget</code> model: user, month ("2026-10"), amount (Rs), vehicle (optional, fleet ke liye). <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p2-b2" data-done="true" checked><span>Is mahine ka kharcha = fuel entries ke cost ka jor, mahina Asia/Karachi time se. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p2-b3" data-done="true" checked><span>Budget status: theek, 80% warning, ya limit cross. <span class="chip fixed">Ho gaya</span></span></label>
           </div>
           <div>
             <div class="label">Frontend</div>
-            <label class="check"><input type="checkbox" id="p2-f1"><span>Dashboard par budget card: kharcha, budget, bacha hua, progress bar.</span></label>
-            <label class="check"><input type="checkbox" id="p2-f2"><span>Budget set aur edit karne ka form.</span></label>
-            <label class="check"><input type="checkbox" id="p2-f3"><span>80% par peela aur 100% par laal alert.</span></label>
+            <label class="check"><input type="checkbox" id="p2-f1" data-done="true" checked><span>Dashboard par budget card: kharcha, budget, bacha hua, progress bar. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p2-f2" data-done="true" checked><span>Budget set aur edit karne ka form. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p2-f3" data-done="true" checked><span>80% par peela aur 100% par laal alert. <span class="chip fixed">Ho gaya</span></span></label>
           </div>
         </div>
         <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Rs 10,000 budget aur Rs 10,500 kharche par laal alert aaye.</li><li>Ek entry delete karke kharcha budget se kam ho to alert hat jaye.</li></ol></div>
