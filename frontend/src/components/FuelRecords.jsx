@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
-import { formatNumber } from "../format";
-import useMonthlyBudgetSummary from "../hooks/useMonthlyBudgetSummary";
+import { formatLitres, formatNumber, formatVehicleLabel } from "../format";
 import useFetch from "../hooks/useFetch";
-import { currentMonthInPakistan } from "../validation";
+import useMonthlyBudgetSummary from "../hooks/useMonthlyBudgetSummary";
+import useVehicles from "../hooks/useVehicles";
+import { currentMonthInPakistan, hasOdometerReading } from "../validation";
 import BudgetAlerts from "./BudgetAlerts";
 import FuelRecordForm from "./FuelRecordForm";
 import Icon from "./Icon";
@@ -19,7 +20,7 @@ const formatDate = (value) =>
   });
 
 function FuelRecords({ user }) {
-  // Admins have no budgets, so they get no budget alerts.
+  // Admins have no budgets, so no budget alerts.
   const canHaveBudget = user.role !== "Admin";
   const [vehicleFilter, setVehicleFilter] = useState("");
   const [editingRecord, setEditingRecord] = useState(null);
@@ -29,14 +30,7 @@ function FuelRecords({ user }) {
     data: vehicles,
     error: vehiclesError,
     loading: vehiclesLoading,
-  } = useFetch(
-    async () => {
-      const { data } = await api.get("/vehicles");
-      return data.vehicles;
-    },
-    [],
-    { initialData: [] },
-  );
+  } = useVehicles();
 
   const {
     data: records,
@@ -55,7 +49,7 @@ function FuelRecords({ user }) {
     { initialData: [] },
   );
 
-  // This month's budget alerts; reloaded after every change to the records.
+  // This month's budget alerts; reloaded after every record change.
   const { data: budgetSummary, reload: reloadBudgetSummary } = useMonthlyBudgetSummary(
     currentMonthInPakistan(),
     { enabled: canHaveBudget },
@@ -133,7 +127,7 @@ function FuelRecords({ user }) {
 
         <div>
           <span>Total litres</span>
-          <strong>{formatNumber(totalLitres)} L</strong>
+          <strong>{formatLitres(totalLitres)}</strong>
         </div>
 
         <div className="summary-divider" />
@@ -165,7 +159,7 @@ function FuelRecords({ user }) {
             <option value="">All vehicles</option>
             {fuelVehicles.map((v) => (
               <option key={v._id} value={v._id}>
-                {v.vehicleName} ({v.registrationNumber})
+                {formatVehicleLabel(v)}
               </option>
             ))}
           </select>
@@ -216,7 +210,7 @@ function FuelRecords({ user }) {
 
                 <div className="vehicle-details">
                   <span>
-                    Quantity: <strong>{formatNumber(r.quantity)} L</strong>
+                    Quantity: <strong>{formatLitres(r.quantity)}</strong>
                   </span>
 
                   <span>
@@ -227,11 +221,12 @@ function FuelRecords({ user }) {
                     Price: <strong>Rs {formatNumber(r.pricePerLitre)}/L</strong>
                   </span>
 
-                  {r.odometer !== undefined && r.odometer !== null && (
-                    <span>
-                      Odometer: <strong>{formatNumber(r.odometer)} km</strong>
-                    </span>
-                  )}
+                  <span>
+                    Odometer:{" "}
+                    <strong>
+                      {hasOdometerReading(r) ? `${formatNumber(r.odometer)} km` : "not working"}
+                    </strong>
+                  </span>
 
                   {r.user?.fullName && (
                     <span>

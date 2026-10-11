@@ -1,6 +1,4 @@
-// Sends every error as JSON in the same { success, message } shape the
-// controllers use. Express 5 forwards rejected async handlers here, so
-// controllers don't need their own try/catch.
+// Sends every error as { success: false, message }; Express 5 forwards rejected async handlers here.
 const CAST_KINDS = { Number: "a number", ObjectId: "a valid id", Date: "a valid date" };
 
 function castMessage(error) {
@@ -23,7 +21,7 @@ export function errorHandler(err, req, res, next) {
     return fail(400, messages.join(". "));
   }
 
-  // Duplicate value blocked by a unique index (email, registrationNumber).
+  // Unique index violation (email, registrationNumber).
   if (err.code === 11000) {
     const field = Object.keys(err.keyValue || {})[0];
     if (field === "registrationNumber") {
@@ -33,8 +31,7 @@ export function errorHandler(err, req, res, next) {
     return fail(409, "This value is already in use");
   }
 
-  // Other client errors with a 4xx status, e.g. payload too large or a badly
-  // encoded URL. Only "exposed" errors have a message safe to show.
+  // Other 4xx errors (e.g. payload too large); only "exposed" messages are safe to show.
   if (err.status >= 400 && err.status < 500) {
     return fail(err.status, err.expose ? err.message : "Bad request");
   }

@@ -27,8 +27,7 @@ function getInitialForm(mode) {
   };
 }
 
-// Only the fields the register endpoint expects; organizationName goes with
-// organizational accounts only.
+// Only the fields /auth/register expects; organizationName only for Organizational.
 function registerPayload(f) {
   const role = f.role || "Individual";
   return {

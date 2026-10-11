@@ -1,15 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// Runs `fetcher` on mount (and whenever the dependencies change) and keeps the
-// resulting data, loading and error state in one place so components don't have
-// to repeat the same try/catch boilerplate.
+// Runs `fetcher` on mount and when deps change; keeps data, loading and error state.
 function useFetch(fetcher, deps = [], { immediate = true, initialData = null } = {}) {
   const [data, setData] = useState(initialData);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(immediate);
-  // Number of the newest request. Requests can overlap (e.g. the month or a
-  // filter is changed twice quickly) and answer out of order; only the newest
-  // one may update the state, so a slow old answer can't replace newer data.
+  // Only the newest request may update state, so a slow older answer can't overwrite newer data.
   const latestRequestNumber = useRef(0);
 
   const reload = useCallback(async (...args) => {

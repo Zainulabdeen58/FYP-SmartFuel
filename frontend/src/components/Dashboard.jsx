@@ -3,6 +3,74 @@ import { ROLE_LABELS } from "../constant";
 import BudgetCard from "./BudgetCard";
 import Icon from "./Icon";
 
+// Quick-access cards; the admin card is shown to admins only.
+const WORKSPACE_CARDS = [
+  {
+    to: "/vehicles",
+    icon: "car",
+    color: "green",
+    label: "FLEET",
+    title: "Vehicle management",
+    text: "Create, view, update and manage your registered vehicle records.",
+    linkText: "Manage vehicles",
+  },
+  {
+    to: "/reports",
+    icon: "chart",
+    color: "purple",
+    label: "ANALYTICS",
+    title: "Reports",
+    text: "Charts of fuel bought and money spent over time, and a comparison of your vehicles.",
+    linkText: "Open reports",
+  },
+  {
+    to: "/profile",
+    icon: "settings",
+    color: "blue",
+    label: "ACCOUNT",
+    title: "Profile settings",
+    text: "Keep your personal account information accurate and up to date.",
+    linkText: "Manage profile",
+  },
+];
+
+const ADMIN_CARD = {
+  to: "/admin",
+  icon: "shield",
+  color: "purple",
+  label: "ADMIN",
+  title: "Administration",
+  text: "Manage registered users and organization vehicle records.",
+  linkText: "Open administration",
+};
+
+function WorkspaceCard({ card }) {
+  return (
+    <Link to={card.to} className="workspace-card">
+      <div className="workspace-card-top">
+        <div className={`workspace-icon ${card.color}`}>
+          <Icon name={card.icon} size={23} />
+        </div>
+
+        <span className="card-arrow">
+          <Icon name="arrow" size={18} />
+        </span>
+      </div>
+
+      <div>
+        <span className="card-label">{card.label}</span>
+        <h3>{card.title}</h3>
+        <p>{card.text}</p>
+      </div>
+
+      <div className={`workspace-link ${card.color}-text`}>
+        {card.linkText}
+        <Icon name="arrow" size={16} />
+      </div>
+    </Link>
+  );
+}
+
 function Dashboard({ user }) {
   return (
     <section>
@@ -93,83 +161,10 @@ function Dashboard({ user }) {
       </div>
 
       <div className="feature-grid">
-        <Link to="/vehicles" className="workspace-card">
-          <div className="workspace-card-top">
-            <div className="workspace-icon green">
-              <Icon name="car" size={23} />
-            </div>
-
-            <span className="card-arrow">
-              <Icon name="arrow" size={18} />
-            </span>
-          </div>
-
-          <div>
-            <span className="card-label">FLEET</span>
-            <h3>Vehicle management</h3>
-
-            <p>
-              Create, view, update and manage your registered vehicle records.
-            </p>
-          </div>
-
-          <div className="workspace-link">
-            Manage vehicles
-            <Icon name="arrow" size={16} />
-          </div>
-        </Link>
-
-        <Link to="/profile" className="workspace-card">
-          <div className="workspace-card-top">
-            <div className="workspace-icon blue">
-              <Icon name="settings" size={23} />
-            </div>
-
-            <span className="card-arrow">
-              <Icon name="arrow" size={18} />
-            </span>
-          </div>
-
-          <div>
-            <span className="card-label">ACCOUNT</span>
-            <h3>Profile settings</h3>
-
-            <p>
-              Keep your personal account information accurate and up to date.
-            </p>
-          </div>
-
-          <div className="workspace-link blue-text">
-            Manage profile
-            <Icon name="arrow" size={16} />
-          </div>
-        </Link>
-
-        {user.role === "Admin" && (
-          <Link to="/admin" className="workspace-card">
-            <div className="workspace-card-top">
-              <div className="workspace-icon purple">
-                <Icon name="shield" size={23} />
-              </div>
-
-              <span className="card-arrow">
-                <Icon name="arrow" size={18} />
-              </span>
-            </div>
-
-            <div>
-              <span className="card-label">ADMIN</span>
-              <h3>Administration</h3>
-
-              <p>Manage registered users and organization vehicle records.</p>
-            </div>
-
-            <div className="workspace-link purple-text">
-              Open administration
-              <Icon name="arrow" size={16} />
-            </div>
-          </Link>
-        )}
+        {WORKSPACE_CARDS.map((card) => (
+          <WorkspaceCard key={card.to} card={card} />
+        ))}
+        {user.role === "Admin" && <WorkspaceCard card={ADMIN_CARD} />}
       </div>
 
       <div className="info-banner">

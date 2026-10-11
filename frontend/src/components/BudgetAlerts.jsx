@@ -1,7 +1,6 @@
-import { formatMonthLabel, formatRupees } from "../format";
+import { formatMonthLabel, formatRupees, formatVehicleLabel } from "../format";
 
-// The alert text for a budget that is 80% or more used.
-// `spending` is { spent, budget } from GET /budgets.
+// Alert text for a budget 80%+ used. `spending` is { spent, budget } from GET /budgets.
 function buildAlertMessage(budgetName, { spent, budget }) {
   const spentOfBudget = `${formatRupees(spent)} of ${formatRupees(budget.amount)}`;
 
@@ -10,8 +9,7 @@ function buildAlertMessage(budgetName, { spent, budget }) {
   return `${budgetName}: fully used (${spentOfBudget})`;
 }
 
-// Yellow (80%+) and red (100%+) alerts for the month's overall budget and
-// each vehicle budget. They show for as long as the spending stays that high.
+// Yellow (80%+) and red (100%+) alerts for the overall and vehicle budgets; live while spending stays that high.
 function BudgetAlerts({ summary, isOrganizationAccount }) {
   if (!summary) return null;
 
@@ -21,7 +19,7 @@ function BudgetAlerts({ summary, isOrganizationAccount }) {
     { key: "overall", budgetName: overallBudgetName, spending: summary.overall },
     ...summary.vehicles.map((vehicleSummary) => ({
       key: vehicleSummary.vehicle._id,
-      budgetName: `${vehicleSummary.vehicle.vehicleName} (${vehicleSummary.vehicle.registrationNumber}) budget`,
+      budgetName: `${formatVehicleLabel(vehicleSummary.vehicle)} budget`,
       spending: vehicleSummary,
     })),
   ];

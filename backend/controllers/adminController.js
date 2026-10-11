@@ -9,7 +9,9 @@ import {
   checkOrganizationName,
   checkRole,
   escapeRegex,
-  firstError
+  firstError,
+  queryText,
+  registrationNumberPattern
 } from "../utils/validation.js";
 
 export async function getUsers(req, res) {
@@ -34,7 +36,7 @@ export async function updateUser(req, res) {
     email !== undefined ? checkEmail(email) : "",
     contactNumber !== undefined ? checkContactNumber(contactNumber) : "",
     role !== undefined ? checkRole(role) : "",
-    // If a value is sent (even null) check that value, otherwise check the saved one.
+    // Check the sent value (even null), otherwise the saved one.
     nextRole === "Organizational"
       ? checkOrganizationName(organizationName !== undefined ? organizationName : user.organizationName)
       : ""
@@ -67,8 +69,7 @@ export async function updateUser(req, res) {
 
   await user.save();
 
-  // Remove budgets the new role cannot have: admins have none, and only
-  // Organizational accounts have budgets per vehicle.
+  // Drop budgets the new role can't have (admins: none; vehicle budgets: Organizational only).
   if (nextRole === "Admin") {
     await Budget.deleteMany({ user: user._id });
   } else if (nextRole !== "Organizational") {
@@ -96,16 +97,14 @@ export async function deleteUser(req, res) {
   res.json({ success: true, message: "User and their vehicles, fuel records and budgets deleted" });
 }
 
-// Query values can arrive as arrays (?user=a&user=b); only plain text is searched.
-const searchText = (value) => (typeof value === "string" ? value.trim() : "");
-
 export async function searchVehicles(req, res) {
-  const user = searchText(req.query.user);
-  const registrationNumber = searchText(req.query.registrationNumber);
+  const user = queryText(req.query.user);
+  const registrationNumber = queryText(req.query.registrationNumber);
   const filter = {};
 
   if (registrationNumber) {
-    filter.registrationNumber = { $regex: escapeRegex(registrationNumber), $options: "i" };
+    // Ignores spaces/hyphens: "LEA 12" also finds "LEA-1234".
+    filter.registrationNumber = { $regex: registrationNumberPattern(registrationNumber) };
   }
 
   if (user) {

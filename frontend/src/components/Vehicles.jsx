@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../api";
-import useFetch from "../hooks/useFetch";
+import { formatVehicleType } from "../format";
+import useVehicles from "../hooks/useVehicles";
 import Icon from "./Icon";
 import VehicleForm from "./VehicleForm";
 
@@ -11,14 +12,7 @@ function Vehicles() {
     setError,
     loading,
     reload: load,
-  } = useFetch(
-    async () => {
-      const { data } = await api.get("/vehicles");
-      return data.vehicles;
-    },
-    [],
-    { initialData: [] }
-  );
+  } = useVehicles();
 
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -111,6 +105,11 @@ function Vehicles() {
                   <h3>{v.vehicleName}</h3>
 
                   <span className="vehicle-badge">{v.fuelType}</span>
+
+                  {/* Older vehicles have no type yet; editing them asks for it. */}
+                  <span className={`vehicle-badge ${v.vehicleType ? "" : "missing"}`}>
+                    {formatVehicleType(v)}
+                  </span>
                 </div>
 
                 <div className="vehicle-meta">
@@ -131,7 +130,7 @@ function Vehicles() {
                   </span>
 
                   <span>
-                    Tank: <strong>{v.fuelTankCapacity}</strong>
+                    Tank: <strong>{v.fuelTankCapacity} L</strong>
                   </span>
 
                   {v.user && (
@@ -168,7 +167,7 @@ function Vehicles() {
           </div>
         ))}
 
-        {/* Show the empty state only once loading has finished, so it doesn't flash on every visit. */}
+        {/* Empty state only after loading, so it doesn't flash on every visit. */}
         {loading && !vehicles.length && (
           <div className="empty-state">
             <p>Loading vehicles...</p>

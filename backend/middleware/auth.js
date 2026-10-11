@@ -9,7 +9,7 @@ export async function protect(req, res, next) {
       .json({ success: false, message: "Authentication required" });
   }
 
-  // Only a bad or expired token is a 401 (the frontend signs the user out on 401).
+  // Only token errors are 401, because the frontend signs the user out on 401.
   let decoded;
   try {
     decoded = jwt.verify(header.split(" ")[1], process.env.JWT_SECRET);
@@ -19,8 +19,7 @@ export async function protect(req, res, next) {
       .json({ success: false, message: "Invalid or expired token" });
   }
 
-  // A database error here is not the user's fault: Express passes it to the
-  // error handler (500), so users are not signed out during a database problem.
+  // A database error goes to the error handler (500), so users aren't signed out during an outage.
   const user = await User.findById(decoded.userId).select("-password");
 
   if (!user) {
@@ -33,8 +32,7 @@ export async function protect(req, res, next) {
   next();
 }
 
-// The opposite of adminOnly: for features only Individual and Organizational
-// accounts have (monthly budgets).
+// The opposite of adminOnly; used for monthly budgets.
 export function nonAdminOnly(req, res, next) {
   if (req.user?.role === "Admin") {
     return res

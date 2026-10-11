@@ -5,8 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    // The dev server only serves files inside frontend/ by default; also allow
-    // ../shared (rules and constants used by both frontend and backend).
+    // Vite only serves frontend/ by default; also allow ../shared (code shared with the backend).
     fs: { allow: [".", "../shared"] }
   }
 });

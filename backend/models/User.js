@@ -17,14 +17,13 @@ const userSchema = new mongoose.Schema(
         "Organization name is required for organizational accounts",
       ],
     },
-    // Holds the bcrypt hash. Plain-password rules (minimum length) are checked
-    // with checkPassword (shared/validation.js) before hashing.
+    // bcrypt hash; the plain password is checked with checkPassword before hashing.
     password: { type: String, required: true }
   },
   { timestamps: true }
 );
 
-// The user fields sent to the client after login, register and profile updates.
+// Fields sent to the client (no password).
 userSchema.methods.toPublic = function () {
   return {
     id: this._id,

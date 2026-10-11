@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { hasErrors } from "../validation";
 
-// Handles the form plumbing every screen repeats: field values, per-field
-// errors, a submit error, loading state, and a submit handler that validates
-// then runs the async action with a shared try/catch.
+// Shared form logic: values, field errors, loading, and a submit that validates first.
 function useForm({
   initialValues,
   validate,
@@ -16,8 +14,26 @@ function useForm({
   const [loading, setLoading] = useState(false);
 
   const updateField = (name, value) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+    const nextForm = { ...form, [name]: value };
+    setForm(nextForm);
+    setFieldErrors((prev) => {
+      // Clear this field's error while typing.
+      const nextErrors = { ...prev, [name]: "" };
+      // Re-check errors shown on other fields; some depend on this one (tank limit on vehicle type).
+      const shownFields = Object.keys(nextErrors).filter((field) => nextErrors[field]);
+      if (validate && shownFields.length > 0) {
+        const errors = validate(nextForm);
+        for (const field of shownFields) nextErrors[field] = errors[field] || "";
+      }
+      return nextErrors;
+    });
+  };
+
+  // On blur: show this field's error at once. Empty fields wait for submit.
+  const validateField = (name) => {
+    if (!validate || form[name] === "") return;
+    const message = validate(form)[name];
+    if (message) setFieldErrors((prev) => ({ ...prev, [name]: message }));
   };
 
   const runValidation = () => {
@@ -53,6 +69,7 @@ function useForm({
     setError,
     loading,
     updateField,
+    validateField,
     handleSubmit,
   };
 }

@@ -249,6 +249,17 @@ const Icon = ({ name, size = 20 }) => {
       </svg>
     ),
 
+    chart: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <path
+          d="M4 20h16M7 16v-5M12 16V6M17 16v-8"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+
     moon: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
         <path

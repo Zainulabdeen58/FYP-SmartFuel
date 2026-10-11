@@ -1,8 +1,7 @@
-// Checks required settings before the server starts, so a missing or weak
-// value stops startup with a clear message instead of failing later.
+// Stops startup with a clear message if JWT_SECRET is missing or weak.
 const MIN_JWT_SECRET_LENGTH = 32;
 
-// The placeholder from .env.example is public, so it must never be used.
+// The .env.example placeholder is public, so it is refused.
 const EXAMPLE_JWT_SECRET = "replace-with-a-long-random-string";
 
 export function checkJwtSecret(secret) {

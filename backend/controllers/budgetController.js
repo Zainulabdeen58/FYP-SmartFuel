@@ -3,6 +3,8 @@ import Budget from "../models/Budget.js";
 import FuelRecord from "../models/FuelRecord.js";
 import Vehicle from "../models/Vehicle.js";
 import { BUDGET_WARNING_PERCENT } from "../../shared/constants.js";
+import { getMonthDateRange } from "../utils/dates.js";
+import { roundToTwoDecimals } from "../utils/numbers.js";
 import {
   checkBudgetAmount,
   checkBudgetMonth,
@@ -11,32 +13,11 @@ import {
   isValidMonth
 } from "../utils/validation.js";
 
-// Budgets belong to Individual and Organizational accounts (the routes block
-// admins), so every query here is limited to the signed-in user's own data.
-//
-// Words used below:
-// - overall budget: the month's budget that is not tied to a vehicle
-//   (the "fleet budget" for an Organizational account).
-// - vehicle budget: one vehicle's budget (Organizational accounts only).
-
-// Adding decimal amounts can give 600.5999999999999 instead of 600.6;
-// rounding to paisa (2 decimals) keeps totals and statuses exact.
-const roundToPaisa = (amount) => Math.round(amount * 100) / 100;
+// The routes block admins, so every query here is limited to req.user's own budgets.
+// "Overall budget" = the month's budget with no vehicle (the fleet budget for Organizational accounts).
 
 const formatRupees = (amount) => `Rs ${amount.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
 
-// The month as a date range: from its first day up to (not including) the
-// first day of the next month. Fuel record dates are stored as UTC midnight
-// of the chosen day, so this range holds exactly the records of that month.
-function getMonthDateRange(month) {
-  const [year, monthNumber] = month.split("-").map(Number);
-  return {
-    monthStart: new Date(Date.UTC(year, monthNumber - 1, 1)),
-    nextMonthStart: new Date(Date.UTC(year, monthNumber, 1))
-  };
-}
-
-// "ok" below 80% of the budget, "warning" from 80%, "over" from 100%.
 function getBudgetStatus(spentAmount, budgetAmount) {
   const percentUsed = (spentAmount / budgetAmount) * 100;
   if (percentUsed >= 100) return "over";
@@ -44,8 +25,6 @@ function getBudgetStatus(spentAmount, budgetAmount) {
   return "ok";
 }
 
-// The spending of a month (or of one vehicle) compared with its budget.
-// `budget` is null when no budget is set, and then only the spending is returned.
 function compareSpendingWithBudget(spentAmount, budget) {
   if (!budget) return { spent: spentAmount, budget: null };
 
@@ -54,23 +33,21 @@ function compareSpendingWithBudget(spentAmount, budget) {
     budget: {
       _id: budget._id,
       amount: budget.amount,
-      remaining: roundToPaisa(budget.amount - spentAmount),
+      remaining: roundToTwoDecimals(budget.amount - spentAmount),
       percentUsed: Math.round((spentAmount / budget.amount) * 100),
       status: getBudgetStatus(spentAmount, budget.amount)
     }
   };
 }
 
-// Adds up the vehicle budgets in `monthBudgets`. `excludedVehicleId` leaves out
-// the vehicle that is being changed, so its old amount is not counted.
+// excludedVehicleId leaves out the vehicle being changed, so its old amount isn't counted.
 function sumVehicleBudgets(monthBudgets, excludedVehicleId) {
   return monthBudgets
     .filter((budget) => budget.vehicle && !budget.vehicle.equals(excludedVehicleId))
     .reduce((total, budget) => total + budget.amount, 0);
 }
 
-// The vehicle a budget is for: it must be the user's own petrol or diesel vehicle.
-// Returns { vehicle } or { status, message } for the error response.
+// Returns { vehicle } (user's own, not electric) or { status, message } for the error.
 async function findVehicleForBudget(req, vehicleId) {
   if (typeof vehicleId !== "string" || !mongoose.isValidObjectId(vehicleId)) {
     return { status: 400, message: "Select a valid vehicle" };
@@ -85,7 +62,7 @@ async function findVehicleForBudget(req, vehicleId) {
   return { vehicle };
 }
 
-// GET /budgets?month=YYYY-MM (default: the current month in Pakistan time)
+// GET /budgets?month=YYYY-MM (default: current month, Pakistan time)
 export async function getMonthlyBudgetSummary(req, res) {
   const month = req.query.month ?? currentMonthInPakistan();
   if (!isValidMonth(month)) {
@@ -98,7 +75,7 @@ export async function getMonthlyBudgetSummary(req, res) {
 
   const [monthBudgets, spendingPerVehicle, userVehicles] = await Promise.all([
     Budget.find({ user: userId, month }),
-    // The month's fuel spending, one row per vehicle: { _id: vehicleId, spent }
+    // Month's spending per vehicle: { _id: vehicleId, spent }
     FuelRecord.aggregate([
       { $match: { user: userId, date: { $gte: monthStart, $lt: nextMonthStart } } },
       { $group: { _id: "$vehicle", spent: { $sum: "$totalCost" } } }
@@ -110,15 +87,14 @@ export async function getMonthlyBudgetSummary(req, res) {
   ]);
 
   const getVehicleSpending = (vehicleId) =>
-    roundToPaisa(spendingPerVehicle.find((row) => row._id.equals(vehicleId))?.spent || 0);
+    roundToTwoDecimals(spendingPerVehicle.find((row) => row._id.equals(vehicleId))?.spent || 0);
   const getVehicleBudget = (vehicleId) => monthBudgets.find((budget) => budget.vehicle?.equals(vehicleId));
 
-  const totalSpent = roundToPaisa(spendingPerVehicle.reduce((total, row) => total + row.spent, 0));
+  const totalSpent = roundToTwoDecimals(spendingPerVehicle.reduce((total, row) => total + row.spent, 0));
   const overallBudget = monthBudgets.find((budget) => budget.vehicle === null);
 
   const vehicleSummaries = userVehicles
-    // Electric vehicles can't be budgeted; one is listed only if it still has
-    // spending or a budget from before its fuel type was changed.
+    // Electric vehicles show only if they still have spending or a budget from before a fuel-type change.
     .filter((vehicle) =>
       vehicle.fuelType !== "Electric" || getVehicleBudget(vehicle._id) || getVehicleSpending(vehicle._id) > 0
     )
@@ -138,8 +114,7 @@ export async function getMonthlyBudgetSummary(req, res) {
   });
 }
 
-// PUT /budgets  { month, amount, vehicle? }
-// Sets the budget for that month (and vehicle): creates it, or replaces the amount.
+// PUT /budgets { month, amount, vehicle? }: creates the budget or replaces its amount.
 export async function createOrUpdateBudget(req, res) {
   const { month, amount } = req.body;
   const vehicleId = req.body.vehicle ?? null;
@@ -153,7 +128,7 @@ export async function createOrUpdateBudget(req, res) {
   let vehicle = null;
 
   if (vehicleId === null) {
-    // The overall budget can't drop below what the vehicle budgets already add up to.
+    // The fleet budget can't be lower than the vehicle budgets' total.
     const vehicleBudgetsTotal = sumVehicleBudgets(monthBudgets);
     if (newAmount < vehicleBudgetsTotal) {
       return res.status(400).json({
@@ -176,7 +151,7 @@ export async function createOrUpdateBudget(req, res) {
       return res.status(400).json({ success: false, message: "Set the fleet budget for this month first" });
     }
 
-    // All vehicle budgets of the month, with this vehicle's new amount, must fit in the fleet budget.
+    // All vehicle budgets (with this new amount) must fit in the fleet budget.
     const vehicleBudgetsTotal = sumVehicleBudgets(monthBudgets, vehicle._id) + newAmount;
     if (vehicleBudgetsTotal > overallBudget.amount) {
       return res.status(400).json({
@@ -194,7 +169,6 @@ export async function createOrUpdateBudget(req, res) {
   res.json({ success: true, message: "Budget saved", budget });
 }
 
-// DELETE /budgets/:id
 export async function deleteBudget(req, res) {
   const budget = await Budget.findById(req.params.id);
   if (!budget) return res.status(404).json({ success: false, message: "Budget not found" });

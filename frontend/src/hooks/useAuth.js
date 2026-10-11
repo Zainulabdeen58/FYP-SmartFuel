@@ -18,8 +18,7 @@ function useAuth() {
     setUser(data.user);
   };
 
-  // Called after a profile edit so the sidebar, dashboard and profile page all
-  // show the same, current user.
+  // After a profile edit, so the sidebar, dashboard and profile stay in step.
   const updateUser = useCallback((nextUser) => {
     localStorage.setItem("user", JSON.stringify(nextUser));
     setUser(nextUser);
@@ -37,9 +36,7 @@ function useAuth() {
     return () => setUnauthorizedHandler(null);
   }, [endSession]);
 
-  // The stored user can be out of date: an admin may have changed this
-  // account's role or details. Re-read it from the server when the app opens
-  // and whenever the user comes back to the tab.
+  // Re-read the user on app open and tab focus; an admin may have changed the role or details.
   const refreshUser = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -49,8 +46,7 @@ function useAuth() {
       // Ignore the answer if the user signed out or switched account meanwhile.
       if (localStorage.getItem("token") === token) updateUser(data.user);
     } catch {
-      // 401 already ended the session (see above); on a network error keep
-      // the stored user and try again on the next focus.
+      // A 401 already signed out; on a network error keep the stored user and retry on next focus.
     }
   }, [updateUser]);
 
@@ -64,8 +60,7 @@ function useAuth() {
     return () => window.removeEventListener("focus", refreshUser);
   }, [signedIn, refreshUser]);
 
-  // Sign out straight away; the server call (a no-op) must not keep the user
-  // waiting if the server is slow or down.
+  // Sign out at once; don't wait for the server call (a no-op).
   const logout = () => {
     api.post("/auth/logout").catch(() => {});
     endSession();

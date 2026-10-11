@@ -1,26 +1,28 @@
 import mongoose from "mongoose";
-import { MAX_STATION_LENGTH } from "../../shared/constants.js";
+import { MAX_ODOMETER_READING, MAX_STATION_LENGTH } from "../../shared/constants.js";
 
 const greaterThanZero = (label) => ({
   validator: (value) => value > 0,
   message: `${label} must be greater than 0`,
 });
 
-// One fuel purchase. `date` is a calendar day stored as UTC midnight
-// (see parseFuelDate in shared/validation.js), so its UTC year/month/day are
-// the Pakistan-time date the user picked and month totals never shift.
+// `date` is the picked day stored as UTC midnight (parseFuelDate), so always read it in UTC.
 const fuelRecordSchema = new mongoose.Schema(
   {
-    // Owner of the vehicle (also when an admin adds the record), so the
-    // user's own list is a simple { user } query.
+    // The vehicle's owner, also when an admin adds the record.
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     vehicle: { type: mongoose.Schema.Types.ObjectId, ref: "Vehicle", required: [true, "Vehicle is required"] },
     date: { type: Date, required: [true, "Date is required"] },
     quantity: { type: Number, required: [true, "Quantity is required"], validate: greaterThanZero("Quantity") },
     totalCost: { type: Number, required: [true, "Total cost is required"], validate: greaterThanZero("Total cost") },
-    // Derived from totalCost / quantity on every save; never taken from the request.
+    // Computed in pre("validate") below; never taken from the request.
     pricePerLitre: { type: Number },
-    odometer: { type: Number, min: [0, "Odometer reading cannot be negative"] },
+    // Km. Not required here: "odometer not working" entries and older ones have none.
+    odometer: {
+      type: Number,
+      min: [0, "Odometer reading cannot be negative"],
+      max: [MAX_ODOMETER_READING, "Odometer reading is too large"],
+    },
     station: { type: String, trim: true, maxlength: [MAX_STATION_LENGTH, `Station name must be at most ${MAX_STATION_LENGTH} characters`] },
   },
   { timestamps: true }

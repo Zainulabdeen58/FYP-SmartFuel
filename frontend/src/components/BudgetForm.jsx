@@ -1,13 +1,13 @@
 import { createPortal } from "react-dom";
 import api from "../api";
+import { NUMBER_INPUT_PROPS } from "../constant";
 import { formatMonthLabel } from "../format";
 import useForm from "../hooks/useForm";
 import { checkBudgetAmount } from "../validation";
 import Icon from "./Icon";
 
-// Sets the overall budget of a month (vehicle = null) or one vehicle's budget.
-// The server checks the month and that vehicle budgets fit in the fleet budget;
-// its message is shown here if they don't.
+// Overall budget (vehicle = null) or one vehicle's budget. The server checks the month
+// and that vehicle budgets fit the fleet budget; its message is shown here.
 function BudgetForm({ month, title, vehicle = null, budget = null, hint = "", onSave, onCancel }) {
   const { form, fieldErrors, error, loading, updateField, handleSubmit } = useForm({
     initialValues: { amount: budget?.amount ?? "" },
@@ -48,9 +48,7 @@ function BudgetForm({ month, title, vehicle = null, budget = null, hint = "", on
 
           <input
             id="budget-amount"
-            type="number"
-            min="0"
-            step="1"
+            {...NUMBER_INPUT_PROPS}
             placeholder="e.g. 30000"
             value={form.amount}
             className={fieldErrors.amount ? "invalid" : ""}

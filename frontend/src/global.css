@@ -1139,6 +1139,10 @@ p {
   font-weight: 700;
 }
 
+.green-text {
+  color: var(--green);
+}
+
 .blue-text {
   color: var(--blue);
 }
@@ -1529,7 +1533,7 @@ p {
    MODAL
 ========================= */
 
-/* Lock background scroll while a modal is open — pure CSS, no JS */
+/* Stop the page scrolling behind an open modal */
 html:has(.modal-backdrop) {
   overflow: hidden;
 }
@@ -2535,10 +2539,6 @@ html:has(.modal-backdrop) {
 }
 
 /* =========================
-   RESPONSIVE
-========================= */
-
-/* =========================
    FUEL RECORDS
 ========================= */
 
@@ -2725,8 +2725,7 @@ a.submit-button {
   font-size: 13px;
 }
 
-/* The actions column has a fixed width so every row's progress bar lines up,
-   whether a row shows two buttons, one or none. */
+/* Fixed-width actions column so every row's progress bar lines up. */
 .budget-vehicle {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) 170px;
@@ -2802,7 +2801,7 @@ a.submit-button {
     gap: 20px;
   }
 
-  /* Keep Edit and Remove side by side (delete buttons are full width on phones elsewhere). */
+  /* Keep Edit and Remove side by side on phones. */
   .budget-actions .delete-button {
     width: auto;
   }
@@ -2811,6 +2810,230 @@ a.submit-button {
     grid-template-columns: 1fr;
 
     gap: 10px;
+  }
+}
+
+/* =========================
+   FUEL FORM: ODOMETER
+========================= */
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  margin-top: 4px;
+
+  color: var(--text-soft);
+
+  font-size: 10px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.checkbox-field input {
+  width: 15px;
+  height: 15px;
+
+  accent-color: var(--green);
+}
+
+.field-hint {
+  color: var(--text-muted);
+
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* Unusual but allowed; doesn't stop saving. */
+.field-warning {
+  color: var(--green);
+
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* Vehicles saved before the vehicle type was asked. */
+.vehicle-badge.missing {
+  color: var(--red);
+
+  background: rgba(255, 102, 125, 0.07);
+
+  border-color: rgba(255, 102, 125, 0.2);
+}
+
+.field input:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+}
+
+/* =========================
+   REPORTS
+========================= */
+
+.report-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  align-items: end;
+
+  gap: 12px;
+
+  margin-bottom: 19px;
+  padding: 16px 18px;
+
+  background: linear-gradient(145deg, var(--elev-1), var(--elev-2));
+
+  border: 1px solid var(--border);
+
+  border-radius: 15px;
+}
+
+.report-reset {
+  justify-self: start;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 16px;
+
+  margin-bottom: 16px;
+}
+
+.chart-card {
+  min-width: 0;
+
+  padding: 18px 20px;
+
+  background: linear-gradient(145deg, var(--elev-1), var(--elev-2));
+
+  border: 1px solid var(--border);
+
+  border-radius: 15px;
+}
+
+.chart-card-header {
+  margin-bottom: 14px;
+}
+
+.chart-card-header h3 {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 14px;
+}
+
+.chart-card-header p {
+  margin: 4px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 10px;
+}
+
+.comparison-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.metric-toggle {
+  display: inline-flex;
+
+  padding: 3px;
+
+  background: var(--fill);
+
+  border: 1px solid var(--border);
+
+  border-radius: 10px;
+}
+
+.metric-toggle button {
+  padding: 7px 12px;
+
+  color: var(--text-muted);
+
+  background: transparent;
+
+  border: 0;
+  border-radius: 8px;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.metric-toggle button.active {
+  color: var(--text);
+
+  background: var(--fill-2);
+}
+
+.chart-note {
+  margin: 10px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 10px;
+}
+
+.report-table-wrap {
+  margin-top: 16px;
+
+  overflow-x: auto;
+}
+
+.report-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 11px;
+}
+
+.report-table th,
+.report-table td {
+  padding: 9px 10px;
+
+  text-align: left;
+  white-space: nowrap;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.report-table th {
+  color: var(--text-muted);
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.report-table td {
+  color: var(--text-soft);
+}
+
+/* Hide the focus outline Recharts draws on a clicked chart. */
+.chart-card .recharts-surface:focus,
+.chart-card .recharts-wrapper:focus {
+  outline: none;
+}
+
+@media (max-width: 850px) {
+  .report-grid {
+    grid-template-columns: 1fr;
   }
 }
 

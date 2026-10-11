@@ -1,22 +1,19 @@
 import { useState } from "react";
 import api from "../api";
 import { MAX_BUDGET_MONTHS_AHEAD } from "../constant";
-import { formatMonthLabel, formatRupees } from "../format";
+import { formatMonthLabel, formatRupees, formatVehicleLabel } from "../format";
 import useMonthlyBudgetSummary from "../hooks/useMonthlyBudgetSummary";
-import { addMonths, checkBudgetMonth, currentMonthInPakistan } from "../validation";
+import { addMonths, checkBudgetMonth, currentMonthInPakistan, listMonths } from "../validation";
 import BudgetAlerts from "./BudgetAlerts";
 import BudgetForm from "./BudgetForm";
 import Icon from "./Icon";
 
-// Months in the month picker: the last 11 months (view only), this month and
-// the months ahead that can be planned.
+// Month picker: last 11 months (view only), this month and the months that can be planned ahead.
 function getSelectableMonths() {
   const currentMonth = currentMonthInPakistan();
-  const monthCount = 12 + MAX_BUDGET_MONTHS_AHEAD;
-  return Array.from({ length: monthCount }, (_, index) => addMonths(currentMonth, index - 11));
+  return listMonths(addMonths(currentMonth, -11), addMonths(currentMonth, MAX_BUDGET_MONTHS_AHEAD));
 }
 
-// Green, amber or red bar for how much of a budget is used (full at 100%).
 function BudgetProgressBar({ budget }) {
   return (
     <div className="budget-bar">
@@ -25,18 +22,16 @@ function BudgetProgressBar({ budget }) {
   );
 }
 
-// "Rs 2,000 left" or "Rs 500 over".
 const formatRemaining = (budget) =>
   budget.remaining < 0
     ? `${formatRupees(-budget.remaining)} over`
     : `${formatRupees(budget.remaining)} left`;
 
-// Monthly fuel budget on the dashboard (FR-08): the month's overall budget
-// and, for Organizational accounts, a budget per vehicle.
+// Dashboard budget card (FR-08): overall budget, plus per-vehicle budgets for Organizational accounts.
 function BudgetCard({ user }) {
   const isOrganizationAccount = user.role === "Organizational";
   const [selectedMonth, setSelectedMonth] = useState(currentMonthInPakistan);
-  // The props for BudgetForm ({ title, vehicle, budget, hint }) while it is open; null when closed.
+  // Props of the open BudgetForm ({ title, vehicle, budget, hint }); null when closed.
   const [budgetFormProps, setBudgetFormProps] = useState(null);
 
   const {
@@ -46,8 +41,7 @@ function BudgetCard({ user }) {
     reload: reloadSummary,
   } = useMonthlyBudgetSummary(selectedMonth);
 
-  // The card shows summary.month, the month the data belongs to. It equals
-  // selectedMonth once that month's answer has arrived.
+  // Use summary.month (the month the data is for), not selectedMonth, which may still be loading.
   const overallBudget = summary?.overall.budget;
   const overallBudgetName = isOrganizationAccount ? "Fleet budget" : "Monthly budget";
   const vehicleBudgetsTotal = (summary?.vehicles || [])
@@ -69,7 +63,7 @@ function BudgetCard({ user }) {
     const freeAmount = Math.max(overallBudget.amount - otherVehiclesTotal, 0);
 
     setBudgetFormProps({
-      title: `${vehicleSummary.vehicle.vehicleName} (${vehicleSummary.vehicle.registrationNumber})`,
+      title: formatVehicleLabel(vehicleSummary.vehicle),
       vehicle: vehicleSummary.vehicle,
       budget: vehicleSummary.budget,
       hint: `Fleet budget ${formatRupees(overallBudget.amount)}. Other vehicles have ${formatRupees(otherVehiclesTotal)}, so up to ${formatRupees(freeAmount)} is free for this vehicle.`,
@@ -210,7 +204,7 @@ function BudgetCard({ user }) {
 
                       {summary.editable && overallBudget && (
                         <div className="row-actions">
-                          {/* An electric vehicle is listed only for an old budget, which can just be removed. */}
+                          {/* Electric vehicles appear only for an old budget, which can only be removed. */}
                           {vehicle.fuelType !== "Electric" && (
                             <button className="edit-button" onClick={() => openVehicleBudgetForm(vehicleSummary)}>
                               <Icon name={budget ? "edit" : "plus"} size={16} />
@@ -235,7 +229,7 @@ function BudgetCard({ user }) {
               </div>
             )}
 
-            {/* Why this month can't be changed: past, or too far ahead (same rule as the server). */}
+            {/* Why this month is view-only (same rule as the server). */}
             {!summary.editable && <p className="budget-note">{checkBudgetMonth(summary.month)}.</p>}
           </>
         )}

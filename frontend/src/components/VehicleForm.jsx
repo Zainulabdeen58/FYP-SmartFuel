@@ -1,11 +1,14 @@
 import { createPortal } from "react-dom";
 import api from "../api";
 import {
+  COMMON_MANUFACTURERS,
   EMPTY_VEHICLE,
   FUEL_TYPES,
   NUMBER_FIELDS,
+  NUMBER_INPUT_PROPS,
   VEHICLE_LABELS,
   VEHICLE_LIMITS,
+  VEHICLE_TYPES,
 } from "../constant";
 import useForm from "../hooks/useForm";
 import Icon from "./Icon";
@@ -17,7 +20,25 @@ import {
   checkModelYear,
   checkRegistrationNumber,
   checkVehicleName,
+  checkVehicleTypeFields,
+  getMileageWarning,
 } from "../validation";
+
+const SELECT_OPTIONS = {
+  vehicleType: VEHICLE_TYPES,
+  fuelType: FUEL_TYPES,
+};
+
+// Suggestions only; any other value is allowed too.
+const SUGGESTIONS = {
+  manufacturer: COMMON_MANUFACTURERS,
+};
+
+// Format examples; other fields show "Enter <label>".
+const PLACEHOLDERS = {
+  registrationNumber: "e.g. LEA-1234 or ICT-AB-123",
+  manufacturer: "e.g. Honda",
+};
 
 function toFormValues(vehicle) {
   if (!vehicle) return EMPTY_VEHICLE;
@@ -25,11 +46,31 @@ function toFormValues(vehicle) {
   return {
     vehicleName: vehicle.vehicleName || "",
     registrationNumber: vehicle.registrationNumber || "",
+    // Older vehicles have no type; the user must pick one.
+    vehicleType: vehicle.vehicleType || "",
     manufacturer: vehicle.manufacturer || "",
     modelYear: vehicle.modelYear ?? "",
-    fuelType: vehicle.fuelType || "Petrol",
+    fuelType: vehicle.fuelType || EMPTY_VEHICLE.fuelType,
+    engineCC: vehicle.engineCC ?? "",
     fuelEfficiency: vehicle.fuelEfficiency ?? "",
     fuelTankCapacity: vehicle.fuelTankCapacity ?? "",
+  };
+}
+
+// Same rules as the server. The type's limit comes first: it is the exact range (car tank 25–80 L).
+function validateVehicle(values) {
+  const typeErrors = checkVehicleTypeFields(values);
+
+  return {
+    vehicleName: checkVehicleName(values.vehicleName),
+    registrationNumber: checkRegistrationNumber(values.registrationNumber),
+    vehicleType: typeErrors.vehicleType,
+    manufacturer: checkManufacturer(values.manufacturer),
+    modelYear: checkModelYear(values.modelYear),
+    fuelType: checkFuelType(values.fuelType),
+    engineCC: typeErrors.engineCC,
+    fuelEfficiency: typeErrors.fuelEfficiency || checkFuelEfficiency(values.fuelEfficiency),
+    fuelTankCapacity: typeErrors.fuelTankCapacity || checkFuelTankCapacity(values.fuelTankCapacity),
   };
 }
 
@@ -42,25 +83,20 @@ function VehicleForm({ vehicle = null, onSave, onCancel }) {
     error,
     loading,
     updateField,
+    validateField,
     handleSubmit: submit,
   } = useForm({
     initialValues: toFormValues(vehicle),
-    validate: (f) => ({
-      vehicleName: checkVehicleName(f.vehicleName),
-      registrationNumber: checkRegistrationNumber(f.registrationNumber),
-      manufacturer: checkManufacturer(f.manufacturer),
-      modelYear: checkModelYear(f.modelYear),
-      fuelType: checkFuelType(f.fuelType),
-      fuelEfficiency: checkFuelEfficiency(f.fuelEfficiency),
-      fuelTankCapacity: checkFuelTankCapacity(f.fuelTankCapacity),
-    }),
-    onSubmit: async (f) => {
+    validate: validateVehicle,
+    onSubmit: async (values) => {
+      const isElectric = values.fuelType === "Electric";
       const payload = {
-        ...f,
-        modelYear: Number(f.modelYear),
-        fuelEfficiency: Number(f.fuelEfficiency),
-        fuelTankCapacity: Number(f.fuelTankCapacity),
-        registrationNumber: f.registrationNumber.trim().toUpperCase(),
+        ...values,
+        modelYear: Number(values.modelYear),
+        // Electric vehicles have no engine size.
+        engineCC: isElectric ? null : Number(values.engineCC),
+        fuelEfficiency: Number(values.fuelEfficiency),
+        fuelTankCapacity: Number(values.fuelTankCapacity),
       };
 
       const { data } = isEdit
@@ -71,6 +107,84 @@ function VehicleForm({ vehicle = null, onSave, onCancel }) {
     },
     errorMessage: "Could not save vehicle",
   });
+
+  const isElectric = form.fuelType === "Electric";
+  // Only a warning under fuel efficiency; never blocks saving.
+  const mileageWarning = getMileageWarning(form);
+
+  const renderField = (key) => {
+    const value = form[key];
+    const isDisabled = key === "engineCC" && isElectric;
+    const fieldError = fieldErrors[key];
+
+    if (SELECT_OPTIONS[key]) {
+      return (
+        <div className="field" key={key}>
+          <label htmlFor={`vehicle-${key}`}>{VEHICLE_LABELS[key]}</label>
+
+          <select
+            id={`vehicle-${key}`}
+            value={value}
+            className={fieldError ? "invalid" : ""}
+            onChange={(e) => updateField(key, e.target.value)}
+          >
+            {key === "vehicleType" && (
+              <option value="" disabled>
+                Select vehicle type
+              </option>
+            )}
+            {SELECT_OPTIONS[key].map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+
+          {fieldError && <span className="field-error">{fieldError}</span>}
+        </div>
+      );
+    }
+
+    const suggestionsId = SUGGESTIONS[key] && `vehicle-${key}-suggestions`;
+    const inputProps = NUMBER_FIELDS.includes(key)
+      ? NUMBER_INPUT_PROPS
+      : { type: "text", maxLength: VEHICLE_LIMITS[key]?.max, list: suggestionsId };
+
+    return (
+      <div className="field" key={key}>
+        <label htmlFor={`vehicle-${key}`}>{VEHICLE_LABELS[key]}</label>
+
+        <input
+          id={`vehicle-${key}`}
+          {...inputProps}
+          placeholder={
+            isDisabled
+              ? "Not needed for electric"
+              : PLACEHOLDERS[key] || `Enter ${VEHICLE_LABELS[key].toLowerCase()}`
+          }
+          value={isDisabled ? "" : value}
+          disabled={isDisabled}
+          className={fieldError ? "invalid" : ""}
+          onChange={(e) => updateField(key, e.target.value)}
+          onBlur={() => validateField(key)}
+        />
+
+        {suggestionsId && (
+          <datalist id={suggestionsId}>
+            {SUGGESTIONS[key].map((option) => (
+              <option key={option} value={option} />
+            ))}
+          </datalist>
+        )}
+
+        {fieldError && <span className="field-error">{fieldError}</span>}
+
+        {key === "fuelEfficiency" && !fieldError && mileageWarning && (
+          <span className="field-warning">{mileageWarning}</span>
+        )}
+      </div>
+    );
+  };
 
   return createPortal(
     <div
@@ -108,46 +222,7 @@ function VehicleForm({ vehicle = null, onSave, onCancel }) {
         </div>
 
         <div className="vehicle-form-grid">
-          {Object.entries(form).map(([key, value]) =>
-            key === "fuelType" ? (
-              <div className="field" key={key}>
-                <label>{VEHICLE_LABELS[key]}</label>
-
-                <select
-                  value={value}
-                  className={fieldErrors[key] ? "invalid" : ""}
-                  onChange={(e) => updateField(key, e.target.value)}
-                >
-                  {FUEL_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-
-                {fieldErrors[key] && (
-                  <span className="field-error">{fieldErrors[key]}</span>
-                )}
-              </div>
-            ) : (
-              <div className="field" key={key}>
-                <label>{VEHICLE_LABELS[key]}</label>
-
-                <input
-                  type={NUMBER_FIELDS.includes(key) ? "number" : "text"}
-                  placeholder={`Enter ${VEHICLE_LABELS[key].toLowerCase()}`}
-                  value={value}
-                  maxLength={VEHICLE_LIMITS[key]?.max}
-                  className={fieldErrors[key] ? "invalid" : ""}
-                  onChange={(e) => updateField(key, e.target.value)}
-                />
-
-                {fieldErrors[key] && (
-                  <span className="field-error">{fieldErrors[key]}</span>
-                )}
-              </div>
-            ),
-          )}
+          {Object.keys(form).map(renderField)}
         </div>
 
         {error && <div className="form-error">{error}</div>}

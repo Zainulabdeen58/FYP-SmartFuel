@@ -1,9 +1,5 @@
-// Creates the Admin account. Registration cannot create admins, so this is the
-// only way to make the first one (later admins can be made from the
-// Administration page). Reads the details from backend/.env:
-//   ADMIN_NAME, ADMIN_EMAIL, ADMIN_CONTACT, ADMIN_PASSWORD
-// Run: npm run seed:admin
-// Safe to run again: an existing admin is left unchanged (its password is not reset).
+// Creates the first Admin from ADMIN_* in backend/.env (registration can't make admins).
+// Run: npm run seed:admin. Safe to rerun: an existing admin is left unchanged (password not reset).
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import connectDB from "../config/db.js";
@@ -12,10 +8,9 @@ import { checkContactNumber, checkEmail, checkFullName, checkPassword, firstErro
 
 function checkAdminPassword(value) {
   if (!value) return "ADMIN_PASSWORD is not set";
-  // Same rule as every other new password (8-64 characters, letters and numbers).
   const error = checkPassword(value);
   if (error) return `ADMIN_PASSWORD: ${error}`;
-  // Refuse placeholder passwords copied from examples or docs.
+  // Refuse placeholder passwords copied from examples.
   if (/change.?me|password|admin123|12345678/i.test(value)) {
     return "ADMIN_PASSWORD looks like a placeholder; choose a real password";
   }

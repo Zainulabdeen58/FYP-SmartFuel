@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import useAuth from "./hooks/useAuth";
 import Layout from "./components/Layout";
@@ -8,6 +9,9 @@ import FuelRecords from "./components/FuelRecords";
 import Profile from "./components/Profile";
 import Admin from "./components/Admin";
 import "./global.css";
+
+// Lazy-loaded: Reports pulls in the large Recharts library, so download it only when opened.
+const Reports = lazy(() => import("./components/Reports"));
 
 export default function App() {
   const { user, save, updateUser, refreshUser, logout } = useAuth();
@@ -27,6 +31,15 @@ export default function App() {
             <Route path="/vehicles" element={<Vehicles />} />
 
             <Route path="/fuel-records" element={<FuelRecords user={user} />} />
+
+            <Route
+              path="/reports"
+              element={
+                <Suspense fallback={<div className="empty-state"><p>Loading reports...</p></div>}>
+                  <Reports user={user} />
+                </Suspense>
+              }
+            />
 
             <Route
               path="/profile"

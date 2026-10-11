@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../api";
 
-// Owns all the admin data: loading users/vehicles, searching, and the
-// user/vehicle CRUD actions. The component only deals with rendering.
+// All admin-page data, searches and actions; the Admin component only renders.
 function useAdmin(currentUser) {
   const [users, setUsers] = useState([]);
   const [vehicles, setVehicles] = useState([]);

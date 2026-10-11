@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-import { FUEL_TYPES, MIN_MODEL_YEAR, maxModelYear } from "../../shared/constants.js";
+import { FUEL_TYPES, MIN_MODEL_YEAR, VEHICLE_TYPES, maxModelYear } from "../../shared/constants.js";
 
-// The controller checks every field first (shared/validation.js); these schema
-// rules are a last guard for code paths that skip the controller.
+// Last guard only; the controller already checks every field.
 
 // Fuel estimates divide by efficiency, so zero must never be stored.
 const greaterThanZero = (label) => ({
@@ -14,8 +13,7 @@ const vehicleSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     vehicleName: { type: String, required: [true, "Vehicle name is required"], trim: true },
-    // unique: the database itself refuses a second vehicle with the same number,
-    // even if two requests arrive at the same moment.
+    // Unique index blocks duplicates even when two requests arrive at once.
     registrationNumber: {
       type: String,
       required: [true, "Registration number is required"],
@@ -23,6 +21,10 @@ const vehicleSchema = new mongoose.Schema(
       uppercase: true,
       unique: true,
     },
+    // Type and engine are optional here so older vehicles still load; the controller requires them.
+    vehicleType: { type: String, enum: VEHICLE_TYPES },
+    // Engine size in cc; electric vehicles have none.
+    engineCC: { type: Number, min: [1, "Engine size must be greater than 0"] },
     manufacturer: { type: String, required: [true, "Manufacturer is required"], trim: true },
     modelYear: {
       type: Number,

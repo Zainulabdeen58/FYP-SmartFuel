@@ -29,9 +29,8 @@ export async function updateProfile(req, res) {
   );
   if (error) return res.status(400).json({ success: false, message: error });
 
-  // A new password needs the current one, so an unattended signed-in browser
-  // can't be used to take over the account. 400 (not 401) keeps the frontend
-  // from treating a wrong current password as an expired session.
+  // A new password needs the current one (protects an unattended signed-in browser).
+  // 400, not 401, so the frontend doesn't treat a wrong password as an expired session.
   if (password) {
     if (typeof currentPassword !== "string" || !currentPassword) {
       return res.status(400).json({ success: false, message: "Enter your current password to set a new one" });

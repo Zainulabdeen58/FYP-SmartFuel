@@ -1,6 +1,7 @@
 import { createPortal } from "react-dom";
 import api from "../api";
-import { EMPTY_FUEL_RECORD, FUEL_RECORD_LABELS, MAX_STATION_LENGTH } from "../constant";
+import { EMPTY_FUEL_RECORD, FUEL_RECORD_LABELS, MAX_STATION_LENGTH, NUMBER_INPUT_PROPS } from "../constant";
+import { formatVehicleLabel } from "../format";
 import useForm from "../hooks/useForm";
 import Icon from "./Icon";
 import {
@@ -10,6 +11,7 @@ import {
   checkPricePerLitre,
   checkStation,
   checkTankCapacity,
+  hasOdometerReading,
   todayInPakistan,
 } from "../validation";
 
@@ -20,17 +22,18 @@ function toFormValues(record, defaultVehicle) {
 
   return {
     vehicle: record.vehicle?._id || record.vehicle || "",
-    // Stored as UTC midnight of the chosen day, so the first 10 characters are that day.
+    // Stored as UTC midnight, so the first 10 characters are the chosen day.
     date: record.date ? record.date.slice(0, 10) : "",
     quantity: record.quantity ?? "",
     totalCost: record.totalCost ?? "",
     odometer: record.odometer ?? "",
+    // No reading (also older entries) opens with "My odometer is not working" ticked.
+    odometerNotWorking: !hasOdometerReading(record),
     station: record.station || "",
   };
 }
 
-const vehicleLabel = (v) =>
-  `${v.vehicleName} (${v.registrationNumber})${v.user?.fullName ? ` · ${v.user.fullName}` : ""}`;
+const vehicleLabel = (v) => `${formatVehicleLabel(v)}${v.user?.fullName ? ` · ${v.user.fullName}` : ""}`;
 
 // `vehicles` is the user's list from /vehicles (every vehicle for an admin).
 function FuelRecordForm({ record = null, vehicles, defaultVehicle = "", onSave, onCancel }) {
@@ -46,14 +49,15 @@ function FuelRecordForm({ record = null, vehicles, defaultVehicle = "", onSave, 
     form,
     fieldErrors,
     error,
+    setError,
     loading,
     updateField,
+    validateField,
     handleSubmit: submit,
   } = useForm({
     initialValues: toFormValues(record, defaultVehicle || options[0]?._id || ""),
     validate: (f) => {
-      // Same as the server: the tank limit is checked only for a new entry or
-      // when the vehicle or quantity is changed.
+      // Same as the server: tank limit only for a new entry or a changed vehicle/quantity.
       const tankVehicle =
         isEdit && f.vehicle === currentVehicleId && Number(f.quantity) === record.quantity
           ? null
@@ -68,7 +72,7 @@ function FuelRecordForm({ record = null, vehicles, defaultVehicle = "", onSave, 
         totalCost:
           checkPositiveNumber(f.totalCost, "Total cost") ||
           checkPricePerLitre(f.quantity, f.totalCost),
-        odometer: checkOdometer(f.odometer),
+        odometer: checkOdometer(f.odometer, { notWorking: f.odometerNotWorking }),
         station: checkStation(f.station),
       };
     },
@@ -78,8 +82,9 @@ function FuelRecordForm({ record = null, vehicles, defaultVehicle = "", onSave, 
         date: f.date,
         quantity: Number(f.quantity),
         totalCost: Number(f.totalCost),
-        // Empty optional fields are sent as "" so an edit can clear them.
-        odometer: f.odometer === "" ? "" : Number(f.odometer),
+        odometerNotWorking: f.odometerNotWorking,
+        ...(!f.odometerNotWorking && { odometer: Number(f.odometer) }),
+        // An empty station is sent as "" so an edit can clear it.
         station: f.station.trim(),
       };
 
@@ -92,21 +97,24 @@ function FuelRecordForm({ record = null, vehicles, defaultVehicle = "", onSave, 
     errorMessage: "Could not save fuel record",
   });
 
+  // For the "not working" hint: mileage falls back to this vehicle's fuel efficiency.
+  const selectedVehicle = vehicles.find((v) => v._id === form.vehicle);
+
   const quantity = Number(form.quantity);
   const totalCost = Number(form.totalCost);
   const pricePerLitre = quantity > 0 && totalCost > 0 ? totalCost / quantity : null;
 
-  const renderInput = (key, type, extra = {}) => (
+  const renderInput = (key, inputProps) => (
     <div className="field" key={key}>
       <label htmlFor={`fuel-${key}`}>{FUEL_RECORD_LABELS[key]}</label>
 
       <input
         id={`fuel-${key}`}
-        type={type}
+        {...inputProps}
         value={form[key]}
         className={fieldErrors[key] ? "invalid" : ""}
         onChange={(e) => updateField(key, e.target.value)}
-        {...extra}
+        onBlur={() => validateField(key)}
       />
 
       {fieldErrors[key] && <span className="field-error">{fieldErrors[key]}</span>}
@@ -160,11 +168,50 @@ function FuelRecordForm({ record = null, vehicles, defaultVehicle = "", onSave, 
             {fieldErrors.vehicle && <span className="field-error">{fieldErrors.vehicle}</span>}
           </div>
 
-          {renderInput("date", "date", { max: todayInPakistan() })}
-          {renderInput("quantity", "number", { min: "0", step: "0.01", placeholder: "e.g. 30" })}
-          {renderInput("totalCost", "number", { min: "0", step: "0.01", placeholder: "e.g. 8000" })}
-          {renderInput("odometer", "number", { min: "0", placeholder: "e.g. 45210" })}
-          {renderInput("station", "text", { maxLength: MAX_STATION_LENGTH, placeholder: "e.g. PSO, Main Boulevard" })}
+          {renderInput("date", { type: "date", max: todayInPakistan() })}
+          {renderInput("quantity", { ...NUMBER_INPUT_PROPS, placeholder: "e.g. 30" })}
+          {renderInput("totalCost", { ...NUMBER_INPUT_PROPS, placeholder: "e.g. 8000" })}
+          <div className="field">
+            <label htmlFor="fuel-odometer">{FUEL_RECORD_LABELS.odometer}</label>
+
+            <input
+              id="fuel-odometer"
+              {...NUMBER_INPUT_PROPS}
+              placeholder={form.odometerNotWorking ? "Not available" : "e.g. 45210"}
+              value={form.odometerNotWorking ? "" : form.odometer}
+              disabled={form.odometerNotWorking}
+              className={fieldErrors.odometer ? "invalid" : ""}
+              onChange={(e) => updateField("odometer", e.target.value)}
+              onBlur={() => validateField("odometer")}
+            />
+
+            <label className="checkbox-field">
+              <input
+                type="checkbox"
+                checked={form.odometerNotWorking}
+                onChange={(e) => {
+                  updateField("odometerNotWorking", e.target.checked);
+                  // A server error about the reading no longer applies.
+                  setError("");
+                }}
+              />
+              My odometer is not working
+            </label>
+
+            {fieldErrors.odometer && <span className="field-error">{fieldErrors.odometer}</span>}
+
+            {form.odometerNotWorking && selectedVehicle && (
+              <span className="field-hint">
+                Mileage for this vehicle will use its fuel efficiency ({selectedVehicle.fuelEfficiency} km/l) as an estimate.
+              </span>
+            )}
+
+            {!form.odometerNotWorking && (
+              <span className="field-hint">Record every fill-up, or the mileage in Reports won't be exact.</span>
+            )}
+          </div>
+
+          {renderInput("station", { type: "text", maxLength: MAX_STATION_LENGTH, placeholder: "e.g. PSO, Main Boulevard" })}
         </div>
 
         <p className="fuel-price-preview">

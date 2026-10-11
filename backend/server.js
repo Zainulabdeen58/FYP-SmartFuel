@@ -9,6 +9,7 @@ import vehicleRoutes from "./routes/vehicleRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import fuelRecordRoutes from "./routes/fuelRecordRoutes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 checkEnv();
@@ -23,8 +24,7 @@ const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173,http://
   .filter(Boolean);
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
-// Express 5 leaves req.body undefined when a request has no JSON body;
-// default it so controllers can always destructure it.
+// Express 5 leaves req.body undefined when there is no JSON body; default it to {}.
 app.use((req, res, next) => {
   req.body ??= {};
   next();
@@ -39,6 +39,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/fuel-records", fuelRecordRoutes);
 app.use("/api/budgets", budgetRoutes);
+app.use("/api/reports", reportRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.use((req, res) => {

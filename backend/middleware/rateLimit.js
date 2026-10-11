@@ -5,11 +5,10 @@ const ONE_HOUR = 60 * 60 * 1000;
 
 const tooMany = (message) => ({ success: false, message });
 
-// Automated API tests send many requests from one IP; NODE_ENV=test turns the limits off.
+// NODE_ENV=test turns the limits off for automated API tests.
 const skip = () => process.env.NODE_ENV === "test";
 
-// Slows password guessing: 10 failed logins per IP in 15 minutes, then 429.
-// Successful logins don't count, so a user who gets it right isn't blocked.
+// Slows password guessing; successful logins don't count.
 export const loginLimiter = rateLimit({
   windowMs: FIFTEEN_MINUTES,
   limit: 10,

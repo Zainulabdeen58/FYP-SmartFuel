@@ -1,18 +1,25 @@
-// Input checks used by both the frontend forms and the backend controllers,
-// so a rule changed here applies on both sides.
-// Each check returns "" when the value is valid, otherwise an error message.
+// Input checks shared by the frontend forms and the backend controllers.
+// Each check returns "" when valid, otherwise an error message.
 import {
+  COMMON_MANUFACTURERS,
   FUEL_TYPES,
   MAX_BUDGET_AMOUNT,
   MAX_BUDGET_MONTHS_AHEAD,
+  MAX_ODOMETER_READING,
   MAX_PASSWORD_LENGTH,
   MAX_PRICE_PER_LITRE,
+  MAX_REGISTRATION_PART_LENGTH,
+  MAX_REGISTRATION_PARTS,
+  MAX_REPORT_MONTHS,
   MAX_STATION_LENGTH,
   MIN_MODEL_YEAR,
   MIN_PASSWORD_LENGTH,
   MIN_PRICE_PER_LITRE,
   ROLES,
+  USUAL_MILEAGE_BY_ENGINE,
   VEHICLE_LIMITS,
+  VEHICLE_TYPE_LIMITS,
+  VEHICLE_TYPES,
   maxModelYear,
 } from "./constants.js";
 
@@ -20,23 +27,21 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[+]?[\d\s\-()]{7,20}$/;
 // Letters of any language (English, Urdu, ...), spaces and . ' -
 const NAME_REGEX = /^[\p{L}\s.'-]+$/u;
-// Letters and numbers of any language, spaces and . ' ( ) & / + -
 const VEHICLE_NAME_REGEX = /^[\p{L}\p{N}][\p{L}\p{N}\s.'()&/+-]*$/u;
-// Groups of letters/numbers joined by single spaces or hyphens, e.g. LEA-1234, ICT AB 123.
-const REGISTRATION_REGEX = /^[A-Z0-9]+([ -][A-Z0-9]+)*$/i;
-// Must start with a letter, e.g. Toyota, Mercedes-Benz, MG.
+const REGISTRATION_REGEX = /^[A-Z0-9 -]+$/i;
 const MANUFACTURER_REGEX = /^\p{L}[\p{L}\p{N}\s.'&-]*$/u;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const MONTH_REGEX = /^\d{4}-(0[1-9]|1[0-2])$/;
+// Plain numbers only (15, 12.5, -3); refuses "1e3" and "0x10", which Number() would accept.
+const NUMBER_TEXT_REGEX = /^[+-]?(\d+(\.\d*)?|\.\d+)$/;
 
 const isText = (value) => typeof value === "string" && value.trim() !== "";
 const isEmpty = (value) => value === undefined || value === null || value === "";
 
-// Form inputs give text ("15") and the API gets numbers (15); both are accepted.
-// Anything else (true, [1], {}) becomes NaN and fails the check.
+// Accepts form text ("15") and JSON numbers (15); anything else (true, {}) is NaN.
 function toNumber(value) {
   if (typeof value === "number") return value;
-  if (isText(value)) return Number(value);
+  if (typeof value === "string" && NUMBER_TEXT_REGEX.test(value.trim())) return Number(value);
   return NaN;
 }
 
@@ -65,9 +70,8 @@ export function checkContactNumber(value) {
   return "";
 }
 
-// For new passwords (register, profile change, admin seeder). Login does not
-// apply it, so accounts created under the old 6-character rule can still sign in.
-// required: false lets an empty value pass (profile form: password unchanged).
+// New passwords only; login skips it so old 6-character passwords still sign in.
+// required: false lets "" pass (profile form: password unchanged).
 export function checkPassword(value, { required = true } = {}) {
   if (typeof value !== "string" || value === "") {
     return required ? "Password is required" : "";
@@ -135,19 +139,44 @@ export function checkVehicleName(value) {
   return "";
 }
 
-// Non-text values (e.g. the number 123) are refused, so the server's
-// duplicate check always compares text.
+// "LEB 07-1234" → ["LEB", "07", "1234"]
+function registrationParts(value) {
+  return value.toUpperCase().match(/[A-Z]+|\d+/g) || [];
+}
+
+// One saved spelling: "lea 1234", "LEA1234" and "LEA-1234" all become "LEA-1234".
+export function normalizeRegistrationNumber(value) {
+  return registrationParts(value).join("-");
+}
+
+// Pakistani numbers (LEA-1234, LEB-07-1234, ICT-AB-123). Non-text is refused so
+// the server's duplicate check always compares text.
 export function checkRegistrationNumber(value) {
   const error = checkText(value, "Registration number", VEHICLE_LIMITS.registrationNumber);
   if (error) return error;
-  const reg = value.trim();
-  if (!REGISTRATION_REGEX.test(reg)) {
-    return "Use only letters and numbers, separated by a single space or hyphen (e.g. LEA-1234)";
+  if (!REGISTRATION_REGEX.test(value.trim())) {
+    return "Use only letters, numbers, spaces and hyphens (e.g. LEA-1234)";
   }
-  if (!/[A-Z]/i.test(reg) || !/\d/.test(reg)) {
-    return "Registration number must contain both letters and numbers";
+
+  const parts = registrationParts(value);
+  const startsWithLetters = /^[A-Z]/.test(parts[0] || "");
+  const hasNumbers = parts.some((part) => /^\d/.test(part));
+  if (!startsWithLetters || !hasNumbers) {
+    return "Registration number must start with letters and contain numbers (e.g. LEA-1234)";
+  }
+  if (parts.some((part) => part.length > MAX_REGISTRATION_PART_LENGTH)) {
+    return `Each part of the registration number can have at most ${MAX_REGISTRATION_PART_LENGTH} letters or numbers (e.g. LEB-07-1234)`;
+  }
+  if (parts.length > MAX_REGISTRATION_PARTS) {
+    return `Registration number can have at most ${MAX_REGISTRATION_PARTS} parts (e.g. ICT-AB-123)`;
   }
   return "";
+}
+
+// Common makes get their usual spelling ("HONDA" → "Honda"); others keep the user's.
+export function normalizeManufacturer(value) {
+  const name = value.trim().replace(/\s+/g, " ");
+  return COMMON_MANUFACTURERS.find((make) => make.toLowerCase() === name.toLowerCase()) || name;
 }
 
 export function checkManufacturer(value) {
@@ -184,16 +213,75 @@ export function checkFuelTankCapacity(value) {
   return checkNumberRange(value, "Fuel tank capacity", VEHICLE_LIMITS.fuelTankCapacity, "litres");
 }
 
+export function checkVehicleType(value) {
+  if (!value) return "Vehicle type is required";
+  if (!VEHICLE_TYPES.includes(value)) return "Select a valid vehicle type";
+  return "";
+}
+
+export function checkEngineCC(value) {
+  if (isEmpty(value)) return "Engine size (cc) is required";
+  const engineCC = toNumber(value);
+  if (!Number.isInteger(engineCC)) return "Engine size must be a whole number of cc";
+  if (engineCC <= 0) return "Engine size must be greater than 0";
+  return "";
+}
+
+const formatWholeNumber = (value) => value.toLocaleString("en-US");
+
+// The rules that depend on the vehicle type, one error per field: a type, an engine
+// size (not for electric) and engine, efficiency and tank within the type's range
+// (VEHICLE_TYPE_LIMITS). Used by the form and the server, so both give the same message.
+// Missing or non-number efficiency and tank are left to their own checks.
+export function checkVehicleTypeFields(vehicle) {
+  const type = vehicle.vehicleType;
+  const isElectric = vehicle.fuelType === "Electric";
+  const limits = VEHICLE_TYPE_LIMITS[type];
+  const errors = { vehicleType: checkVehicleType(type), engineCC: "", fuelEfficiency: "", fuelTankCapacity: "" };
+
+  if (limits) {
+    const outsideRange = (value, { min, max }) => {
+      const number = toNumber(value);
+      return Number.isFinite(number) && (number < min || number > max);
+    };
+    const { engineCC, fuelEfficiency, fuelTankCapacity } = limits;
+
+    if (!isElectric && outsideRange(vehicle.engineCC, engineCC)) {
+      errors.engineCC = `${type} engine must be ${formatWholeNumber(engineCC.min)} to ${formatWholeNumber(engineCC.max)} cc`;
+    }
+    if (outsideRange(vehicle.fuelEfficiency, fuelEfficiency)) {
+      errors.fuelEfficiency = `${type} fuel efficiency must be between ${fuelEfficiency.min} and ${fuelEfficiency.max} km/l`;
+    }
+    if (outsideRange(vehicle.fuelTankCapacity, fuelTankCapacity)) {
+      errors.fuelTankCapacity = `${type} fuel tank must be between ${fuelTankCapacity.min} and ${formatWholeNumber(fuelTankCapacity.max)} litres`;
+    }
+  }
+
+  // The type's range comes first: it is the exact limit for this vehicle.
+  if (!isElectric) errors.engineCC ||= checkEngineCC(vehicle.engineCC);
+  return errors;
+}
+
+// Only a warning (never blocks saving) when efficiency is unusual for the engine size.
+export function getMileageWarning(vehicle) {
+  const bands = USUAL_MILEAGE_BY_ENGINE[vehicle.vehicleType];
+  const engineCC = toNumber(vehicle.engineCC);
+  const kmPerLitre = toNumber(vehicle.fuelEfficiency);
+  if (!bands || vehicle.fuelType === "Electric" || !(engineCC > 0) || !(kmPerLitre > 0)) return "";
+
+  const band = bands.find((usualBand) => engineCC <= usualBand.maxEngineCC);
+  if (kmPerLitre >= band.minKmPerLitre && kmPerLitre <= band.maxKmPerLitre) return "";
+  return `${kmPerLitre} km/l is unusual for a ${formatWholeNumber(engineCC)}cc ${vehicle.vehicleType.toLowerCase()} (usually ${band.minKmPerLitre} to ${band.maxKmPerLitre} km/l). Please check it.`;
+}
+
 // Fuel records
 
-// Today's calendar date in Pakistan as "YYYY-MM-DD" (en-CA formats that way).
-// "Today" and "future" are judged in Pakistan time on both sides.
+// Today in Pakistan as "YYYY-MM-DD" (en-CA format), so server and browser agree.
 export function todayInPakistan() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Karachi" }).format(new Date());
 }
 
-// Fuel dates are calendar days ("YYYY-MM-DD"), stored as UTC midnight of that day.
-// Returns null for anything that is not a real date in that format.
+// "YYYY-MM-DD" → UTC midnight of that day (how fuel dates are stored), or null.
 export function parseFuelDate(value) {
   if (typeof value !== "string" || !DATE_REGEX.test(value)) return null;
   const date = new Date(`${value}T00:00:00.000Z`);
@@ -213,8 +301,7 @@ export function checkTankCapacity(quantity, tankCapacity) {
     : "";
 }
 
-// Catches typing mistakes such as Rs 5 or Rs 5,000 per litre. Only checked
-// once quantity and total cost are both valid numbers.
+// Catches typing mistakes (Rs 5 or Rs 5,000 a litre); skipped until both numbers are valid.
 export function checkPricePerLitre(quantity, totalCost) {
   const qty = toNumber(quantity);
   const cost = toNumber(totalCost);
@@ -226,11 +313,19 @@ export function checkPricePerLitre(quantity, totalCost) {
   return "";
 }
 
-export function checkOdometer(value) {
-  if (isEmpty(value)) return "";
-  const num = toNumber(value);
-  if (!Number.isFinite(num)) return "Odometer reading must be a number";
-  if (num < 0) return "Odometer reading cannot be negative";
+// An entry without a reading is a "not working" entry (so are older ones from before readings were required).
+export const hasOdometerReading = (record) => record.odometer !== undefined && record.odometer !== null;
+
+// Required unless "My odometer is not working" is ticked (common on old bikes and cars).
+export function checkOdometer(value, { notWorking = false } = {}) {
+  if (notWorking) return "";
+  if (isEmpty(value)) return 'Enter the odometer reading, or tick "My odometer is not working"';
+  const reading = toNumber(value);
+  if (!Number.isFinite(reading)) return "Odometer reading must be a number";
+  if (reading < 0) return "Odometer reading cannot be negative";
+  if (reading > MAX_ODOMETER_READING) {
+    return `Odometer reading cannot be more than ${MAX_ODOMETER_READING.toLocaleString("en-US")} km`;
+  }
   return "";
 }
 
@@ -243,9 +338,8 @@ export function checkStation(value) {
   return "";
 }
 
-// Budgets (FR-08). A budget month is text like "2026-10".
+// Months ("YYYY-MM" text, used by budgets and reports)
 
-// The current month in Pakistan as "YYYY-MM".
 export function currentMonthInPakistan() {
   return todayInPakistan().slice(0, 7);
 }
@@ -260,8 +354,26 @@ export function isValidMonth(value) {
   return typeof value === "string" && MONTH_REGEX.test(value);
 }
 
-// Past months are view-only, so only the current month and the next
-// MAX_BUDGET_MONTHS_AHEAD months can be set or changed.
+// Both ends included: ("2026-01", "2026-03") → 3.
+export function countMonths(fromMonth, toMonth) {
+  const [fromYear, fromMonthNumber] = fromMonth.split("-").map(Number);
+  const [toYear, toMonthNumber] = toMonth.split("-").map(Number);
+  return (toYear - fromYear) * 12 + (toMonthNumber - fromMonthNumber) + 1;
+}
+
+// First month of a range of `monthCount` months ending with `toMonth`: ("2026-10", 3) → "2026-08".
+export function firstMonthOfRange(toMonth, monthCount) {
+  return addMonths(toMonth, -(monthCount - 1));
+}
+
+// Every month from `fromMonth` to `toMonth`, both included, oldest first.
+export function listMonths(fromMonth, toMonth) {
+  return Array.from({ length: countMonths(fromMonth, toMonth) }, (_, index) => addMonths(fromMonth, index));
+}
+
+// Budgets (FR-08)
+
+// Past months are view-only; only this month up to MAX_BUDGET_MONTHS_AHEAD ahead can change.
 export function checkBudgetMonth(value) {
   if (isEmpty(value)) return "Month is required";
   if (!isValidMonth(value)) return "Enter a valid month (YYYY-MM)";
@@ -278,6 +390,17 @@ export function checkBudgetAmount(value) {
   if (error) return error;
   if (toNumber(value) > MAX_BUDGET_AMOUNT) {
     return `Budget cannot be more than Rs ${MAX_BUDGET_AMOUNT.toLocaleString("en-US")}`;
+  }
+  return "";
+}
+
+// Reports (FR-09, FR-10)
+
+export function checkReportRange(fromMonth, toMonth) {
+  if (!isValidMonth(fromMonth) || !isValidMonth(toMonth)) return "Choose valid months (YYYY-MM)";
+  if (fromMonth > toMonth) return "The start month must be on or before the end month";
+  if (countMonths(fromMonth, toMonth) > MAX_REPORT_MONTHS) {
+    return `Choose a range of at most ${MAX_REPORT_MONTHS / 12} years`;
   }
   return "";
 }

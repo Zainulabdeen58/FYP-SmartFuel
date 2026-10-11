@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ROLE_LABELS } from "../constant";
+import { formatVehicleType } from "../format";
 import useAdmin from "../hooks/useAdmin";
 import Icon from "./Icon";
 import VehicleForm from "./VehicleForm";
@@ -86,8 +87,7 @@ function Admin({ currentUser, onSelfUpdated }) {
             setEditingUser(null);
             loadUsers();
             loadVehicles();
-            // The admin edited their own account: refresh the signed-in user
-            // so the sidebar and profile show the new details.
+            // Admin edited their own account: refresh the signed-in user (sidebar, profile).
             if (String(savedUser?._id) === String(currentUserId)) onSelfUpdated();
           }}
           onCancel={() => setEditingUser(null)}
@@ -221,7 +221,7 @@ function Admin({ currentUser, onSelfUpdated }) {
                 </div>
 
                 <div className="admin-contact">
-                  {v.manufacturer} · {v.modelYear}
+                  {formatVehicleType(v)} · {v.manufacturer} · {v.modelYear}
                   {v.user?.fullName ? ` · ${v.user.fullName}` : ""}
                 </div>
 

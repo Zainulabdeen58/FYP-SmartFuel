@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 import dns from "node:dns";
 
-// mongodb+srv:// needs an SRV DNS lookup. Node's default resolver can be
-// refused on some Windows/ISP setups, so point it at public DNS servers.
+// Public DNS, because some Windows/ISP resolvers refuse the SRV lookup mongodb+srv:// needs.
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 export default async function connectDB() {

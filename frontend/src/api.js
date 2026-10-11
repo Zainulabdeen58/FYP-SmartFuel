@@ -4,13 +4,12 @@ const api = axios.create({
   baseURL: "http://localhost:5000/api"
 });
 
-// Login and register answer 401 for wrong credentials; that is not an expired session.
+// A 401 from login or register means wrong credentials, not an expired session.
 const AUTH_ENDPOINTS = ["/auth/login", "/auth/register"];
 
 let handleUnauthorized = null;
 
-// useAuth registers a handler here so an expired or rejected token signs the
-// user out instead of leaving the app on a session the server no longer accepts.
+// Set by useAuth, so any other 401 (expired or rejected token) signs the user out.
 export function setUnauthorizedHandler(handler) {
   handleUnauthorized = handler;
 }

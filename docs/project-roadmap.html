@@ -241,14 +241,14 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
       <p class="lead">SRS ki har functionality, roles, edge cases aur coding ke phases ek jagah. Pehle dekhein kya ban chuka hai, phir phase ba phase aage ka kaam. Har phase ke tasks par tick laga kar apni progress yahin track karein.</p>
       <div class="basis">
         <span>SRS: 13 functional requirements</span>
-        <span>Code: Phase 0 (02bfc1b) + Phase 1 (f05e116) + Phase 2</span>
+        <span>Code: Phase 0 (02bfc1b) + Phase 1 (f05e116) + Phase 2 + Phase 3</span>
         <span>Update: 10 Oct 2026</span>
       </div>
     </div>
-    <div class="gauge" aria-label="Project progress gauge: 5 requirements mukammal, 8 baqi">
+    <div class="gauge" aria-label="Project progress gauge: 7 requirements mukammal, 6 baqi">
       <svg viewBox="0 0 200 122" role="img" aria-hidden="true">
         <path class="g-track" d="M 20 100 A 80 80 0 0 1 180 100"></path>
-        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 71.63 25.20"></path>
+        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 109.64 20.58"></path>
         <line class="g-tick" x1="20" y1="100" x2="34" y2="100"></line>
         <line class="g-tick" x1="43.43" y1="43.43" x2="53.33" y2="53.33"></line>
         <line class="g-tick" x1="100" y1="20" x2="100" y2="34"></line>
@@ -257,11 +257,11 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <text class="g-label" x="20" y="118" text-anchor="middle">E</text>
         <text class="g-label" x="100" y="13" text-anchor="middle">½</text>
         <text class="g-label" x="180" y="118" text-anchor="middle">F</text>
-        <line class="g-needle" x1="100" y1="100" x2="79.43" y2="45.77"></line>
+        <line class="g-needle" x1="100" y1="100" x2="106.99" y2="42.42"></line>
         <circle class="g-hub" cx="100" cy="100" r="7"></circle>
       </svg>
-      <div class="gauge-value">5 / 13</div>
-      <div class="gauge-note">Requirements ka fuel gauge, Phase 2 ke baad.</div>
+      <div class="gauge-value">7 / 13</div>
+      <div class="gauge-note">Requirements ka fuel gauge, Phase 3 ke baad.</div>
     </div>
   </div>
 </header>
@@ -288,31 +288,33 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
     <div class="summary-grid">
       <div class="panel">
         <span class="pill done">Ban chuka</span>
-        <h3>Account, vehicles, fuel records aur budget</h3>
-        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Fuel purchase records (FR-04) aur monthly budget aur alerts (FR-08) bhi ban gaye. Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
+        <h3>Account, vehicles, fuel records, budget aur reports</h3>
+        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Fuel purchase records (FR-04), monthly budget aur alerts (FR-08), aur charts wala Reports page filters ke saath (FR-09, FR-10) bhi ban gaye. Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
       </div>
       <div class="panel">
         <span class="pill todo">Baqi</span>
         <h3>Asal "Smart Fuel" hissa</h3>
-        <p>Trips, route optimization, map, charts, crisis mode aur notifications. Yeh 8 requirements abhi shuru nahi hui. Project ka naam jis kaam par hai, woh yahi hissa hai.</p>
+        <p>Trips, route optimization, map, crisis mode aur notifications. Yeh 6 requirements abhi shuru nahi hui. Project ka naam jis kaam par hai, woh yahi hissa hai.</p>
       </div>
       <div class="panel">
         <span class="pill partial">Agla qadam</span>
-        <h3>Phase 3: Dashboard charts aur filters</h3>
-        <p>Phase 0 (buniyad), Phase 1 (fuel records) aur Phase 2 (budget) ka code mukammal ho gaya. Ab dashboard charts aur filters (FR-09, FR-10), fuel entries aur budget ke data se. Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
+        <h3>Phase 4: Trips, fuel ka andaza aur map</h3>
+        <p>Phase 0 se Phase 3 tak (buniyad, fuel records, budget, reports) ka code mukammal ho gaya. Ab trips, fuel ka andaza aur map (FR-05, FR-06, FR-11, FR-12). Asal mileage ab odometer se milti hai, jo fuel ke andaze mein kaam aayegi. Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
       </div>
     </div>
     <div class="count-row">
-      <span class="pill done">5 mukammal</span>
-      <span class="pill todo">8 shuru nahi hui</span>
+      <span class="pill done">7 mukammal</span>
+      <span class="pill todo">6 shuru nahi hui</span>
       <span class="pill done">Phase 0: code mukammal</span>
       <span class="pill done">Phase 1: code mukammal</span>
       <span class="pill done">Phase 2: code mukammal</span>
+      <span class="pill done">Phase 3: code mukammal</span>
       <span class="pill todo">8 coding phases</span>
     </div>
     <div class="note ok" style="margin-top:16px"><strong>Update, 3 Oct 2026:</strong> Phase 0 ke saare Missing aur Bug items theek ho gaye. Neeche aise har item par <span class="chip fixed">Fixed</span> laga hai. Backend ko 51 automated checks se test kiya gaya aur sab pass hue. Jin par <span class="chip decide">Decide</span> hai, unka faisla abhi baqi hai.</div>
     <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 1 (FR-04 fuel purchase records) ka code mukammal. Sidebar mein "Fuel Records" page: entry add, edit, delete aur gaari ke hisaab se filter. Backend ko 69 naye automated checks se test kiya gaya, sab pass. Phase 0 ke 51 checks bhi dobara pass hue.</div>
     <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 2 (FR-08 monthly budget aur alerts) ka code mukammal. Dashboard par "Fuel budget" card (mahina chunein, budget set/edit/remove, progress bar) aur Fuel Records page par alert. Organizational account ke liye fleet budget aur har gaari ka budget. Backend ko 61 naye automated checks se test kiya gaya, sab pass, aur browser mein bhi chala kar dekha gaya.</div>
+    <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 3 (FR-09 charts, FR-10 filters) ka code mukammal. Sidebar mein "Reports" page: mahana litre aur mahana kharcha ke charts, gaariyon ka muqabla (litre, kharcha, mileage), aur filters (period, gaari, fuel type; admin ke liye user) jo URL mein yaad rehte hain. Fuel entry mein odometer ab zaroori hai, "My odometer is not working" ke option ke saath, aur reading peeche nahi ja sakti. Backend ke 49 naye checks pass, Phase 2 ke 61 bhi dobara pass, aur browser mein poora flow chala kar dekha gaya.</div>
   </section>
 
   <section id="roles">
@@ -415,8 +417,8 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
           <tr><td class="fr-code">FR-06</td><td>Fuel ka andaza aur optimized route</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
           <tr><td class="fr-code">FR-07</td><td>Crisis mode</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-5">Phase 5</a></td></tr>
           <tr><td class="fr-code">FR-08</td><td>Monthly budget aur alerts</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-2">Phase 2</a> (ho gaya)</td></tr>
-          <tr><td class="fr-code">FR-09</td><td>Charts aur graphs</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-3">Phase 3</a></td></tr>
-          <tr><td class="fr-code">FR-10</td><td>Dashboard filters</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-3">Phase 3</a></td></tr>
+          <tr><td class="fr-code">FR-09</td><td>Charts aur graphs</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-3">Phase 3</a> (ho gaya)</td></tr>
+          <tr><td class="fr-code">FR-10</td><td>Dashboard filters</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-3">Phase 3</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-11</td><td>Map par route dikhana</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
           <tr><td class="fr-code">FR-12</td><td>Map zoom, pan, interact</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
           <tr><td class="fr-code">FR-13</td><td>Notifications</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-6">Phase 6</a></td></tr>
@@ -485,6 +487,9 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
               <li>Electric gaari ke liye km/l aur litre tank ka matlab nahi banta (kWh hona chahiye). <span class="chip decide">Decide</span></li>
               <li>Negative values server par ruk jaati hain. <span class="chip ok">Handled</span></li>
               <li>Registration number chhote harfon ya space ke saath likha jaye to khud bade harf aur trim. <span class="chip ok">Handled</span></li>
+              <li>Gaari ki qism (Motorcycle, Rickshaw, Car, SUV/Jeep, Van/Pickup, Bus/Truck) aur engine cc zaroori; mileage, tank aur cc qism ki had se bahar ho to reject (maslan bike 5 km/l). cc ke hisaab se ajeeb mileage par sirf peeli warning. Purani gaariyan "Type missing", edit par bharna zaroori. <span class="chip fixed">Fixed, 10 Oct 2026</span></li>
+              <li>Ek hi number alag tarah likha jaye ("LEA 1234", "LEA1234", "LEA-1234") to doosri gaari na bane; har number "LEA-1234" ki shakal mein save. Bekaar number ("A55555557771444") reject: harf se shuru, zyada se zyada 4 hisse, har hissa 4 harf/number tak. <span class="chip fixed">Fixed, 10 Oct 2026</span></li>
+              <li>Form mein ghalti field chhorte hi dikhe aur qism ki asal had bataye (Car tank 25–80 L). Number box par mouse wheel se value na badle, "1e3" jaisa text reject. Electric gaari par bhi qism ki had (sirf cc nahi). "HONDA" → "Honda". <span class="chip fixed">Fixed, 10 Oct 2026</span></li>
             </ul>
           </div>
         </div>
@@ -665,36 +670,40 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         </div>
       </article>
 
-      <article class="fr" data-status="todo" id="fr-09">
+      <article class="fr" data-status="done" id="fr-09">
         <div class="fr-head">
           <span class="fr-code">FR-09</span>
           <h3>Charts aur graphs</h3>
-          <span class="pill todo">Shuru nahi</span>
+          <span class="pill done">Mukammal</span>
           <a class="phase-link" href="#phase-3">Phase 3</a>
         </div>
         <div class="fr-body">
           <div>
             <blockquote class="srs">The system shall provide visual charts and graphs showing total fuel consumption, costs over time, and per-vehicle statistics.</blockquote>
             <p><strong>Matlab:</strong> Graphs: har mahine kitne litre aur kitne rupay, aur har gaari ka muqabla (litre, kharcha, average km/l).</p>
+            <p class="small"><strong>Faisle (10 Oct 2026):</strong> charts alag "Reports" page par, SRS ke mutabiq teen: mahana litre, mahana kharcha, gaariyon ka muqabla. Fuel entry mein odometer zaroori, "My odometer is not working" ke option ke saath. Mileage = pehli aur aakhri reading ka farq ÷ pehli reading ke baad dala gaya fuel; 2 readings na hon to gaari ki likhi fuel efficiency "(estimate)" ke saath. Library: Recharts.</p>
           </div>
           <div>
             <div class="label">Edge cases</div>
             <ul class="edges">
-              <li>Koi data nahi to khaali chart ki jagah "pehli fuel entry add karein".</li>
-              <li>Sirf ek entry ho to line chart ki jagah seedha number ya bar.</li>
-              <li>Delete ho chuki gaari ka purana data: "Deleted vehicle" naam se dikhayein ya chhupa dein.</li>
-              <li>Electric (kWh) aur petrol (litre) ko ek hi chart mein na milayein.</li>
-              <li>Odometer na ho to chart par "khareeda gaya fuel" likhein, "consumption" nahi.</li>
+              <li>Koi data nahi to khaali chart ki jagah "pehli fuel entry add karein". <span class="chip fixed">Fixed</span></li>
+              <li>Sirf ek entry ho to line chart ki jagah seedha number ya bar (charts bars hain). <span class="chip fixed">Fixed</span></li>
+              <li>Delete ho chuki gaari ka purana data: gaari delete hone par us ki entries bhi delete hoti hain, is liye yeh surat nahi banti. <span class="chip fixed">Fixed</span></li>
+              <li>Electric (kWh) aur petrol (litre) ko ek hi chart mein na milayein: electric gaari ki fuel entry banti hi nahi. <span class="chip fixed">Fixed</span></li>
+              <li>Charts par "Fuel bought" likha hai, "consumption" nahi; asal kharch (mileage) odometer se. <span class="chip fixed">Fixed</span></li>
+              <li>Odometer reading peeche na jaye (typing ki ghalti mileage na bigaare). <span class="chip fixed">Fixed</span></li>
+              <li>Beech ki fuel entries na likhi hon (maslan 5,000 km par sirf 30 L) to mileage ghalat na aaye: do readings ke beech ka jo hissa gaari ki likhi mileage ke 2 guna se zyada ho, woh chhod diya jata hai aur "gap skipped" likha aata hai. <span class="chip fixed">Fixed</span></li>
+              <li>Meter kharab ho to "My odometer is not working"; mileage phir gaari ki likhi efficiency se "(estimate)". <span class="chip fixed">Fixed</span></li>
             </ul>
           </div>
         </div>
       </article>
 
-      <article class="fr" data-status="todo" id="fr-10">
+      <article class="fr" data-status="done" id="fr-10">
         <div class="fr-head">
           <span class="fr-code">FR-10</span>
           <h3>Dashboard filters</h3>
-          <span class="pill todo">Shuru nahi</span>
+          <span class="pill done">Mukammal</span>
           <a class="phase-link" href="#phase-3">Phase 3</a>
         </div>
         <div class="fr-body">
@@ -705,10 +714,12 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
           <div>
             <div class="label">Edge cases</div>
             <ul class="edges">
-              <li>Start date end date ke baad ho to error dikhayein.</li>
-              <li>Filter ka koi result na ho to "is filter mein data nahi".</li>
-              <li>Bohat lamba range (5 saal) ho to mahine ki jagah saal ke hisaab se dikhayein.</li>
-              <li>Page refresh par chuna hua filter yaad rahe.</li>
+              <li>Start date end date ke baad ho to error dikhayein. <span class="chip fixed">Fixed</span></li>
+              <li>Filter ka koi result na ho to "is filter mein data nahi". <span class="chip fixed">Fixed</span></li>
+              <li>Bohat lamba range (24 mahine se zyada) ho to mahine ki jagah saal ke hisaab se dikhayein. <span class="chip fixed">Fixed</span></li>
+              <li>Page refresh par chuna hua filter yaad rahe (URL mein). <span class="chip fixed">Fixed</span></li>
+              <li>Mahina ya filter jaldi badalne par purana jawab naya data na mitaye. <span class="chip fixed">Fixed</span></li>
+              <li>Admin ko sab ka data, aur "User" filter se kisi ek user ka. <span class="chip fixed">Fixed</span></li>
             </ul>
           </div>
         </div>
@@ -895,18 +906,19 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <div class="phase-head"><h3>Dashboard charts aur filters</h3><span class="phase-count" data-count></span></div>
         <div class="phase-meta"><span class="tag">FR-09</span><span class="tag">FR-10</span><span class="tag dep">Pehle chahiye: Phase 1</span></div>
         <p class="why">Fuel entries jama hone ke baad unhein graphs mein dikhana.</p>
+        <div class="note ok"><strong>Code mukammal, 10 Oct 2026.</strong> 6 kaam ho gaye aur 49 automated checks pass hue. Done ki dono shartein poori: filter badalne par charts update hote hain, aur data na ho to saaf message aata hai.</div>
         <div class="tasks">
           <div>
             <div class="label">Backend</div>
-            <label class="check"><input type="checkbox" id="p3-b1"><span>Stats endpoint (MongoDB aggregation): har mahine ke litre aur rupay.</span></label>
-            <label class="check"><input type="checkbox" id="p3-b2"><span>Har gaari ka total litre, total kharcha, average km/l (odometer ho to).</span></label>
-            <label class="check"><input type="checkbox" id="p3-b3"><span>Filters: from date, to date, vehicle, fuel type.</span></label>
+            <label class="check"><input type="checkbox" id="p3-b1" data-done="true" checked><span>Stats endpoint (MongoDB aggregation): har mahine ke litre aur rupay. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p3-b2" data-done="true" checked><span>Har gaari ka total litre, total kharcha, average km/l (odometer ho to). <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p3-b3" data-done="true" checked><span>Filters: from date, to date, vehicle, fuel type. <span class="chip fixed">Ho gaya</span></span></label>
           </div>
           <div>
             <div class="label">Frontend</div>
-            <label class="check"><input type="checkbox" id="p3-f1"><span>Charts library chunna aur install karna (Recharts ya Chart.js).</span></label>
-            <label class="check"><input type="checkbox" id="p3-f2"><span>Teen charts: kharcha over time, litre over time, gaariyon ka muqabla.</span></label>
-            <label class="check"><input type="checkbox" id="p3-f3"><span>Filter bar aur khaali data ka message.</span></label>
+            <label class="check"><input type="checkbox" id="p3-f1" data-done="true" checked><span>Charts library chunna aur install karna (Recharts ya Chart.js). <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p3-f2" data-done="true" checked><span>Teen charts: kharcha over time, litre over time, gaariyon ka muqabla. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p3-f3" data-done="true" checked><span>Filter bar aur khaali data ka message. <span class="chip fixed">Ho gaya</span></span></label>
           </div>
         </div>
         <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Filter badalne par charts update hon.</li><li>Data na ho to khaali chart ki jagah saaf message aaye.</li></ol></div>
