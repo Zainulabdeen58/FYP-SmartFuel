@@ -18,7 +18,9 @@ const userSchema = new mongoose.Schema(
       ],
     },
     // bcrypt hash; the plain password is checked with checkPassword before hashing.
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    // Crisis mode (FR-07): each user turns it on for themselves during a fuel shortage.
+    crisisMode: { type: Boolean, default: false }
   },
   { timestamps: true }
 );
@@ -32,6 +34,7 @@ userSchema.methods.toPublic = function () {
     contactNumber: this.contactNumber,
     role: this.role,
     organizationName: this.organizationName,
+    crisisMode: this.crisisMode,
   };
 };
 

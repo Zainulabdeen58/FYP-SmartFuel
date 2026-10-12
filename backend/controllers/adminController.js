@@ -62,6 +62,8 @@ export async function updateUser(req, res) {
   if (contactNumber !== undefined) user.contactNumber = contactNumber.trim();
 
   user.role = nextRole;
+  // Admins have no crisis mode.
+  if (nextRole === "Admin") user.crisisMode = false;
   if (nextRole !== "Organizational") {
     user.organizationName = undefined;
   } else if (organizationName !== undefined) {

@@ -37,6 +37,12 @@ export function formatDuration(minutes) {
 export const formatDay = (value) =>
   new Date(value).toLocaleDateString("en-GB", { timeZone: "UTC", day: "numeric", month: "short", year: "numeric" });
 
+// "Liberty Market, Lahore, Punjab" → "Liberty Market"
+export const formatPlaceName = (place) => place.name.split(",")[0];
+
+// "Liberty Market → Faisal Mosque"
+export const formatTripPlaces = (trip) => `${formatPlaceName(trip.start)} → ${formatPlaceName(trip.destination)}`;
+
 // Short numbers for chart axes: 25000 → "25K".
 export const formatCompactNumber = (value) =>
   Number(value).toLocaleString("en-US", { notation: "compact", maximumFractionDigits: 1 });

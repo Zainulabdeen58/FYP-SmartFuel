@@ -782,6 +782,12 @@ p {
 .secondary-button {
   min-height: 42px;
 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
   padding: 0 17px;
 
   color: var(--text-soft);
@@ -2920,7 +2926,8 @@ a.submit-button {
   margin-bottom: 14px;
 }
 
-.chart-card-header h3 {
+.chart-card-header h3,
+.crisis-switch h3 {
   margin: 0;
 
   color: var(--text);
@@ -2928,7 +2935,8 @@ a.submit-button {
   font-size: 14px;
 }
 
-.chart-card-header p {
+.chart-card-header p,
+.crisis-switch p {
   margin: 4px 0 0;
 
   color: var(--text-muted);
@@ -3077,9 +3085,6 @@ a.submit-button {
 }
 
 .place-row .secondary-button {
-  display: inline-flex;
-  align-items: center;
-
   gap: 6px;
 
   white-space: nowrap;
@@ -3316,6 +3321,159 @@ a.submit-button {
   .place-row {
     flex-wrap: wrap;
   }
+}
+
+/* =========================
+   CRISIS MODE
+========================= */
+
+/* Top bar sign on every page while crisis mode is on. */
+.crisis-badge {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 5px 10px;
+
+  color: var(--red);
+  background: rgba(255, 102, 125, 0.08);
+
+  border: 1px solid rgba(255, 102, 125, 0.25);
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.crisis-badge:hover {
+  border-color: rgba(255, 102, 125, 0.45);
+}
+
+.crisis-switch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  margin-bottom: 16px;
+}
+
+.crisis-switch.on {
+  border-color: rgba(255, 102, 125, 0.35);
+}
+
+.crisis-switch.on h3 {
+  color: var(--red);
+}
+
+.crisis-switch p {
+  max-width: 560px;
+
+  line-height: 1.5;
+}
+
+/* Space below each block of the crisis page. */
+.crisis-block {
+  margin: 0 0 16px;
+}
+
+.suggestion-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+
+  margin-bottom: 16px;
+}
+
+.suggestion-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+
+  gap: 6px 14px;
+}
+
+.suggestion-head h3 {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 13px;
+}
+
+.suggestion-saving {
+  color: var(--green);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.suggestion-text {
+  margin: 8px 0 0;
+
+  color: var(--text-soft);
+
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.suggestion-trips {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+
+  margin: 12px 0 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.suggestion-trips li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  gap: 6px 12px;
+
+  padding: 8px 10px;
+
+  color: var(--text-muted);
+  background: var(--fill);
+
+  border-radius: 9px;
+
+  font-size: 10px;
+}
+
+.suggestion-trips strong {
+  color: var(--text);
+}
+
+.suggestion-actions {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 12px;
+}
+
+.tips-list {
+  margin: 0;
+  padding-left: 18px;
+
+  color: var(--text-soft);
+
+  font-size: 11px;
+  line-height: 1.8;
 }
 
 /* Hide the focus outline Recharts draws on a clicked chart. */

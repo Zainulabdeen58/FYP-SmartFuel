@@ -131,3 +131,17 @@ export const ESTIMATE_HISTORY_MONTHS = 12;
 export const MIN_MEASURED_MILEAGE_KM = 300;
 // The recommended route may take at most this many times as long as the fastest route.
 export const MAX_ROUTE_SLOWDOWN = 1.5;
+
+// Crisis mode (FR-07). Accepting a suggestion gives trips one of these statuses; nothing
+// is deleted, and "Plan again" makes the trip planned again.
+export const CRISIS_TRIP_STATUSES = ["postponed", "combined"];
+export const ALL_TRIP_STATUSES = [...TRIP_STATUSES, ...CRISIS_TRIP_STATUSES];
+export const CRISIS_SUGGESTION_TYPES = ["combine", "postpone", "route"];
+// Same-day trips whose starts are this close, and whose destinations are this close,
+// can be combined into one trip.
+export const COMBINE_TRIP_RADIUS_KM = 5;
+// Roads are longer than the straight line. Used for the extra stop of a combined trip
+// and for trips without routes.
+export const ROAD_DISTANCE_FACTOR = 1.3;
+// Suggestions that save less driving than this are not worth showing.
+export const MIN_CRISIS_SAVING_KM = 1;

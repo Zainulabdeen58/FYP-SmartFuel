@@ -32,14 +32,13 @@ export async function protect(req, res, next) {
   next();
 }
 
-// The opposite of adminOnly; used for monthly budgets.
-export function nonAdminOnly(req, res, next) {
-  if (req.user?.role === "Admin") {
-    return res
-      .status(403)
-      .json({ success: false, message: "Admin accounts do not have budgets" });
-  }
-  next();
+// The opposite of adminOnly: answers admins with 403 and this message. Used for what admins
+// don't have (budgets, crisis mode) or may only look at (trips).
+export function nonAdminOnly(message) {
+  return (req, res, next) => {
+    if (req.user?.role === "Admin") return res.status(403).json({ success: false, message });
+    next();
+  };
 }
 
 export function adminOnly(req, res, next) {

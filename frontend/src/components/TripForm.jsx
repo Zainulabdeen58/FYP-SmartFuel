@@ -50,7 +50,7 @@ function priceHint(basis, loading) {
 
 // Plans a trip or edits a planned one. The routes and fuel are worked out by the
 // server when the trip is saved. `vehicles` are the user's own.
-function TripForm({ trip = null, vehicles, onSave, onCancel }) {
+function TripForm({ trip = null, vehicles, crisisMode, onSave, onCancel }) {
   const isEdit = Boolean(trip);
   const savedDate = trip?.date.slice(0, 10);
   const isElectricVehicle = (vehicleId) => vehicles.find((v) => v._id === vehicleId)?.fuelType === "Electric";
@@ -207,6 +207,12 @@ function TripForm({ trip = null, vehicles, onSave, onCancel }) {
               {fieldErrors.priority && <span className="field-error">{fieldErrors.priority}</span>}
             </div>
           </div>
+
+          {crisisMode && form.priority === "non-essential" && (
+            <p className="field-warning">
+              Crisis mode is on: is this trip needed now? Trips that can wait are suggested for postponing.
+            </p>
+          )}
 
           <div className="field">
             <label htmlFor="trip-purpose">Purpose (optional)</label>

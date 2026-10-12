@@ -5,19 +5,15 @@ import {
   getEstimateBasis,
   getTrip,
   getTrips,
+  planTripAgain,
   recalculateTripRoutes,
   updateTrip
 } from "../controllers/tripController.js";
-import { protect } from "../middleware/auth.js";
+import { nonAdminOnly, protect } from "../middleware/auth.js";
 import { routeLimiter } from "../middleware/rateLimit.js";
 
 // Admins can look at every trip but not change them (roadmap proposal).
-function viewOnlyForAdmins(req, res, next) {
-  if (req.user.role === "Admin") {
-    return res.status(403).json({ success: false, message: "Admins can view trips but not change them" });
-  }
-  next();
-}
+const viewOnlyForAdmins = nonAdminOnly("Admins can view trips but not change them");
 
 const router = Router();
 router.use(protect);
@@ -29,4 +25,5 @@ router
   .put(viewOnlyForAdmins, routeLimiter, updateTrip)
   .delete(viewOnlyForAdmins, deleteTrip);
 router.post("/:id/routes", viewOnlyForAdmins, routeLimiter, recalculateTripRoutes);
+router.post("/:id/plan-again", viewOnlyForAdmins, planTripAgain);
 export default router;

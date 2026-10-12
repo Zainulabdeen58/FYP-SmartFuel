@@ -7,7 +7,7 @@ import {
 import { nonAdminOnly, protect } from "../middleware/auth.js";
 
 const router = Router();
-router.use(protect, nonAdminOnly);
+router.use(protect, nonAdminOnly("Admin accounts do not have budgets"));
 router.route("/").get(getMonthlyBudgetSummary).put(createOrUpdateBudget);
 router.delete("/:id", deleteBudget);
 export default router;

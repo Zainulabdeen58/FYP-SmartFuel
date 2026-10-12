@@ -241,14 +241,14 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
       <p class="lead">SRS ki har functionality, roles, edge cases aur coding ke phases ek jagah. Pehle dekhein kya ban chuka hai, phir phase ba phase aage ka kaam. Har phase ke tasks par tick laga kar apni progress yahin track karein.</p>
       <div class="basis">
         <span>SRS: 13 functional requirements</span>
-        <span>Code: Phase 0 (02bfc1b) + Phase 1 (f05e116) + Phase 2 + Phase 3</span>
-        <span>Update: 10 Oct 2026</span>
+        <span>Code: Phase 0 se Phase 5 tak</span>
+        <span>Update: 13 Oct 2026</span>
       </div>
     </div>
-    <div class="gauge" aria-label="Project progress gauge: 11 requirements mukammal, 2 baqi">
+    <div class="gauge" aria-label="Project progress gauge: 12 requirements mukammal, 1 baqi">
       <svg viewBox="0 0 200 122" role="img" aria-hidden="true">
         <path class="g-track" d="M 20 100 A 80 80 0 0 1 180 100"></path>
-        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 170.84 62.82"></path>
+        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 177.68 80.85"></path>
         <line class="g-tick" x1="20" y1="100" x2="34" y2="100"></line>
         <line class="g-tick" x1="43.43" y1="43.43" x2="53.33" y2="53.33"></line>
         <line class="g-tick" x1="100" y1="20" x2="100" y2="34"></line>
@@ -257,11 +257,11 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <text class="g-label" x="20" y="118" text-anchor="middle">E</text>
         <text class="g-label" x="100" y="13" text-anchor="middle">½</text>
         <text class="g-label" x="180" y="118" text-anchor="middle">F</text>
-        <line class="g-needle" x1="100" y1="100" x2="151.36" y2="73.05"></line>
+        <line class="g-needle" x1="100" y1="100" x2="156.31" y2="86.12"></line>
         <circle class="g-hub" cx="100" cy="100" r="7"></circle>
       </svg>
-      <div class="gauge-value">11 / 13</div>
-      <div class="gauge-note">Requirements ka fuel gauge, Phase 4 ke baad.</div>
+      <div class="gauge-value">12 / 13</div>
+      <div class="gauge-note">Requirements ka fuel gauge, Phase 5 ke baad.</div>
     </div>
   </div>
 </header>
@@ -288,28 +288,29 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
     <div class="summary-grid">
       <div class="panel">
         <span class="pill done">Ban chuka</span>
-        <h3>Account, vehicles, fuel records, budget, reports aur trips</h3>
-        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Fuel purchase records (FR-04), monthly budget aur alerts (FR-08), charts wala Reports page filters ke saath (FR-09, FR-10), aur trips map par raaston, fuel aur kharche ke andaze ke saath (FR-05, FR-06, FR-11, FR-12) bhi ban gaye. Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
+        <h3>Account, vehicles, fuel records, budget, reports, trips aur crisis mode</h3>
+        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Fuel purchase records (FR-04), monthly budget aur alerts (FR-08), charts wala Reports page filters ke saath (FR-09, FR-10), trips map par raaston, fuel aur kharche ke andaze ke saath (FR-05, FR-06, FR-11, FR-12), aur crisis mode jo trips milane, taalne aur kam fuel wale raaste ke mashware deta hai (FR-07), bhi ban gaye. Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
       </div>
       <div class="panel">
         <span class="pill todo">Baqi</span>
         <h3>Asal "Smart Fuel" hissa</h3>
-        <p>Crisis mode (FR-07) aur notifications (FR-13). Yeh 2 requirements abhi shuru nahi hui. Crisis mode trips ki priority aur date par chalega, jo ab maujood hain.</p>
+        <p>Notifications (FR-13). Yeh aakhri requirement abhi shuru nahi hui. Is ke saare events (budget 80% aur 100%, inefficient trip, crisis mode ke mashware) ab maujood hain.</p>
       </div>
       <div class="panel">
         <span class="pill partial">Agla qadam</span>
-        <h3>Phase 5: Crisis mode</h3>
-        <p>Phase 0 se Phase 4 tak (buniyad, fuel records, budget, reports, trips aur map) ka code mukammal ho gaya. Ab crisis mode (FR-07): ghair-zaroori trips taalna aur ek din ke qareebi trips milana. Phase 4 mein asli OpenRouteService key ke saath ek dafa haath se check baqi hai (aap ki key se). Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
+        <h3>Phase 6: Notifications</h3>
+        <p>Phase 0 se Phase 5 tak (buniyad, fuel records, budget, reports, trips, map aur crisis mode) ka code mukammal ho gaya. Ab notifications (FR-13): budget 80% aur 100%, inefficient trip aur crisis mode ke mashware par app ke andar notification. Phase 4 mein asli OpenRouteService key ke saath ek dafa haath se check baqi hai (aap ki key se). Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
       </div>
     </div>
     <div class="count-row">
-      <span class="pill done">11 mukammal</span>
-      <span class="pill todo">2 shuru nahi hui</span>
+      <span class="pill done">12 mukammal</span>
+      <span class="pill todo">1 shuru nahi hui</span>
       <span class="pill done">Phase 0: code mukammal</span>
       <span class="pill done">Phase 1: code mukammal</span>
       <span class="pill done">Phase 2: code mukammal</span>
       <span class="pill done">Phase 3: code mukammal</span>
       <span class="pill done">Phase 4: code mukammal</span>
+      <span class="pill done">Phase 5: code mukammal</span>
       <span class="pill todo">8 coding phases</span>
     </div>
     <div class="note ok" style="margin-top:16px"><strong>Update, 3 Oct 2026:</strong> Phase 0 ke saare Missing aur Bug items theek ho gaye. Neeche aise har item par <span class="chip fixed">Fixed</span> laga hai. Backend ko 51 automated checks se test kiya gaya aur sab pass hue. Jin par <span class="chip decide">Decide</span> hai, unka faisla abhi baqi hai.</div>
@@ -317,6 +318,7 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
     <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 2 (FR-08 monthly budget aur alerts) ka code mukammal. Dashboard par "Fuel budget" card (mahina chunein, budget set/edit/remove, progress bar) aur Fuel Records page par alert. Organizational account ke liye fleet budget aur har gaari ka budget. Backend ko 61 naye automated checks se test kiya gaya, sab pass, aur browser mein bhi chala kar dekha gaya.</div>
     <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 3 (FR-09 charts, FR-10 filters) ka code mukammal. Sidebar mein "Reports" page: mahana litre aur mahana kharcha ke charts, gaariyon ka muqabla (litre, kharcha, mileage), aur filters (period, gaari, fuel type; admin ke liye user) jo URL mein yaad rehte hain. Fuel entry mein odometer ab zaroori hai, "My odometer is not working" ke option ke saath, aur reading peeche nahi ja sakti. Backend ke 49 naye checks pass, Phase 2 ke 61 bhi dobara pass, aur browser mein poora flow chala kar dekha gaya.</div>
     <div class="note ok" style="margin-top:10px"><strong>Update, 11 Oct 2026:</strong> Phase 4 (FR-05 trips, FR-06 fuel ka andaza aur raaste, FR-11/12 map) ka code mukammal. Sidebar mein "Trips" page: jagah search ya map par click se start aur destination, gaari, date, priority aur fuel ki qeemat (aakhri entry se khud bhar jati hai). Save par 2-3 raaste (sab se tez, sab se chhota, motorway se bach kar) map par, har ek ka km, waqt, litre aur rupay, aur sab se kam fuel wala "Recommended". Motorcycle/rickshaw hamesha motorway se bachte hain. Route service band ho to bhi trip save hota hai aur "Try again" aata hai. Backend ke 89 naye checks aur browser ke 39 checks pass, purane 188 checks bhi dobara pass. Tests ek nakli route service (<code>backend/dev/fakeOrs.js</code>) par chale; asli key ke saath ek check baqi.</div>
+    <div class="note ok" style="margin-top:10px"><strong>Update, 13 Oct 2026:</strong> Phase 5 (FR-07 crisis mode) ka code mukammal. Sidebar mein "Crisis mode" page par on/off switch, aur mode on ho to har page ke topbar par laal "Crisis mode on" nishani. Mashware: ek din ke qareebi trips ek safar mein milana, "Can wait" trips postpone karna, aur kam fuel wala recommended raasta; har ek ke saath km, litre aur rupay ki bachat. Is mahine ke planned trips ka kharcha bache hue budget se zyada ho to warning. "Accept" trip ko Postponed/Combined karta hai ya raasta badalta hai, kuch delete nahi hota, aur "Plan again" se wapas. Mode band karne par mashware chhup jate hain, trips waise hi rehte hain. Phase 4 ka ek bug bhi theek hua: Recalculate ya Mark completed ke baad trip details se gaari ka naam ghayab ho jata tha. Backend ke 65 naye checks aur browser ke 30 checks pass; purane saare checks bhi dobara pass.</div>
   </section>
 
   <section id="roles">
@@ -377,7 +379,7 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
             <tr><td>Fuel purchase records</td><td class="yes">Apne</td><td class="yes">Fleet ke</td><td class="yes">Sab ke</td></tr>
             <tr><td>Trips aur route planning</td><td class="yes">Apne</td><td class="yes">Fleet ke</td><td class="prop">Sirf dekhna (proposal)</td></tr>
             <tr><td>Monthly budget</td><td class="yes">Personal</td><td class="yes">Fleet + har gaari</td><td class="no">Zaroorat nahi</td></tr>
-            <tr><td>Crisis mode</td><td class="yes">Apne liye</td><td class="yes">Apne liye</td><td class="prop">Poore system ke liye (proposal)</td></tr>
+            <tr><td>Crisis mode</td><td class="yes">Apne liye</td><td class="yes">Apne liye</td><td class="no">Nahi (SRS: users ke liye)</td></tr>
             <tr><td>Dashboard aur charts</td><td class="yes">Apna data</td><td class="yes">Fleet muqabla</td><td class="prop">System stats (proposal)</td></tr>
             <tr><td>Notifications</td><td class="yes">Haan</td><td class="yes">Haan</td><td class="yes">Haan</td></tr>
             <tr><td>Users manage karna</td><td class="no">Nahi</td><td class="no">Nahi</td><td class="yes">Haan</td></tr>
@@ -417,7 +419,7 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
           <tr><td class="fr-code">FR-04</td><td>Fuel purchase records</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-1">Phase 1</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-05</td><td>Trips banana</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-4">Phase 4</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-06</td><td>Fuel ka andaza aur optimized route</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-4">Phase 4</a> (ho gaya)</td></tr>
-          <tr><td class="fr-code">FR-07</td><td>Crisis mode</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-5">Phase 5</a></td></tr>
+          <tr><td class="fr-code">FR-07</td><td>Crisis mode</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-5">Phase 5</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-08</td><td>Monthly budget aur alerts</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-2">Phase 2</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-09</td><td>Charts aur graphs</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-3">Phase 3</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-10</td><td>Dashboard filters</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-3">Phase 3</a> (ho gaya)</td></tr>
@@ -612,32 +614,33 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         </div>
       </article>
 
-      <article class="fr" data-status="todo" id="fr-07">
+      <article class="fr" data-status="done" id="fr-07">
         <div class="fr-head">
           <span class="fr-code">FR-07</span>
           <h3>Crisis mode</h3>
-          <span class="pill todo">Shuru nahi</span>
+          <span class="pill done">Mukammal</span>
           <a class="phase-link" href="#phase-5">Phase 5</a>
         </div>
         <div class="fr-body">
           <div>
             <blockquote class="srs">The system shall provide a "crisis mode" that recommends strategies such as combining trips or avoiding non-essential travel to conserve fuel.</blockquote>
             <p><strong>Matlab:</strong> Fuel ki kami ke dino ka mode jo mashware de: safar mila lo, ghair-zaroori safar chhor do.</p>
+            <p class="small"><strong>Faisle (13 Oct 2026, SRS ke mutabiq):</strong> har user (Individual, Organizational) apne liye on/off karta hai; Admin ka crisis mode nahi. Mashware: ek din ke qareebi trips milana (start aur manzil dono 5 km ke andar), "Can wait" trip postpone, aur kam fuel wala recommended raasta; saath mein is mahine ke trips ka kharcha bache hue budget se. "Accept" trip ko Postponed/Combined karta hai ya raasta badalta hai, kuch delete nahi hota, "Plan again" se wapas. "Ignore" mashwara chhupa deta hai. Mashware save nahi hote, har dafa trips se naye bante hain.</p>
             <p><strong>Rules (proposal):</strong></p>
             <ul>
-              <li>Ek hi din ke trips jinki manzil qareeb ho (jaise 5 km ke andar): "inhein ek safar mein milayein".</li>
-              <li>Ghair-zaroori priority wala trip: "aage karein ya cancel karein".</li>
-              <li>Kitne litre aur rupay bachenge, yeh bhi dikhayein.</li>
+              <li>Ek hi din ke trips jinki manzil qareeb ho (jaise 5 km ke andar): "inhein ek safar mein milayein". <span class="chip fixed">Ho gaya</span></li>
+              <li>Ghair-zaroori priority wala trip: "aage karein ya cancel karein". <span class="chip fixed">Ho gaya</span></li>
+              <li>Kitne litre aur rupay bachenge, yeh bhi dikhayein. <span class="chip fixed">Ho gaya</span></li>
             </ul>
           </div>
           <div>
             <div class="label">Edge cases</div>
             <ul class="edges">
-              <li>Mode kaun on kare: har user khud, ya Admin poore system ke liye? Supervisor se poochein.</li>
-              <li>Koi trip planned na ho to sirf aam tips dikhayein.</li>
-              <li>Purane trips jinki priority nahi, unhein "unknown" maan kar user se poochein.</li>
-              <li>Sirf ek trip ho to "combine" ka mashwara na dein.</li>
-              <li>Mode band karne par mashware hat jayen, user ka data delete na ho.</li>
+              <li>Mode kaun on kare: har user khud, ya Admin poore system ke liye? Supervisor se poochein. <span class="chip fixed">SRS ke mutabiq har user khud</span></li>
+              <li>Koi trip planned na ho to sirf aam tips dikhayein. <span class="chip fixed">Ho gaya</span></li>
+              <li>Purane trips jinki priority nahi, unhein "unknown" maan kar user se poochein. <span class="chip fixed">Lagu nahi: Phase 4 se har trip ki priority zaroori hai</span></li>
+              <li>Sirf ek trip ho to "combine" ka mashwara na dein. <span class="chip fixed">Ho gaya</span></li>
+              <li>Mode band karne par mashware hat jayen, user ka data delete na ho. <span class="chip fixed">Ho gaya</span></li>
             </ul>
           </div>
         </div>
@@ -959,17 +962,18 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <div class="phase-head"><h3>Crisis mode</h3><span class="phase-count" data-count></span></div>
         <div class="phase-meta"><span class="tag">FR-07</span><span class="tag dep">Pehle chahiye: Phase 2, Phase 4</span></div>
         <p class="why">Mashware trips aur budget ke data par bante hain, isliye un dono ke baad.</p>
+        <div class="note ok"><strong>Code mukammal, 13 Oct 2026.</strong> 5 kaam ho gaye, backend ke 65 aur browser ke 30 checks pass. Done ki dono shartein poori: crisis mode on karne par ek din ke do qareebi trips "Combine" mashware mein aate hain, aur mode band karne par mashware chhup jate hain, koi trip nahi badalta.</div>
         <div class="tasks">
           <div>
             <div class="label">Backend</div>
-            <label class="check"><input type="checkbox" id="p5-b1"><span>User mein <code>crisisMode</code> on/off (aur Admin ka system-wide switch agar supervisor kahe).</span></label>
-            <label class="check"><input type="checkbox" id="p5-b2"><span>Rules: ek din ke qareebi trips "combine", ghair-zaroori trips "postpone".</span></label>
-            <label class="check"><input type="checkbox" id="p5-b3"><span>Bachat ka andaza: in mashwaron se kitne litre aur rupay bachenge.</span></label>
+            <label class="check"><input type="checkbox" id="p5-b1" data-done="true" checked><span>User mein <code>crisisMode</code> on/off (aur Admin ka system-wide switch agar supervisor kahe). <span class="chip fixed">Ho gaya; Admin switch nahi (SRS)</span></span></label>
+            <label class="check"><input type="checkbox" id="p5-b2" data-done="true" checked><span>Rules: ek din ke qareebi trips "combine", ghair-zaroori trips "postpone". <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p5-b3" data-done="true" checked><span>Bachat ka andaza: in mashwaron se kitne litre aur rupay bachenge. <span class="chip fixed">Ho gaya</span></span></label>
           </div>
           <div>
             <div class="label">Frontend</div>
-            <label class="check"><input type="checkbox" id="p5-f1"><span>Crisis mode switch (dashboard ya topbar) aur saaf nishani ke mode on hai.</span></label>
-            <label class="check"><input type="checkbox" id="p5-f2"><span>Mashwaron ki list, har ek par "Maan liya" ya "Ignore".</span></label>
+            <label class="check"><input type="checkbox" id="p5-f1" data-done="true" checked><span>Crisis mode switch (dashboard ya topbar) aur saaf nishani ke mode on hai. <span class="chip fixed">Alag page + topbar nishani</span></span></label>
+            <label class="check"><input type="checkbox" id="p5-f2" data-done="true" checked><span>Mashwaron ki list, har ek par "Maan liya" ya "Ignore". <span class="chip fixed">Ho gaya</span></span></label>
           </div>
         </div>
         <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Crisis mode on karne par ek din ke do qareebi trips "combine" mashware mein aayen.</li><li>Mode off karne par mashware hat jayen, data delete na ho.</li></ol></div>
@@ -1026,7 +1030,7 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
     <ol class="qs">
       <li><div><strong>Organizational account ka matlab kya hai?</strong><span class="small">Sirf ek login se poori fleet, ya organization ke andar members aur drivers ke alag logins?</span></div></li>
       <li><div><strong>Admin account kaun bana sakta hai?</strong><span class="small">Register page se koi bhi, ya sirf pehle se maujood Admin?</span></div></li>
-      <li><div><strong>Crisis mode kaun on karta hai?</strong><span class="small">Har user khud, ya Admin poore system ke liye?</span></div></li>
+      <li><div><strong>Crisis mode kaun on karta hai?</strong><span class="small">Har user khud, ya Admin poore system ke liye? <strong>Abhi:</strong> SRS ke mutabiq har user khud (Admin ka switch nahi); supervisor kahe to Admin ka switch baad mein.</span></div></li>
       <li><div><strong>"Inefficient trip" kis ko kahenge?</strong><span class="small">Hamari proposal: chuna gaya raasta recommended raaste se 15% ya zyada fuel le.</span></div></li>
       <li><div><strong>Notifications sirf app ke andar kaafi hain?</strong><span class="small">Ya email bhi chahiye?</span></div></li>
       <li><div><strong>Electric gaariyan fuel features mein shamil hain?</strong><span class="small">Unke liye km/l aur litre theek nahi, kWh chahiye.</span></div></li>

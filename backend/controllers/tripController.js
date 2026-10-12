@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { ESTIMATE_HISTORY_MONTHS } from "../../shared/constants.js";
+import { ALL_TRIP_STATUSES, CRISIS_TRIP_STATUSES, ESTIMATE_HISTORY_MONTHS } from "../../shared/constants.js";
 import FuelRecord from "../models/FuelRecord.js";
-import Trip from "../models/Trip.js";
+import Trip, { TRIP_VEHICLE_FIELDS } from "../models/Trip.js";
 import Vehicle from "../models/Vehicle.js";
 import { isOwnerOrAdmin, ownerFilter } from "../utils/access.js";
 import { findRoutes } from "../utils/ors.js";
@@ -16,10 +16,14 @@ import {
   checkTripStatus,
   firstError,
   parseFuelDate,
-  queryText
+  queryText,
+  todayInPakistan
 } from "../utils/validation.js";
 
 const fields = ["vehicle", "start", "destination", "date", "purpose", "priority", "status", "pricePerLitre", "selectedRoute"];
+
+// Enough of another trip to name it ("Liberty Market → Faisal Mosque, 12 Oct").
+const LINKED_TRIP_FIELDS = "start destination date status";
 
 const NOT_FOUND = { success: false, message: "Trip not found" };
 const NOT_AUTHORIZED = { success: false, message: "Not authorized" };
@@ -104,6 +108,21 @@ async function calculateRoutes(trip, vehicle) {
   trip.routeError = undefined;
 }
 
+// A trip as the client shows it: with its vehicle and owner, and its crisis mode links
+// (the trip it was combined into, and the trips combined into it). Every trip response
+// uses this, so the details stay complete after any change.
+async function withDetails(trip) {
+  const [, combinedTrips] = await Promise.all([
+    trip.populate([
+      { path: "vehicle", select: TRIP_VEHICLE_FIELDS },
+      { path: "user", select: "fullName email" },
+      { path: "combinedInto", select: LINKED_TRIP_FIELDS }
+    ]),
+    Trip.find({ combinedInto: trip._id }).select(LINKED_TRIP_FIELDS).sort({ createdAt: 1 }).lean()
+  ]);
+  return { ...trip.toObject(), combinedTrips };
+}
+
 const savedMessage = (trip, action) =>
   trip.routeError ? `Trip ${action}, but routes could not be calculated: ${trip.routeError}` : `Trip ${action}`;
 
@@ -137,10 +156,10 @@ export async function createTrip(req, res) {
   });
   await calculateRoutes(trip, vehicle);
   await trip.save();
-  res.status(201).json({ success: true, message: savedMessage(trip, "saved"), trip });
+  res.status(201).json({ success: true, message: savedMessage(trip, "saved"), trip: await withDetails(trip) });
 }
 
-// ?vehicle=<id>&status=planned|completed; admins may add ?user=<id>. Route lines are left
+// ?vehicle=<id>&status=<any trip status>; admins may add ?user=<id>. Route lines are left
 // out (GET /trips/:id has them).
 export async function getTrips(req, res) {
   const userId = req.user.role === "Admin" ? queryText(req.query.user) : "";
@@ -153,8 +172,8 @@ export async function getTrips(req, res) {
   if (vehicleId && !mongoose.isValidObjectId(vehicleId)) {
     return res.status(400).json({ success: false, message: "Select a valid vehicle" });
   }
-  if (status && checkTripStatus(status)) {
-    return res.status(400).json({ success: false, message: checkTripStatus(status) });
+  if (status && !ALL_TRIP_STATUSES.includes(status)) {
+    return res.status(400).json({ success: false, message: "Choose a valid status" });
   }
 
   const trips = await Trip.find({
@@ -163,20 +182,17 @@ export async function getTrips(req, res) {
     ...(status && { status })
   })
     .select("-routes.geometry")
-    .populate("vehicle", "vehicleName registrationNumber fuelType vehicleType")
+    .populate("vehicle", TRIP_VEHICLE_FIELDS)
     .populate("user", "fullName email")
     .sort({ date: -1, createdAt: -1 });
   res.json({ success: true, trips });
 }
 
 export async function getTrip(req, res) {
-  const trip = await Trip.findById(req.params.id)
-    .populate("vehicle", "vehicleName registrationNumber fuelType vehicleType")
-    .populate("user", "fullName email");
+  const trip = await Trip.findById(req.params.id);
   if (!trip) return res.status(404).json(NOT_FOUND);
-  // trip.user is null if the owner was deleted.
-  if (!isOwnerOrAdmin(req, trip.user?._id)) return res.status(403).json(NOT_AUTHORIZED);
-  res.json({ success: true, trip });
+  if (!isOwnerOrAdmin(req, trip.user)) return res.status(403).json(NOT_AUTHORIZED);
+  res.json({ success: true, trip: await withDetails(trip) });
 }
 
 // A new vehicle or new places get new routes from the route service; a new price only
@@ -185,6 +201,9 @@ export async function updateTrip(req, res) {
   const trip = await Trip.findById(req.params.id);
   if (!trip) return res.status(404).json(NOT_FOUND);
   if (!isOwnerOrAdmin(req, trip.user)) return res.status(403).json(NOT_AUTHORIZED);
+  if (CRISIS_TRIP_STATUSES.includes(trip.status)) {
+    return res.status(400).json({ success: false, message: `This trip is ${trip.status}: plan it again before changing it` });
+  }
 
   const data = pickTripFields(req.body);
   const vehicleChanged = data.vehicle !== undefined && String(data.vehicle) !== String(trip.vehicle);
@@ -239,7 +258,11 @@ export async function updateTrip(req, res) {
   }
 
   await trip.save();
-  res.json({ success: true, message: savedMessage(trip, "updated"), trip });
+  // Trips combined into this one were done along with it.
+  if (trip.status === "completed" && current.status !== "completed") {
+    await Trip.updateMany({ combinedInto: trip._id, status: "combined" }, { status: "completed" });
+  }
+  res.json({ success: true, message: savedMessage(trip, "updated"), trip: await withDetails(trip) });
 }
 
 // POST /trips/:id/routes: asks for the routes again (after a route service problem, or
@@ -257,7 +280,32 @@ export async function recalculateTripRoutes(req, res) {
 
   await calculateRoutes(trip, vehicle);
   await trip.save();
-  res.json({ success: true, message: savedMessage(trip, "recalculated"), trip });
+  res.json({ success: true, message: savedMessage(trip, "recalculated"), trip: await withDetails(trip) });
+}
+
+// POST /trips/:id/plan-again: undoes an accepted crisis mode suggestion (postponed or
+// combined → planned). That suggestion is then ignored for this trip, so it isn't made again.
+// The date is not checked: a trip whose day has passed shows as overdue.
+export async function planTripAgain(req, res) {
+  const trip = await Trip.findById(req.params.id);
+  if (!trip) return res.status(404).json(NOT_FOUND);
+  if (!isOwnerOrAdmin(req, trip.user)) return res.status(403).json(NOT_AUTHORIZED);
+  if (!CRISIS_TRIP_STATUSES.includes(trip.status)) {
+    return res.status(400).json({ success: false, message: "Only postponed or combined trips can be planned again" });
+  }
+
+  const undoneSuggestion = trip.status === "postponed" ? "postpone" : "combine";
+  trip.ignoredSuggestions = [...(trip.ignoredSuggestions || []), undoneSuggestion];
+  trip.status = "planned";
+  trip.combinedInto = undefined;
+  await trip.save();
+
+  const isOverdue = toDateText(trip.date) < todayInPakistan();
+  res.json({
+    success: true,
+    message: isOverdue ? "Trip planned again; its day has passed, so change the date" : "Trip planned again",
+    trip: await withDetails(trip)
+  });
 }
 
 export async function deleteTrip(req, res) {
@@ -266,5 +314,6 @@ export async function deleteTrip(req, res) {
   if (!isOwnerOrAdmin(req, trip.user)) return res.status(403).json(NOT_AUTHORIZED);
 
   await trip.deleteOne();
+  await Trip.releaseCombinedTrips([trip._id]);
   res.json({ success: true, message: "Trip deleted" });
 }

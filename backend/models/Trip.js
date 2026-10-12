@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import {
+  ALL_TRIP_STATUSES,
+  CRISIS_SUGGESTION_TYPES,
   MAX_PLACE_NAME_LENGTH,
   MAX_TRIP_PURPOSE_LENGTH,
   TRIP_PRIORITIES,
-  TRIP_STATUSES,
 } from "../../shared/constants.js";
 
 const placeSchema = new mongoose.Schema(
@@ -14,6 +15,9 @@ const placeSchema = new mongoose.Schema(
   },
   { _id: false }
 );
+
+// The vehicle fields sent with a trip (populate select).
+export const TRIP_VEHICLE_FIELDS = "vehicleName registrationNumber fuelType vehicleType";
 
 // One way from start to destination. litres and cost are null for electric vehicles.
 const routeSchema = new mongoose.Schema(
@@ -42,7 +46,12 @@ const tripSchema = new mongoose.Schema(
     date: { type: Date, required: [true, "Date is required"] },
     purpose: { type: String, trim: true, maxlength: MAX_TRIP_PURPOSE_LENGTH },
     priority: { type: String, enum: TRIP_PRIORITIES, required: true },
-    status: { type: String, enum: TRIP_STATUSES, default: "planned" },
+    // "postponed" and "combined" are set only by accepting a crisis mode suggestion.
+    status: { type: String, enum: ALL_TRIP_STATUSES, default: "planned" },
+    // A "combined" trip is done along with this trip.
+    combinedInto: { type: mongoose.Schema.Types.ObjectId, ref: "Trip" },
+    // Crisis mode suggestion types the user ignored (or undid) for this trip.
+    ignoredSuggestions: { type: [{ type: String, enum: CRISIS_SUGGESTION_TYPES }], default: undefined },
 
     // What the fuel estimate is based on, saved so the trip keeps its numbers
     // when the vehicle or prices change later. All null for electric vehicles.
@@ -64,5 +73,15 @@ const tripSchema = new mongoose.Schema(
 
 tripSchema.index({ user: 1, date: -1 });
 tripSchema.index({ vehicle: 1, date: -1 });
+tripSchema.index({ combinedInto: 1 }, { sparse: true });
+
+// Call when these trips are deleted: trips that were combined into them are planned on
+// their own again.
+tripSchema.statics.releaseCombinedTrips = function (deletedTripIds) {
+  return this.updateMany(
+    { combinedInto: { $in: deletedTripIds }, status: "combined" },
+    { status: "planned", $unset: { combinedInto: 1 } }
+  );
+};
 
 export default mongoose.model("Trip", tripSchema);

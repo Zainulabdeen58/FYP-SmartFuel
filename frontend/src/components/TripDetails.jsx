@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../api";
-import { TRIP_PRIORITY_LABELS, TRIP_STATUS_LABELS } from "../constant";
-import { formatDay, formatVehicleLabel } from "../format";
+import { CRISIS_TRIP_STATUSES, TRIP_PRIORITY_LABELS, TRIP_STATUS_LABELS } from "../constant";
+import { formatDay, formatPlaceName, formatTripPlaces, formatVehicleLabel } from "../format";
 import useTrip from "../hooks/useTrip";
 import { isTripOverdue } from "../validation";
 import Icon from "./Icon";
@@ -27,6 +27,8 @@ function TripDetails({ tripId, canChange, onChanged, onEdit, onDelete, onClose }
   }
 
   const isPlanned = trip.status === "planned";
+  // Postponed or combined by an accepted crisis mode suggestion.
+  const isSetAsideInCrisis = CRISIS_TRIP_STATUSES.includes(trip.status);
   const canChooseRoute = canChange && isPlanned && trip.routes.length > 1;
 
   const change = async (request) => {
@@ -59,6 +61,7 @@ function TripDetails({ tripId, canChange, onChanged, onEdit, onDelete, onClose }
   };
   const recalculate = () => change(() => api.post(`/trips/${trip._id}/routes`));
   const markCompleted = () => change(() => api.put(`/trips/${trip._id}`, { status: "completed" }));
+  const planAgain = () => change(() => api.post(`/trips/${trip._id}/plan-again`));
 
   return (
     <div className="chart-card trip-details">
@@ -83,7 +86,7 @@ function TripDetails({ tripId, canChange, onChanged, onEdit, onDelete, onClose }
           </div>
 
           <div className="trip-badges">
-            <span className="vehicle-badge">{TRIP_STATUS_LABELS[trip.status]}</span>
+            <span className={`vehicle-badge${isSetAsideInCrisis ? " muted" : ""}`}>{TRIP_STATUS_LABELS[trip.status]}</span>
             <span className={`vehicle-badge${trip.priority === "essential" ? "" : " muted"}`}>
               {TRIP_PRIORITY_LABELS[trip.priority]}
             </span>
@@ -91,6 +94,22 @@ function TripDetails({ tripId, canChange, onChanged, onEdit, onDelete, onClose }
           </div>
 
           {trip.purpose && <p className="chart-note">{trip.purpose}</p>}
+
+          {trip.status === "postponed" && (
+            <p className="field-warning">Postponed in crisis mode. Plan it again when the trip is needed.</p>
+          )}
+          {trip.status === "combined" && trip.combinedInto && (
+            <p className="field-warning">
+              Combined in crisis mode: done along with {formatTripPlaces(trip.combinedInto)} on{" "}
+              {formatDay(trip.combinedInto.date)}.
+            </p>
+          )}
+          {trip.combinedTrips?.length > 0 && (
+            <p className="chart-note">
+              Also on this trip (combined in crisis mode):{" "}
+              {trip.combinedTrips.map((other) => formatPlaceName(other.destination)).join(", ")}.
+            </p>
+          )}
         </div>
 
         <button type="button" className="modal-close" onClick={onClose} aria-label="Close trip">
@@ -146,6 +165,13 @@ function TripDetails({ tripId, canChange, onChanged, onEdit, onDelete, onClose }
                 Mark completed
               </button>
             </>
+          )}
+
+          {isSetAsideInCrisis && (
+            <button type="button" className="edit-button" onClick={planAgain} disabled={busy}>
+              <Icon name="refresh" size={17} />
+              Plan again
+            </button>
           )}
 
           <button type="button" className="delete-button" onClick={() => onDelete(trip)} disabled={busy}>

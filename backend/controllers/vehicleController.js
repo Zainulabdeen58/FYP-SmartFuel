@@ -149,7 +149,9 @@ export async function deleteVehicle(req, res) {
 
   await FuelRecord.deleteMany({ vehicle: vehicle._id });
   await Budget.deleteMany({ vehicle: vehicle._id });
+  const tripIds = await Trip.find({ vehicle: vehicle._id }).distinct("_id");
   await Trip.deleteMany({ vehicle: vehicle._id });
+  await Trip.releaseCombinedTrips(tripIds);
   await vehicle.deleteOne();
   res.json({ success: true, message: "Vehicle, its fuel records, budgets and trips deleted" });
 }

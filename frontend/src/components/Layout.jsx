@@ -10,7 +10,7 @@ function Layout({ user, logout, children }) {
   const { theme, toggle } = useTheme();
 
   const links =
-    user.role === "Admin" ? [...NAV_LINKS, ADMIN_LINK] : NAV_LINKS;
+    user.role === "Admin" ? [...NAV_LINKS.filter((link) => !link.hideForAdmin), ADMIN_LINK] : NAV_LINKS;
 
   return (
     <div className="app-shell">
@@ -97,6 +97,13 @@ function Layout({ user, logout, children }) {
           </div>
 
           <div className="topbar-right">
+            {user.crisisMode && (
+              <Link to="/crisis" className="crisis-badge" title="Open crisis mode">
+                <Icon name="alert" size={14} />
+                Crisis mode on
+              </Link>
+            )}
+
             <div className="status">
               <span className="status-dot" />
               System operational

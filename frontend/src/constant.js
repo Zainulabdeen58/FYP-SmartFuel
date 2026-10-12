@@ -1,6 +1,7 @@
 // Re-exports shared/constants.js so components import everything from here.
 export {
   COMMON_MANUFACTURERS,
+  CRISIS_TRIP_STATUSES,
   DEFAULT_REPORT_MONTHS,
   FUEL_TYPES,
   MAX_BUDGET_MONTHS_AHEAD,
@@ -24,6 +25,8 @@ export const NAV_LINKS = [
   { to: "/vehicles", label: "Vehicles", icon: "car" },
   { to: "/fuel-records", label: "Fuel Records", icon: "fuel" },
   { to: "/trips", label: "Trips", icon: "route" },
+  // Admins have no trips of their own, so no crisis mode.
+  { to: "/crisis", label: "Crisis mode", icon: "alert", hideForAdmin: true },
   { to: "/reports", label: "Reports", icon: "chart" },
   { to: "/profile", label: "Profile", icon: "user" },
 ];
@@ -92,7 +95,12 @@ export const REPORT_MONTHS_TO_CHOOSE_FROM = 60;
 
 // Trips page (Trips.jsx)
 export const TRIP_PRIORITY_LABELS = { essential: "Essential", "non-essential": "Can wait" };
-export const TRIP_STATUS_LABELS = { planned: "Planned", completed: "Completed" };
+export const TRIP_STATUS_LABELS = {
+  planned: "Planned",
+  completed: "Completed",
+  postponed: "Postponed",
+  combined: "Combined",
+};
 // Where a trip estimate's km/l came from.
 export const MILEAGE_SOURCE_LABELS = {
   odometer: "measured from your odometer readings",

@@ -8,6 +8,7 @@ import Vehicles from "./components/Vehicles";
 import FuelRecords from "./components/FuelRecords";
 import Profile from "./components/Profile";
 import Admin from "./components/Admin";
+import CrisisMode from "./components/CrisisMode";
 import "./global.css";
 
 // Lazy-loaded: Reports pulls in the large Recharts library and Trips the Leaflet map,
@@ -40,6 +41,17 @@ export default function App() {
                 <Suspense fallback={<div className="empty-state"><p>Loading trips...</p></div>}>
                   <Trips user={user} />
                 </Suspense>
+              }
+            />
+
+            <Route
+              path="/crisis"
+              element={
+                user.role === "Admin" ? (
+                  <Navigate to="/dashboard" replace />
+                ) : (
+                  <CrisisMode user={user} saveUser={updateUser} />
+                )
               }
             />
 

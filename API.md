@@ -14,7 +14,7 @@ are never answered with 401, because the frontend signs the user out on any 401.
 - `POST /auth/logout` (Bearer token)
 
 ## Profile
-- `GET /users/profile` — the same user shape as login (`id`, `fullName`, `email`, `contactNumber`, `role`, `organizationName`)
+- `GET /users/profile` — the same user shape as login (`id`, `fullName`, `email`, `contactNumber`, `role`, `organizationName`, `crisisMode`)
 - `PUT /users/profile` — any of `fullName`, `email`, `contactNumber`, `organizationName` (organizational accounts). To change the password send `password` and `currentPassword`.
 
 ## Vehicles
@@ -49,16 +49,31 @@ Users see only records for their own vehicles; admins see all.
 
 ## Trips (FR-05, FR-06)
 A trip is a planned journey from `start` to `destination` (each `{ name, lat, lng }` inside Pakistan) by one vehicle on one day (`YYYY-MM-DD`, Pakistan time). Routes come from OpenRouteService through the server; the key never reaches the browser. Admins can read every trip but get 403 on changes.
-- `GET /trips?vehicle=&status=&user=` returns `trips` (newest date first, without the route lines). `status` is `planned` or `completed`; `user` works for admins only.
+- `GET /trips?vehicle=&status=&user=` returns `trips` (newest date first, without the route lines). `status` is `planned`, `completed`, `postponed` or `combined`; `user` works for admins only.
 - `GET /trips/estimate-basis?vehicle=<id>` returns `basis`: `{ fuelType, kmPerLitre, mileageSource, tankRangeKm, latestPrice }`. `kmPerLitre` is the mileage measured from odometer readings over the last 12 months once at least 300 km were measured (`mileageSource: "odometer"`), otherwise the vehicle's `fuelEfficiency` (`"stated"`). `latestPrice` is `{ pricePerLitre, date }` of the vehicle's latest fuel entry in that time, or `null`. All null for electric vehicles.
 - `POST /trips` with `vehicle`, `start`, `destination`, `date` (today up to 365 days ahead), `priority` (`essential` or `non-essential`), optional `purpose` (up to 200 characters) and `pricePerLitre` (Rs 100 to 1,000; required except for electric vehicles). A new trip is always `planned`. Start and destination must be at least 0.2 km apart. Returns 201 with the trip; when the route service fails the trip is still saved, without routes, with `routeError` and the message "Trip saved, but routes could not be calculated: …".
-- Trip fields besides the above: `status`, `kmPerLitre`, `mileageSource`, `pricePerLitre`, `tankRangeKm` (the estimate basis saved with the trip), `routes`, `recommendedRoute` and `selectedRoute` (indexes into `routes`), `routeError`, `routesCalculatedAt`.
+- Trip fields besides the above: `status` (`planned`, `completed`, or `postponed`/`combined` after an accepted crisis mode suggestion), `combinedInto` (the trip a combined trip is done with), `ignoredSuggestions` (crisis mode suggestion types ignored for this trip), `kmPerLitre`, `mileageSource`, `pricePerLitre`, `tankRangeKm` (the estimate basis saved with the trip), `routes`, `recommendedRoute` and `selectedRoute` (indexes into `routes`), `routeError`, `routesCalculatedAt`.
 - Each route: `{ label, distanceKm, durationMin, litres, cost, needsRefuel, geometry }`. Labels are `Fastest`, `Shortest` and `Avoids motorways` (ORS gives alternative routes only under 100 km, so these are separate requests; duplicates are dropped). Motorcycles and rickshaws get only `Fastest` and `Shortest`, both avoiding motorways; buses/trucks use the `driving-hgv` profile. `litres` = km ÷ km/l and `cost` = litres × price (null for electric). `needsRefuel` is true when the route is longer than km/l × tank. `geometry` is an encoded polyline. `recommendedRoute`: the fewest litres among routes taking at most 1.5 × the fastest time.
-- `GET /trips/:id` returns one trip with route lines.
-- `PUT /trips/:id` changes any of the create fields, `status` and `selectedRoute`. A new vehicle or new places get new routes; a new price only recalculates the rupees. The date rule runs only when the date or status changes: planned trips today or later, completed trips today or earlier.
+- `GET /trips/:id` returns one trip with route lines. This and every other single-trip answer (create, update, recalculate, plan again) has `vehicle` and `user` filled in, `combinedInto` as `{ _id, start, destination, date, status }` and `combinedTrips` (the trips combined into this one).
+- `PUT /trips/:id` changes any of the create fields, `status` (`planned` or `completed`) and `selectedRoute`. A new vehicle or new places get new routes; a new price only recalculates the rupees. The date rule runs only when the date or status changes: planned trips today or later, completed trips today or earlier. Postponed and combined trips can't be changed (400) until planned again. Completing a trip also completes the trips combined into it.
 - `POST /trips/:id/routes` asks the route service again (planned trips only).
-- `DELETE /trips/:id`.
+- `POST /trips/:id/plan-again` makes a postponed or combined trip planned again (undoes the crisis mode suggestion, which is then not made again for this trip). The date is not checked; a passed day makes the trip overdue.
+- `DELETE /trips/:id`. Trips combined into it become planned again (also when its vehicle is deleted).
 - Trips, edits and recalculations are limited to 20 per user per 10 minutes.
+
+## Crisis mode (FR-07)
+For Individual and Organizational accounts (admins get 403). Each user turns it on for themselves. Suggestions are never stored: they are worked out from the user's planned trips from today on, on every request.
+- `PUT /crisis/mode` with `enabled` (`true` or `false`) returns the updated `user`. Turning it off only hides the suggestions; no trip changes.
+- `GET /crisis` returns `crisisMode` and `advice` (`null` while off): `{ plannedTrips, suggestions, totalSaving, budget, hasIgnoredSuggestions }`.
+  - Each suggestion: `{ id, type, trips, saving }` (`routeLabel` and `recommendedRoute` too for `route`). `trips` are `{ _id, start, destination, date, priority, vehicle }`; `saving` is `{ km, litres, cost }`, an estimate (litres and cost 0 for electric vehicles). A trip is in at most one suggestion, checked in this order:
+    - `combine`: trips on the same day whose starts are within 5 km of each other and whose destinations are too. The first trip (an essential one, then the longest) is the main trip; the others become extra stops on it. Saving: the others' km minus the extra stops (straight line × 1.3).
+    - `postpone`: a `non-essential` trip; saving: the whole trip.
+    - `route`: the chosen route is longer than the recommended one; saving: the extra km.
+  - A trip without routes is counted as the straight line × 1.3. Suggestions saving under 1 km, and combinations that would use more fuel, are left out.
+  - `budget` (`null` without an overall budget this month): `{ month, plannedCost, remaining, isShort }`: `plannedCost` is this month's planned trips, `remaining` what is left of the budget after this month's fuel entries, and `isShort` means `plannedCost` is more than `remaining`.
+- `POST /crisis/suggestions/:id/accept`: `combine` marks the other trips `combined` (with `combinedInto`), `postpone` marks the trip `postponed`, `route` selects the recommended route. 400 while crisis mode is off; 404 when the suggestion no longer exists (its trips changed).
+- `POST /crisis/suggestions/:id/ignore` hides the suggestion (stored on its trips in `ignoredSuggestions`); the trips don't change.
+- `DELETE /crisis/ignored` shows every ignored suggestion again.
 
 ## Places
 For the trip form; limited to 30 per user per 10 minutes. Results are cached on the server.

@@ -282,6 +282,17 @@ const Icon = ({ name, size = 20 }) => {
         <circle cx="12" cy="10" r="2.3" stroke="currentColor" strokeWidth="1.8" />
       </svg>
     ),
+    alert: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <path
+          d="M10.3 4.2 2.6 17.5a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
+        <path d="M12 9.5V14M12 17.2v.1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
     refresh: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
         <path

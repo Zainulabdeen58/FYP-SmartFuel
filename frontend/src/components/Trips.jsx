@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
-import { TRIP_STATUS_LABELS } from "../constant";
+import { CRISIS_TRIP_STATUSES, TRIP_STATUS_LABELS } from "../constant";
 import {
   formatDay,
   formatDistance,
   formatDuration,
   formatLitres,
   formatRupees,
+  formatTripPlaces,
   formatVehicleLabel,
 } from "../format";
 import useTrips from "../hooks/useTrips";
@@ -16,9 +17,6 @@ import { isTripOverdue } from "../validation";
 import Icon from "./Icon";
 import TripDetails from "./TripDetails";
 import TripForm from "./TripForm";
-
-// "Liberty Market, Lahore, Punjab" → "Liberty Market"
-const shortPlaceName = (place) => place.name.split(",")[0];
 
 // Trips page (FR-05, FR-06, FR-11, FR-12). Admins see every trip but cannot change them.
 function Trips({ user }) {
@@ -99,6 +97,7 @@ function Trips({ user }) {
           key={editingTrip?._id || "new"}
           trip={editingTrip}
           vehicles={vehicles}
+          crisisMode={user.crisisMode}
           onSave={(savedTrip) => {
             closeForm();
             setSavedCount((count) => count + 1);
@@ -223,9 +222,11 @@ function Trips({ user }) {
                 <div className="vehicle-info">
                   <div className="vehicle-title">
                     <h3>
-                      {shortPlaceName(trip.start)} → {shortPlaceName(trip.destination)}
+                      {formatTripPlaces(trip)}
                     </h3>
-                    <span className="vehicle-badge">{TRIP_STATUS_LABELS[trip.status]}</span>
+                    <span className={`vehicle-badge${CRISIS_TRIP_STATUSES.includes(trip.status) ? " muted" : ""}`}>
+                      {TRIP_STATUS_LABELS[trip.status]}
+                    </span>
                     {trip.priority === "non-essential" && <span className="vehicle-badge muted">Can wait</span>}
                     {isTripOverdue(trip) && <span className="vehicle-badge missing">Overdue</span>}
                   </div>
