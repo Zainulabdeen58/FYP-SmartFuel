@@ -5,8 +5,11 @@ export {
   FUEL_TYPES,
   MAX_BUDGET_MONTHS_AHEAD,
   MAX_STATION_LENGTH,
+  MAX_TRIP_PURPOSE_LENGTH,
+  PAKISTAN_BOUNDS,
   REGISTER_ROLES,
   ROLES,
+  TRIP_PRIORITIES,
   VEHICLE_LIMITS,
   VEHICLE_TYPES,
 } from "../../shared/constants.js";
@@ -20,6 +23,7 @@ export const NAV_LINKS = [
   { to: "/dashboard", label: "Dashboard", icon: "dashboard" },
   { to: "/vehicles", label: "Vehicles", icon: "car" },
   { to: "/fuel-records", label: "Fuel Records", icon: "fuel" },
+  { to: "/trips", label: "Trips", icon: "route" },
   { to: "/reports", label: "Reports", icon: "chart" },
   { to: "/profile", label: "Profile", icon: "user" },
 ];
@@ -85,6 +89,28 @@ export const REPORT_PERIOD_PRESETS = [
 
 // How far back the custom "From" and "To" month pickers go.
 export const REPORT_MONTHS_TO_CHOOSE_FROM = 60;
+
+// Trips page (Trips.jsx)
+export const TRIP_PRIORITY_LABELS = { essential: "Essential", "non-essential": "Can wait" };
+export const TRIP_STATUS_LABELS = { planned: "Planned", completed: "Completed" };
+// Where a trip estimate's km/l came from.
+export const MILEAGE_SOURCE_LABELS = {
+  odometer: "measured from your odometer readings",
+  stated: "the vehicle's stated fuel efficiency",
+};
+
+export const EMPTY_TRIP = {
+  vehicle: "",
+  start: null,
+  destination: null,
+  date: "",
+  priority: "essential",
+  purpose: "",
+  pricePerLitre: "",
+};
+
+// The map first shows all of Pakistan.
+export const MAP_START_VIEW = { center: [30.4, 69.4], zoom: 5 };
 
 export const FUEL_RECORD_LABELS = {
   vehicle: "Vehicle",

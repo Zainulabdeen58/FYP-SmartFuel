@@ -7,15 +7,23 @@ import {
   MAX_BUDGET_MONTHS_AHEAD,
   MAX_ODOMETER_READING,
   MAX_PASSWORD_LENGTH,
+  MAX_PLACE_NAME_LENGTH,
   MAX_PRICE_PER_LITRE,
   MAX_REGISTRATION_PART_LENGTH,
   MAX_REGISTRATION_PARTS,
   MAX_REPORT_MONTHS,
   MAX_STATION_LENGTH,
+  MAX_TRIP_DAYS_AHEAD,
+  MAX_TRIP_PURPOSE_LENGTH,
   MIN_MODEL_YEAR,
   MIN_PASSWORD_LENGTH,
   MIN_PRICE_PER_LITRE,
+  MIN_TRIP_DISTANCE_KM,
+  PAKISTAN_BOUNDS,
+  PLACE_SEARCH_LENGTH,
   ROLES,
+  TRIP_PRIORITIES,
+  TRIP_STATUSES,
   USUAL_MILEAGE_BY_ENGINE,
   VEHICLE_LIMITS,
   VEHICLE_TYPE_LIMITS,
@@ -403,4 +411,103 @@ export function checkReportRange(fromMonth, toMonth) {
     return `Choose a range of at most ${MAX_REPORT_MONTHS / 12} years`;
   }
   return "";
+}
+
+// Trips (FR-05, FR-06)
+
+export function isInPakistan(lat, lng) {
+  const { minLat, maxLat, minLng, maxLng } = PAKISTAN_BOUNDS;
+  return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
+}
+
+// A trip's start or destination: { name, lat, lng } inside Pakistan.
+// `label` is "Start" or "Destination".
+export function checkPlace(place, label) {
+  if (!place || typeof place !== "object") {
+    return `Choose the ${label.toLowerCase()} from the search or on the map`;
+  }
+  const nameError = checkText(place.name, `${label} name`, { min: 2, max: MAX_PLACE_NAME_LENGTH });
+  if (nameError) return nameError;
+  const { lat, lng } = place;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return `Choose the ${label.toLowerCase()} from the search or on the map`;
+  }
+  if (!isInPakistan(lat, lng)) return `${label} must be in Pakistan`;
+  return "";
+}
+
+// Straight-line distance between two { lat, lng } points (haversine formula).
+export function distanceBetweenKm(from, to) {
+  const toRadians = (degrees) => (degrees * Math.PI) / 180;
+  const latChange = toRadians(to.lat - from.lat);
+  const lngChange = toRadians(to.lng - from.lng);
+  const a =
+    Math.sin(latChange / 2) ** 2 +
+    Math.cos(toRadians(from.lat)) * Math.cos(toRadians(to.lat)) * Math.sin(lngChange / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Checked once both places are valid.
+export function checkDifferentPlaces(start, destination) {
+  if (checkPlace(start, "Start") || checkPlace(destination, "Destination")) return "";
+  return distanceBetweenKm(start, destination) < MIN_TRIP_DISTANCE_KM
+    ? "Start and destination are the same place"
+    : "";
+}
+
+// addDays("2026-10-11", 30) → "2026-11-10".
+function addDays(day, daysToAdd) {
+  const date = parseFuelDate(day);
+  date.setUTCDate(date.getUTCDate() + daysToAdd);
+  return date.toISOString().slice(0, 10);
+}
+
+// A planned trip is dated from today up to MAX_TRIP_DAYS_AHEAD; a completed one
+// today or earlier. Dates are calendar days in Pakistan time, like fuel entries.
+export function checkTripDate(value, status) {
+  if (isEmpty(value)) return "Date is required";
+  if (!parseFuelDate(value)) return "Enter a valid date (YYYY-MM-DD)";
+  const today = todayInPakistan();
+  if (status === "completed") {
+    return value > today ? "A completed trip cannot be in the future" : "";
+  }
+  if (value < today) return "A planned trip cannot be in the past";
+  if (value > addDays(today, MAX_TRIP_DAYS_AHEAD)) {
+    return `Trips can be planned at most ${MAX_TRIP_DAYS_AHEAD} days ahead`;
+  }
+  return "";
+}
+
+export function checkTripStatus(value) {
+  return TRIP_STATUSES.includes(value) ? "" : "Status must be planned or completed";
+}
+
+export function checkTripPriority(value) {
+  if (!value) return "Priority is required";
+  return TRIP_PRIORITIES.includes(value) ? "" : "Choose essential or non-essential";
+}
+
+// Optional.
+export function checkTripPurpose(value) {
+  if (value === undefined || value === null) return "";
+  if (typeof value !== "string") return "Purpose must be text";
+  if (value.trim().length > MAX_TRIP_PURPOSE_LENGTH) {
+    return `Purpose must be at most ${MAX_TRIP_PURPOSE_LENGTH} characters`;
+  }
+  return "";
+}
+
+// The price used for a trip's cost; same range as fuel entries.
+export function checkFuelPrice(value) {
+  const error = checkPositiveNumber(value, "Fuel price");
+  if (error) return error;
+  const price = toNumber(value);
+  if (price < MIN_PRICE_PER_LITRE || price > MAX_PRICE_PER_LITRE) {
+    return `Fuel price must be between Rs ${MIN_PRICE_PER_LITRE} and Rs ${MAX_PRICE_PER_LITRE} per litre`;
+  }
+  return "";
+}
+
+export function checkPlaceSearch(value) {
+  return checkText(value, "Search text", PLACE_SEARCH_LENGTH);
 }

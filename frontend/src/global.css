@@ -3025,6 +3025,299 @@ a.submit-button {
   color: var(--text-soft);
 }
 
+/* =========================
+   TRIPS
+========================= */
+
+.trip-form,
+.trip-details {
+  margin-bottom: 19px;
+}
+
+.trip-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  align-items: start;
+
+  gap: 20px;
+}
+
+.trip-form-fields {
+  display: grid;
+
+  gap: 14px;
+}
+
+.trip-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 12px;
+}
+
+.trip-form-map {
+  position: sticky;
+  top: 90px;
+
+  display: grid;
+
+  gap: 8px;
+}
+
+.place-row {
+  display: flex;
+
+  gap: 8px;
+}
+
+.place-row input {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.place-row .secondary-button {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 6px;
+
+  white-space: nowrap;
+}
+
+.secondary-button.active {
+  color: var(--green);
+
+  border-color: var(--green);
+}
+
+.place-results {
+  margin: 4px 0 0;
+  padding: 4px;
+
+  list-style: none;
+
+  background: var(--surface-2);
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.place-results button {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  width: 100%;
+  padding: 8px 10px;
+
+  color: var(--text-soft);
+
+  background: none;
+
+  border: 0;
+  border-radius: 8px;
+
+  font-size: 12px;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.place-results button:hover {
+  color: var(--text);
+
+  background: var(--fill-2);
+}
+
+/* Leaflet's layers use z-index 400 to 1000; isolation keeps them below the sidebar, top bar and modals. */
+.trip-map {
+  position: relative;
+
+  isolation: isolate;
+
+  height: 420px;
+
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.trip-details .trip-map {
+  margin: 14px 0;
+}
+
+.trip-map .leaflet-container {
+  height: 100%;
+
+  background: var(--surface-2);
+
+  font-family: inherit;
+}
+
+/* Dark theme: darker map tiles. */
+:root:not([data-theme="light"]) .trip-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+}
+
+.trip-map .leaflet-control-attribution {
+  color: var(--text-muted);
+
+  background: color-mix(in srgb, var(--surface) 85%, transparent);
+}
+
+.trip-map .leaflet-control-attribution a {
+  color: var(--blue);
+}
+
+.trip-map .leaflet-bar a {
+  color: var(--text);
+
+  background: var(--surface-2);
+
+  border-color: var(--border);
+}
+
+.trip-map .leaflet-bar a.leaflet-disabled {
+  color: var(--text-faint);
+
+  background: var(--surface-3);
+}
+
+/* Solid lines, so the whole line can be clicked to choose that route. */
+.route-line {
+  stroke: var(--text-faint);
+  stroke-opacity: 0.75;
+
+  cursor: pointer;
+}
+
+.route-line.selected {
+  stroke: var(--green);
+  stroke-opacity: 1;
+}
+
+.trip-pin {
+  stroke: #fff;
+  stroke-width: 2;
+
+  fill-opacity: 1;
+}
+
+.trip-pin.start {
+  fill: var(--blue);
+}
+
+.trip-pin.destination {
+  fill: var(--red);
+}
+
+.map-note {
+  position: absolute;
+  z-index: 1000;
+  top: 12px;
+  right: 12px;
+  left: 12px;
+
+  margin: 0;
+  padding: 8px 12px;
+
+  color: var(--text);
+
+  background: var(--surface-2);
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  font-size: 11px;
+}
+
+.trip-details-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.trip-badges {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 6px;
+
+  margin-top: 8px;
+}
+
+.vehicle-badge.muted {
+  color: var(--text-muted);
+
+  background: var(--fill);
+
+  border-color: var(--border);
+}
+
+.trip-details .form-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  margin-top: 12px;
+}
+
+.route-choice {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+}
+
+.report-table tr.selected td {
+  color: var(--text);
+
+  background: var(--fill);
+}
+
+.trip-actions {
+  flex-wrap: wrap;
+
+  margin-top: 14px;
+}
+
+@media (max-width: 900px) {
+  .trip-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* One column: the map comes first, so picking a place doesn't need scrolling past Save. */
+  .trip-form-map {
+    position: static;
+
+    order: -1;
+  }
+}
+
+@media (max-width: 650px) {
+  .trip-map {
+    height: 300px;
+  }
+
+  .trip-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .place-row {
+    flex-wrap: wrap;
+  }
+}
+
 /* Hide the focus outline Recharts draws on a clicked chart. */
 .chart-card .recharts-surface:focus,
 .chart-card .recharts-wrapper:focus {

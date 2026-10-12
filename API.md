@@ -4,7 +4,9 @@ Base URL: `/api`
 
 Every response is JSON. Errors look like `{ "success": false, "message": "..." }`
 with status 400 (invalid input or id), 401 (missing/expired token), 403 (not allowed),
-404 (not found), 409 (email or registration number already in use) or 429 (too many attempts).
+404 (not found), 409 (email or registration number already in use), 422 (no road route between two places),
+429 (too many attempts) or 503 (the route service is not set up or not working). Route-service problems
+are never answered with 401, because the frontend signs the user out on any 401.
 
 ## Authentication
 - `POST /auth/register` — `fullName`, `email`, `contactNumber`, `role` (`Individual` or `Organizational`; `Admin` is rejected), `password` (8-64 characters, letters and numbers). Limited to 10 registrations per IP per hour. `organizationName` is required when `role` is `Organizational`.
@@ -44,6 +46,24 @@ Users see only records for their own vehicles; admins see all.
   - `periods`: one `{ period, litres, cost }` per month (`"2026-10"`) or year (`"2026"`) in the range, including empty ones.
   - `vehicles`: one row per vehicle with entries in the range: `{ vehicle: { _id, vehicleName, registrationNumber, fuelType, ownerName }, entries, litres, cost, mileage }`.
   - `mileage`: `{ kmPerLitre, distanceKm, source, skippedGaps }`, measured gap by gap between consecutive odometer readings (gap distance ÷ litres bought in the gap). A gap above 2× the vehicle's `fuelEfficiency` means fill-ups were not recorded, so it is skipped and counted in `skippedGaps`. `source: "odometer"`: `kmPerLitre` = counted distance ÷ counted litres. With no usable gap it is the vehicle's `fuelEfficiency`, with `source: "estimate"` and `distanceKm: null`.
+
+## Trips (FR-05, FR-06)
+A trip is a planned journey from `start` to `destination` (each `{ name, lat, lng }` inside Pakistan) by one vehicle on one day (`YYYY-MM-DD`, Pakistan time). Routes come from OpenRouteService through the server; the key never reaches the browser. Admins can read every trip but get 403 on changes.
+- `GET /trips?vehicle=&status=&user=` returns `trips` (newest date first, without the route lines). `status` is `planned` or `completed`; `user` works for admins only.
+- `GET /trips/estimate-basis?vehicle=<id>` returns `basis`: `{ fuelType, kmPerLitre, mileageSource, tankRangeKm, latestPrice }`. `kmPerLitre` is the mileage measured from odometer readings over the last 12 months once at least 300 km were measured (`mileageSource: "odometer"`), otherwise the vehicle's `fuelEfficiency` (`"stated"`). `latestPrice` is `{ pricePerLitre, date }` of the vehicle's latest fuel entry in that time, or `null`. All null for electric vehicles.
+- `POST /trips` with `vehicle`, `start`, `destination`, `date` (today up to 365 days ahead), `priority` (`essential` or `non-essential`), optional `purpose` (up to 200 characters) and `pricePerLitre` (Rs 100 to 1,000; required except for electric vehicles). A new trip is always `planned`. Start and destination must be at least 0.2 km apart. Returns 201 with the trip; when the route service fails the trip is still saved, without routes, with `routeError` and the message "Trip saved, but routes could not be calculated: …".
+- Trip fields besides the above: `status`, `kmPerLitre`, `mileageSource`, `pricePerLitre`, `tankRangeKm` (the estimate basis saved with the trip), `routes`, `recommendedRoute` and `selectedRoute` (indexes into `routes`), `routeError`, `routesCalculatedAt`.
+- Each route: `{ label, distanceKm, durationMin, litres, cost, needsRefuel, geometry }`. Labels are `Fastest`, `Shortest` and `Avoids motorways` (ORS gives alternative routes only under 100 km, so these are separate requests; duplicates are dropped). Motorcycles and rickshaws get only `Fastest` and `Shortest`, both avoiding motorways; buses/trucks use the `driving-hgv` profile. `litres` = km ÷ km/l and `cost` = litres × price (null for electric). `needsRefuel` is true when the route is longer than km/l × tank. `geometry` is an encoded polyline. `recommendedRoute`: the fewest litres among routes taking at most 1.5 × the fastest time.
+- `GET /trips/:id` returns one trip with route lines.
+- `PUT /trips/:id` changes any of the create fields, `status` and `selectedRoute`. A new vehicle or new places get new routes; a new price only recalculates the rupees. The date rule runs only when the date or status changes: planned trips today or later, completed trips today or earlier.
+- `POST /trips/:id/routes` asks the route service again (planned trips only).
+- `DELETE /trips/:id`.
+- Trips, edits and recalculations are limited to 20 per user per 10 minutes.
+
+## Places
+For the trip form; limited to 30 per user per 10 minutes. Results are cached on the server.
+- `GET /places/search?text=` (3 to 100 characters) returns `places`: up to 5 `{ name, lat, lng }` in Pakistan, best first.
+- `GET /places/reverse?lat=&lng=` returns `place` (`{ name, lat, lng }` or `null`): a name for a point picked on the map.
 
 ## Monthly budgets
 Individual and Organizational accounts only; admins get 403. Months are `YYYY-MM` in Pakistan time. Spending is the total cost of the user's fuel records dated in that month, added up on every request (nothing is stored).

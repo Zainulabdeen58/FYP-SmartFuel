@@ -10,6 +10,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import fuelRecordRoutes from "./routes/fuelRecordRoutes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import tripRoutes from "./routes/tripRoutes.js";
+import placeRoutes from "./routes/placeRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 checkEnv();
@@ -40,6 +42,8 @@ app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/fuel-records", fuelRecordRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/trips", tripRoutes);
+app.use("/api/places", placeRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.use((req, res) => {

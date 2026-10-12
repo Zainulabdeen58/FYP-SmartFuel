@@ -1,5 +1,6 @@
 import Budget from "../models/Budget.js";
 import FuelRecord from "../models/FuelRecord.js";
+import Trip from "../models/Trip.js";
 import User from "../models/User.js";
 import Vehicle from "../models/Vehicle.js";
 import {
@@ -92,9 +93,10 @@ export async function deleteUser(req, res) {
 
   await FuelRecord.deleteMany({ user: user._id });
   await Budget.deleteMany({ user: user._id });
+  await Trip.deleteMany({ user: user._id });
   await Vehicle.deleteMany({ user: user._id });
   await user.deleteOne();
-  res.json({ success: true, message: "User and their vehicles, fuel records and budgets deleted" });
+  res.json({ success: true, message: "User and their vehicles, fuel records, budgets and trips deleted" });
 }
 
 export async function searchVehicles(req, res) {

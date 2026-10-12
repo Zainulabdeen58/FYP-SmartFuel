@@ -111,3 +111,23 @@ export const MAX_MONTHLY_REPORT_MONTHS = 24;
 // A gap between readings with mileage above this × the stated efficiency means
 // fill-ups were missed, so the gap is left out of the measured mileage.
 export const MAX_MILEAGE_FACTOR = 2;
+
+// Trips (FR-05, FR-06). Priority tells the later crisis mode (FR-07) which trips can wait.
+export const TRIP_PRIORITIES = ["essential", "non-essential"];
+export const TRIP_STATUSES = ["planned", "completed"];
+export const MAX_TRIP_PURPOSE_LENGTH = 200;
+export const MAX_PLACE_NAME_LENGTH = 150;
+export const PLACE_SEARCH_LENGTH = { min: 3, max: 100 };
+// A planned trip can be dated from today up to this many days ahead.
+export const MAX_TRIP_DAYS_AHEAD = 365;
+// Start and destination closer than this (straight line) count as the same place.
+export const MIN_TRIP_DISTANCE_KM = 0.2;
+// The rectangle around Pakistan (it also takes in border areas of neighbouring
+// countries). Trip places must be inside it, and the map stays inside it.
+export const PAKISTAN_BOUNDS = { minLat: 23.5, maxLat: 37.2, minLng: 60.8, maxLng: 77.9 };
+// Fuel estimates use the mileage measured over this many months of fuel entries,
+// once at least MIN_MEASURED_MILEAGE_KM were measured; otherwise the stated efficiency.
+export const ESTIMATE_HISTORY_MONTHS = 12;
+export const MIN_MEASURED_MILEAGE_KM = 300;
+// The recommended route may take at most this many times as long as the fastest route.
+export const MAX_ROUTE_SLOWDOWN = 1.5;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api";
-import { formatLitres, formatNumber, formatVehicleLabel } from "../format";
+import { formatDay, formatLitres, formatNumber, formatVehicleLabel } from "../format";
 import useFetch from "../hooks/useFetch";
 import useMonthlyBudgetSummary from "../hooks/useMonthlyBudgetSummary";
 import useVehicles from "../hooks/useVehicles";
@@ -9,15 +9,6 @@ import { currentMonthInPakistan, hasOdometerReading } from "../validation";
 import BudgetAlerts from "./BudgetAlerts";
 import FuelRecordForm from "./FuelRecordForm";
 import Icon from "./Icon";
-
-// Dates are stored as UTC midnight of the chosen day, so format them in UTC.
-const formatDate = (value) =>
-  new Date(value).toLocaleDateString("en-GB", {
-    timeZone: "UTC",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
 
 function FuelRecords({ user }) {
   // Admins have no budgets, so no budget alerts.
@@ -198,7 +189,7 @@ function FuelRecords({ user }) {
                 </div>
 
                 <div className="vehicle-meta">
-                  <span>{formatDate(r.date)}</span>
+                  <span>{formatDay(r.date)}</span>
 
                   {r.station && (
                     <>

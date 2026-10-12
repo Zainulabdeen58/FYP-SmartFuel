@@ -10,8 +10,10 @@ import Profile from "./components/Profile";
 import Admin from "./components/Admin";
 import "./global.css";
 
-// Lazy-loaded: Reports pulls in the large Recharts library, so download it only when opened.
+// Lazy-loaded: Reports pulls in the large Recharts library and Trips the Leaflet map,
+// so they are downloaded only when opened.
 const Reports = lazy(() => import("./components/Reports"));
+const Trips = lazy(() => import("./components/Trips"));
 
 export default function App() {
   const { user, save, updateUser, refreshUser, logout } = useAuth();
@@ -31,6 +33,15 @@ export default function App() {
             <Route path="/vehicles" element={<Vehicles />} />
 
             <Route path="/fuel-records" element={<FuelRecords user={user} />} />
+
+            <Route
+              path="/trips"
+              element={
+                <Suspense fallback={<div className="empty-state"><p>Loading trips...</p></div>}>
+                  <Trips user={user} />
+                </Suspense>
+              }
+            />
 
             <Route
               path="/reports"

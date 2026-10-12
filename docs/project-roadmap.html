@@ -245,10 +245,10 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <span>Update: 10 Oct 2026</span>
       </div>
     </div>
-    <div class="gauge" aria-label="Project progress gauge: 7 requirements mukammal, 6 baqi">
+    <div class="gauge" aria-label="Project progress gauge: 11 requirements mukammal, 2 baqi">
       <svg viewBox="0 0 200 122" role="img" aria-hidden="true">
         <path class="g-track" d="M 20 100 A 80 80 0 0 1 180 100"></path>
-        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 109.64 20.58"></path>
+        <path class="g-fill" d="M 20 100 A 80 80 0 0 1 170.84 62.82"></path>
         <line class="g-tick" x1="20" y1="100" x2="34" y2="100"></line>
         <line class="g-tick" x1="43.43" y1="43.43" x2="53.33" y2="53.33"></line>
         <line class="g-tick" x1="100" y1="20" x2="100" y2="34"></line>
@@ -257,11 +257,11 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <text class="g-label" x="20" y="118" text-anchor="middle">E</text>
         <text class="g-label" x="100" y="13" text-anchor="middle">½</text>
         <text class="g-label" x="180" y="118" text-anchor="middle">F</text>
-        <line class="g-needle" x1="100" y1="100" x2="106.99" y2="42.42"></line>
+        <line class="g-needle" x1="100" y1="100" x2="151.36" y2="73.05"></line>
         <circle class="g-hub" cx="100" cy="100" r="7"></circle>
       </svg>
-      <div class="gauge-value">7 / 13</div>
-      <div class="gauge-note">Requirements ka fuel gauge, Phase 3 ke baad.</div>
+      <div class="gauge-value">11 / 13</div>
+      <div class="gauge-note">Requirements ka fuel gauge, Phase 4 ke baad.</div>
     </div>
   </div>
 </header>
@@ -288,33 +288,35 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
     <div class="summary-grid">
       <div class="panel">
         <span class="pill done">Ban chuka</span>
-        <h3>Account, vehicles, fuel records, budget aur reports</h3>
-        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Fuel purchase records (FR-04), monthly budget aur alerts (FR-08), aur charts wala Reports page filters ke saath (FR-09, FR-10) bhi ban gaye. Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
+        <h3>Account, vehicles, fuel records, budget, reports aur trips</h3>
+        <p>Teeno account types (Individual, Organization, Admin) ke saath register, login, profile update aur logout. Vehicles ka poora kaam (add, dekhna, edit, delete). Fuel purchase records (FR-04), monthly budget aur alerts (FR-08), charts wala Reports page filters ke saath (FR-09, FR-10), aur trips map par raaston, fuel aur kharche ke andaze ke saath (FR-05, FR-06, FR-11, FR-12) bhi ban gaye. Is ke ilawa Admin panel jo saare users aur vehicles manage karta hai. Yeh SRS mein alag se nahi likha, yeh extra hai.</p>
       </div>
       <div class="panel">
         <span class="pill todo">Baqi</span>
         <h3>Asal "Smart Fuel" hissa</h3>
-        <p>Trips, route optimization, map, crisis mode aur notifications. Yeh 6 requirements abhi shuru nahi hui. Project ka naam jis kaam par hai, woh yahi hissa hai.</p>
+        <p>Crisis mode (FR-07) aur notifications (FR-13). Yeh 2 requirements abhi shuru nahi hui. Crisis mode trips ki priority aur date par chalega, jo ab maujood hain.</p>
       </div>
       <div class="panel">
         <span class="pill partial">Agla qadam</span>
-        <h3>Phase 4: Trips, fuel ka andaza aur map</h3>
-        <p>Phase 0 se Phase 3 tak (buniyad, fuel records, budget, reports) ka code mukammal ho gaya. Ab trips, fuel ka andaza aur map (FR-05, FR-06, FR-11, FR-12). Asal mileage ab odometer se milti hai, jo fuel ke andaze mein kaam aayegi. Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
+        <h3>Phase 5: Crisis mode</h3>
+        <p>Phase 0 se Phase 4 tak (buniyad, fuel records, budget, reports, trips aur map) ka code mukammal ho gaya. Ab crisis mode (FR-07): ghair-zaroori trips taalna aur ek din ke qareebi trips milana. Phase 4 mein asli OpenRouteService key ke saath ek dafa haath se check baqi hai (aap ki key se). Phase 0 mein sirf 2 faisle aur Figma screens baqi hain.</p>
       </div>
     </div>
     <div class="count-row">
-      <span class="pill done">7 mukammal</span>
-      <span class="pill todo">6 shuru nahi hui</span>
+      <span class="pill done">11 mukammal</span>
+      <span class="pill todo">2 shuru nahi hui</span>
       <span class="pill done">Phase 0: code mukammal</span>
       <span class="pill done">Phase 1: code mukammal</span>
       <span class="pill done">Phase 2: code mukammal</span>
       <span class="pill done">Phase 3: code mukammal</span>
+      <span class="pill done">Phase 4: code mukammal</span>
       <span class="pill todo">8 coding phases</span>
     </div>
     <div class="note ok" style="margin-top:16px"><strong>Update, 3 Oct 2026:</strong> Phase 0 ke saare Missing aur Bug items theek ho gaye. Neeche aise har item par <span class="chip fixed">Fixed</span> laga hai. Backend ko 51 automated checks se test kiya gaya aur sab pass hue. Jin par <span class="chip decide">Decide</span> hai, unka faisla abhi baqi hai.</div>
     <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 1 (FR-04 fuel purchase records) ka code mukammal. Sidebar mein "Fuel Records" page: entry add, edit, delete aur gaari ke hisaab se filter. Backend ko 69 naye automated checks se test kiya gaya, sab pass. Phase 0 ke 51 checks bhi dobara pass hue.</div>
     <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 2 (FR-08 monthly budget aur alerts) ka code mukammal. Dashboard par "Fuel budget" card (mahina chunein, budget set/edit/remove, progress bar) aur Fuel Records page par alert. Organizational account ke liye fleet budget aur har gaari ka budget. Backend ko 61 naye automated checks se test kiya gaya, sab pass, aur browser mein bhi chala kar dekha gaya.</div>
     <div class="note ok" style="margin-top:10px"><strong>Update, 10 Oct 2026:</strong> Phase 3 (FR-09 charts, FR-10 filters) ka code mukammal. Sidebar mein "Reports" page: mahana litre aur mahana kharcha ke charts, gaariyon ka muqabla (litre, kharcha, mileage), aur filters (period, gaari, fuel type; admin ke liye user) jo URL mein yaad rehte hain. Fuel entry mein odometer ab zaroori hai, "My odometer is not working" ke option ke saath, aur reading peeche nahi ja sakti. Backend ke 49 naye checks pass, Phase 2 ke 61 bhi dobara pass, aur browser mein poora flow chala kar dekha gaya.</div>
+    <div class="note ok" style="margin-top:10px"><strong>Update, 11 Oct 2026:</strong> Phase 4 (FR-05 trips, FR-06 fuel ka andaza aur raaste, FR-11/12 map) ka code mukammal. Sidebar mein "Trips" page: jagah search ya map par click se start aur destination, gaari, date, priority aur fuel ki qeemat (aakhri entry se khud bhar jati hai). Save par 2-3 raaste (sab se tez, sab se chhota, motorway se bach kar) map par, har ek ka km, waqt, litre aur rupay, aur sab se kam fuel wala "Recommended". Motorcycle/rickshaw hamesha motorway se bachte hain. Route service band ho to bhi trip save hota hai aur "Try again" aata hai. Backend ke 89 naye checks aur browser ke 39 checks pass, purane 188 checks bhi dobara pass. Tests ek nakli route service (<code>backend/dev/fakeOrs.js</code>) par chale; asli key ke saath ek check baqi.</div>
   </section>
 
   <section id="roles">
@@ -413,14 +415,14 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
           <tr><td class="fr-code">FR-02</td><td>Vehicle add karna</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-0">Phase 0</a> (fixes ho gaye)</td></tr>
           <tr><td class="fr-code">FR-03</td><td>Vehicle dekhna, edit, delete</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-0">Phase 0</a> (fixes ho gaye)</td></tr>
           <tr><td class="fr-code">FR-04</td><td>Fuel purchase records</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-1">Phase 1</a> (ho gaya)</td></tr>
-          <tr><td class="fr-code">FR-05</td><td>Trips banana</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
-          <tr><td class="fr-code">FR-06</td><td>Fuel ka andaza aur optimized route</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
+          <tr><td class="fr-code">FR-05</td><td>Trips banana</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-4">Phase 4</a> (ho gaya)</td></tr>
+          <tr><td class="fr-code">FR-06</td><td>Fuel ka andaza aur optimized route</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-4">Phase 4</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-07</td><td>Crisis mode</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-5">Phase 5</a></td></tr>
           <tr><td class="fr-code">FR-08</td><td>Monthly budget aur alerts</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-2">Phase 2</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-09</td><td>Charts aur graphs</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-3">Phase 3</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-10</td><td>Dashboard filters</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-3">Phase 3</a> (ho gaya)</td></tr>
-          <tr><td class="fr-code">FR-11</td><td>Map par route dikhana</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
-          <tr><td class="fr-code">FR-12</td><td>Map zoom, pan, interact</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-4">Phase 4</a></td></tr>
+          <tr><td class="fr-code">FR-11</td><td>Map par route dikhana</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-4">Phase 4</a> (ho gaya)</td></tr>
+          <tr><td class="fr-code">FR-12</td><td>Map zoom, pan, interact</td><td><span class="pill done">Mukammal</span></td><td><a href="#phase-4">Phase 4</a> (ho gaya)</td></tr>
           <tr><td class="fr-code">FR-13</td><td>Notifications</td><td><span class="pill todo">Shuru nahi</span></td><td><a href="#phase-6">Phase 6</a></td></tr>
         </tbody>
       </table>
@@ -553,56 +555,58 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         </div>
       </article>
 
-      <article class="fr" data-status="todo" id="fr-05">
+      <article class="fr" data-status="done" id="fr-05">
         <div class="fr-head">
           <span class="fr-code">FR-05</span>
           <h3>Trips banana</h3>
-          <span class="pill todo">Shuru nahi</span>
+          <span class="pill done">Mukammal</span>
           <a class="phase-link" href="#phase-4">Phase 4</a>
         </div>
         <div class="fr-body">
           <div>
             <blockquote class="srs">The system shall allow users to create trips by specifying a starting point and destination.</blockquote>
             <p><strong>Matlab:</strong> Safar plan karna: kahan se kahan, kis gaari se, kis din.</p>
+            <p class="small"><strong>Faisle (11 Oct 2026):</strong> naya trip "Planned", date aaj se 365 din aage tak; safar ke baad "Completed". Jagah naam likh kar Search aur list se chunein, ya map par click karein. Electric gaari ka trip banta hai magar fuel ka andaza nahi. Admin trips sirf dekhta hai (supervisor se confirm karna hai).</p>
             <p><strong>Fields (proposal):</strong> gaari, start (naam aur location), destination, date, maqsad, priority (zaroori ya ghair-zaroori), status (planned ya completed).</p>
             <p class="small">Priority SRS mein nahi likhi, lekin crisis mode (FR-07) ko "ghair-zaroori safar" pehchanne ke liye yahi chahiye.</p>
           </div>
           <div>
             <div class="label">Edge cases</div>
             <ul class="edges">
-              <li>Jagah ka naam na mile, ya kai jagah milen (jaise "Saddar" Karachi aur Rawalpindi dono mein). List dikha kar user se chunwayein.</li>
-              <li>Start aur destination ek hi jagah ho to reject.</li>
-              <li>Sadak ka koi raasta hi na ho to saaf message.</li>
-              <li>Safar tank ki range se lamba ho (distance zyada ho efficiency × tank se) to "raste mein fuel bharna hoga".</li>
-              <li>Map ya route API band ho ya limit khatam ho jaye to trip phir bhi save ho, andaza baad mein.</li>
-              <li>Gaari select na ki ho to fuel ka andaza nahi ho sakta, isliye gaari zaroori.</li>
+              <li>Jagah ka naam na mile, ya kai jagah milen (jaise "Saddar" Karachi aur Rawalpindi dono mein). List dikha kar user se chunwayein. <span class="chip fixed">Fixed</span></li>
+              <li>Start aur destination ek hi jagah ho to reject. <span class="chip fixed">Fixed</span></li>
+              <li>Sadak ka koi raasta hi na ho to saaf message. <span class="chip fixed">Fixed</span></li>
+              <li>Safar tank ki range se lamba ho (distance zyada ho efficiency × tank se) to "raste mein fuel bharna hoga". <span class="chip fixed">Fixed</span></li>
+              <li>Map ya route API band ho ya limit khatam ho jaye to trip phir bhi save ho, andaza baad mein. <span class="chip fixed">Fixed</span></li>
+              <li>Gaari select na ki ho to fuel ka andaza nahi ho sakta, isliye gaari zaroori. <span class="chip fixed">Fixed</span></li>
             </ul>
           </div>
         </div>
       </article>
 
-      <article class="fr" data-status="todo" id="fr-06">
+      <article class="fr" data-status="done" id="fr-06">
         <div class="fr-head">
           <span class="fr-code">FR-06</span>
           <h3>Fuel ka andaza aur optimized route</h3>
-          <span class="pill todo">Shuru nahi</span>
+          <span class="pill done">Mukammal</span>
           <a class="phase-link" href="#phase-4">Phase 4</a>
         </div>
         <div class="fr-body">
           <div>
             <blockquote class="srs">The system shall calculate the estimated fuel required and suggest optimized routes to minimize fuel consumption.</blockquote>
             <p><strong>Matlab:</strong> Safar ke liye kitna fuel lagega aur kitne paise, yeh batana. Kai raaston mein se kam fuel wala raasta suggest karna.</p>
+            <p class="small"><strong>Faisle (11 Oct 2026):</strong> OpenRouteService 100 km se lambe safar ke alternative raaste nahi deta, is liye har trip par alag requests: sab se tez, sab se chhota, aur motorway se bach kar. Recommended = sab se kam litre, bashart woh sab se tez raaste se 1.5 guna se zyada waqt na le. km/l odometer se naapi hui (kam se kam 300 km), warna gaari ki likhi. Qeemat gaari ki aakhri entry se, user badal sakta hai. Motorcycle aur rickshaw motorway par mana hain, is liye un ke raaste motorway se bachte hain.</p>
             <div class="formula">fuel (L) = distance (km) ÷ efficiency (km/l)<br>kharcha (Rs) = fuel (L) × price per litre<br>Misaal: 120 km ÷ 12 km/l = 10 L · 10 L × Rs 265 = Rs 2,650</div>
             <p class="small">Price user ki aakhri fuel entry se. Misaal ka Rs 265 sirf samjhane ke liye hai.</p>
           </div>
           <div>
             <div class="label">Edge cases</div>
             <ul class="edges">
-              <li>Efficiency 0 ya khaali ho to 0 se divide. Isliye FR-02 mein 0 se zyada lazmi.</li>
-              <li>User ki koi fuel entry nahi to price kahan se aaye: default price ya user se poochein.</li>
-              <li>Sirf ek raasta mile to wahi dikhayein aur likhein "alternative nahi mila".</li>
-              <li>Chhota raasta zyada waqt le (traffic) to fuel aur time dono dikhayein, user chune.</li>
-              <li>Yeh andaza hai. Chadhaai, traffic aur AC ka asar shamil nahi, UI mein bhi "andaza" likhein.</li>
+              <li>Efficiency 0 ya khaali ho to 0 se divide. Isliye FR-02 mein 0 se zyada lazmi. <span class="chip fixed">Fixed</span></li>
+              <li>User ki koi fuel entry nahi to price kahan se aaye: default price ya user se poochein. <span class="chip fixed">Fixed</span></li>
+              <li>Sirf ek raasta mile to wahi dikhayein aur likhein "alternative nahi mila". <span class="chip fixed">Fixed</span></li>
+              <li>Chhota raasta zyada waqt le (traffic) to fuel aur time dono dikhayein, user chune. <span class="chip fixed">Fixed</span></li>
+              <li>Yeh andaza hai. Chadhaai, traffic aur AC ka asar shamil nahi, UI mein bhi "andaza" likhein. <span class="chip fixed">Fixed</span></li>
             </ul>
           </div>
         </div>
@@ -725,49 +729,51 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         </div>
       </article>
 
-      <article class="fr" data-status="todo" id="fr-11">
+      <article class="fr" data-status="done" id="fr-11">
         <div class="fr-head">
           <span class="fr-code">FR-11</span>
           <h3>Map par route dikhana</h3>
-          <span class="pill todo">Shuru nahi</span>
+          <span class="pill done">Mukammal</span>
           <a class="phase-link" href="#phase-4">Phase 4</a>
         </div>
         <div class="fr-body">
           <div>
             <blockquote class="srs">The system shall display planned and optimized routes on a map, including distance, estimated fuel consumption, and travel time.</blockquote>
             <p><strong>Matlab:</strong> Map par raaste ki line, saath mein distance (km), andazan fuel (L) aur waqt (minute).</p>
+            <p class="small"><strong>Faisle (11 Oct 2026):</strong> Leaflet aur OpenStreetMap. Chuna hua raasta moti amber line, baqi grey; line par click se raasta chunein. Map na khule to neeche table mein saari tafseel.</p>
           </div>
           <div>
             <div class="label">Edge cases</div>
             <ul class="edges">
-              <li>Internet slow ho aur map load na ho to bhi route ki details text mein dikhen.</li>
-              <li>Kai raaste hon to recommended raasta alag rang mein, baqi halke.</li>
-              <li>OpenStreetMap aur route provider ka naam (attribution) map par dikhana zaroori hai.</li>
-              <li>API key frontend code mein na ho. Call backend ke zariye karein.</li>
-              <li>Mobile par map ki height aur controls theek hon.</li>
+              <li>Internet slow ho aur map load na ho to bhi route ki details text mein dikhen. <span class="chip fixed">Fixed</span></li>
+              <li>Kai raaste hon to recommended raasta alag rang mein, baqi halke. <span class="chip fixed">Fixed</span></li>
+              <li>OpenStreetMap aur route provider ka naam (attribution) map par dikhana zaroori hai. <span class="chip fixed">Fixed</span></li>
+              <li>API key frontend code mein na ho. Call backend ke zariye karein. <span class="chip fixed">Fixed</span></li>
+              <li>Mobile par map ki height aur controls theek hon. <span class="chip fixed">Fixed</span></li>
             </ul>
           </div>
         </div>
       </article>
 
-      <article class="fr" data-status="todo" id="fr-12">
+      <article class="fr" data-status="done" id="fr-12">
         <div class="fr-head">
           <span class="fr-code">FR-12</span>
           <h3>Map zoom, pan, interact</h3>
-          <span class="pill todo">Shuru nahi</span>
+          <span class="pill done">Mukammal</span>
           <a class="phase-link" href="#phase-4">Phase 4</a>
         </div>
         <div class="fr-body">
           <div>
             <blockquote class="srs">The system shall allow users to zoom, pan, and interact with the map for better trip planning.</blockquote>
             <p><strong>Matlab:</strong> Map ko zoom in/out karna, khiskana (pan), aur raaste ya marker par click karke details dekhna. Leaflet yeh sab khud deta hai.</p>
+            <p class="small"><strong>Faisle (11 Oct 2026):</strong> mouse wheel se zoom sirf map par click ke baad; map Pakistan ke gird mehdood (zoom 5 se kam nahi); keyboard ke + aur − chalte hain.</p>
           </div>
           <div>
             <div class="label">Edge cases</div>
             <ul class="edges">
-              <li>Mobile par do ungliyon se zoom, aur page scroll aur map pan aapas mein na takrayein.</li>
-              <li>Bohat zyada zoom out (poori duniya) na ho, Pakistan ke aas paas had lagayein.</li>
-              <li>Keyboard se bhi zoom (+ aur −) chale.</li>
+              <li>Mobile par do ungliyon se zoom, aur page scroll aur map pan aapas mein na takrayein. <span class="chip fixed">Fixed</span></li>
+              <li>Bohat zyada zoom out (poori duniya) na ho, Pakistan ke aas paas had lagayein. <span class="chip fixed">Fixed</span></li>
+              <li>Keyboard se bhi zoom (+ aur −) chale. <span class="chip fixed">Fixed</span></li>
             </ul>
           </div>
         </div>
@@ -929,19 +935,20 @@ footer { padding-block: 40px 56px; color: var(--muted); font-size: 0.88rem; }
         <div class="phase-head"><h3>Trips, fuel ka andaza aur map</h3><span class="phase-count" data-count></span></div>
         <div class="phase-meta"><span class="tag">FR-05</span><span class="tag">FR-06</span><span class="tag">FR-11</span><span class="tag">FR-12</span><span class="tag dep">Pehle chahiye: Phase 0, Phase 1</span></div>
         <p class="why">Sab se bada phase. Andaze ke liye efficiency 0 se zyada (Phase 0) aur fuel price (Phase 1) chahiye.</p>
+        <div class="note ok"><strong>Code mukammal, 11 Oct 2026.</strong> 7 kaam ho gaye, backend ke 89 aur browser ke 39 checks pass. Done ki dono shartein nakli route service par poori: Lahore se Islamabad ke 3 raaste map par aur Recommended highlight, aur service band ho to bhi trip save ho kar saaf message. Baqi: <code>backend/.env</code> mein asli <code>ORS_API_KEY</code> daal kar ek dafa car aur motorcycle ka Lahore → Islamabad check.</div>
         <div class="tasks">
           <div>
             <div class="label">Backend</div>
-            <label class="check"><input type="checkbox" id="p4-b1"><span>OpenRouteService ki free API key, backend <code>.env</code> mein (frontend mein kabhi nahi).</span></label>
-            <label class="check"><input type="checkbox" id="p4-b2"><span>Geocoding endpoint: jagah ka naam se location (lat/lng); results cache.</span></label>
-            <label class="check"><input type="checkbox" id="p4-b3"><span>Route endpoint: 2-3 raaste, har ek ka km, waqt, litre, rupay; kam fuel wala "Recommended".</span></label>
-            <label class="check"><input type="checkbox" id="p4-b4"><span><code>Trip</code> model aur CRUD: gaari, start, destination, date, priority, status.</span></label>
+            <label class="check"><input type="checkbox" id="p4-b1" data-done="true" checked><span>OpenRouteService ki free API key, backend <code>.env</code> mein (frontend mein kabhi nahi). <span class="chip fixed">Code tayar; key aap daalein</span></span></label>
+            <label class="check"><input type="checkbox" id="p4-b2" data-done="true" checked><span>Geocoding endpoint: jagah ka naam se location (lat/lng); results cache. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p4-b3" data-done="true" checked><span>Route endpoint: 2-3 raaste, har ek ka km, waqt, litre, rupay; kam fuel wala "Recommended". <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p4-b4" data-done="true" checked><span><code>Trip</code> model aur CRUD: gaari, start, destination, date, priority, status. <span class="chip fixed">Ho gaya</span></span></label>
           </div>
           <div>
             <div class="label">Frontend</div>
-            <label class="check"><input type="checkbox" id="p4-f1"><span>"Trips" page: start/destination search, gaari select, priority.</span></label>
-            <label class="check"><input type="checkbox" id="p4-f2"><span>react-leaflet v5 map: raaston ki lines, recommended alag rang mein, zoom aur pan.</span></label>
-            <label class="check"><input type="checkbox" id="p4-f3"><span>Trip card: km, minute, litre, rupay; tank range se lamba safar ho to warning.</span></label>
+            <label class="check"><input type="checkbox" id="p4-f1" data-done="true" checked><span>"Trips" page: start/destination search, gaari select, priority. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p4-f2" data-done="true" checked><span>react-leaflet v5 map: raaston ki lines, recommended alag rang mein, zoom aur pan. <span class="chip fixed">Ho gaya</span></span></label>
+            <label class="check"><input type="checkbox" id="p4-f3" data-done="true" checked><span>Trip card: km, minute, litre, rupay; tank range se lamba safar ho to warning. <span class="chip fixed">Ho gaya</span></span></label>
           </div>
         </div>
         <div class="done-when"><div class="label">Done tab hoga jab</div><ol><li>Lahore se Islamabad ke trip par raaste map par dikhen aur recommended highlight ho.</li><li>Route API band ho to bhi trip save ho aur saaf message aaye.</li></ol></div>

@@ -14,6 +14,11 @@ export function checkJwtSecret(secret) {
 }
 
 export default function checkEnv() {
+  // Optional: without it trips still save, but routes and place search are off.
+  if (!process.env.ORS_API_KEY) {
+    console.warn("ORS_API_KEY is not set, so trip routes and place search are off. Get a free key at openrouteservice.org and add it to backend/.env.");
+  }
+
   const error = checkJwtSecret(process.env.JWT_SECRET);
   if (!error) return;
 
