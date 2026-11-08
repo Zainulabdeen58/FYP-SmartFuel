@@ -13,6 +13,7 @@ import reportRoutes from "./routes/reportRoutes.js";
 import tripRoutes from "./routes/tripRoutes.js";
 import placeRoutes from "./routes/placeRoutes.js";
 import crisisRoutes from "./routes/crisisRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 checkEnv();
@@ -46,6 +47,7 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/places", placeRoutes);
 app.use("/api/crisis", crisisRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.use((req, res) => {

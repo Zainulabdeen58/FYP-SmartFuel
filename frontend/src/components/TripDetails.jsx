@@ -18,10 +18,21 @@ function TripDetails({ tripId, canChange, onChanged, onEdit, onDelete, onClose }
   const [actionError, setActionError] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // "Trip not found" when it was deleted after a notification about it was made.
   if (!trip) {
     return (
       <div className="chart-card trip-details">
-        {error ? <div className="form-error">{error}</div> : <p className="chart-note">{loading ? "Loading trip..." : ""}</p>}
+        {error ? (
+          <div className="trip-missing">
+            <div className="form-error">{error}</div>
+            <button type="button" className="secondary-button" onClick={onClose}>
+              <Icon name="close" size={16} />
+              Close
+            </button>
+          </div>
+        ) : (
+          <p className="chart-note">{loading ? "Loading trip..." : ""}</p>
+        )}
       </div>
     );
   }

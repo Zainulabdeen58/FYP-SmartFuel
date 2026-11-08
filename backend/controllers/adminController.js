@@ -1,5 +1,6 @@
 import Budget from "../models/Budget.js";
 import FuelRecord from "../models/FuelRecord.js";
+import Notification from "../models/Notification.js";
 import Trip from "../models/Trip.js";
 import User from "../models/User.js";
 import Vehicle from "../models/Vehicle.js";
@@ -72,9 +73,11 @@ export async function updateUser(req, res) {
 
   await user.save();
 
-  // Drop budgets the new role can't have (admins: none; vehicle budgets: Organizational only).
+  // Drop what the new role can't have (admins: no budgets or notifications; vehicle budgets:
+  // Organizational only).
   if (nextRole === "Admin") {
     await Budget.deleteMany({ user: user._id });
+    await Notification.deleteMany({ user: user._id });
   } else if (nextRole !== "Organizational") {
     await Budget.deleteMany({ user: user._id, vehicle: { $ne: null } });
   }
@@ -96,9 +99,10 @@ export async function deleteUser(req, res) {
   await FuelRecord.deleteMany({ user: user._id });
   await Budget.deleteMany({ user: user._id });
   await Trip.deleteMany({ user: user._id });
+  await Notification.deleteMany({ user: user._id });
   await Vehicle.deleteMany({ user: user._id });
   await user.deleteOne();
-  res.json({ success: true, message: "User and their vehicles, fuel records, budgets and trips deleted" });
+  res.json({ success: true, message: "User and their vehicles, fuel records, budgets, trips and notifications deleted" });
 }
 
 export async function searchVehicles(req, res) {

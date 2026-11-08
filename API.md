@@ -75,6 +75,17 @@ For Individual and Organizational accounts (admins get 403). Each user turns it 
 - `POST /crisis/suggestions/:id/ignore` hides the suggestion (stored on its trips in `ignoredSuggestions`); the trips don't change.
 - `DELETE /crisis/ignored` shows every ignored suggestion again.
 
+## Notifications (FR-13)
+For Individual and Organizational accounts (admins get 403). Notifications are made by the server after a change is saved, never through this API, and each event makes at most one (a unique `{ user, key }` index). MongoDB deletes them 60 days after they were made.
+- Events (`type`):
+  - `budget-warning` and `budget-over`: after a fuel record is added or edited, or a budget is saved, a budget of that month (overall or a vehicle's) has reached 80% or 100%. Once per budget per month; a budget that jumps past 100% gets only `budget-over`. The vehicle's owner is notified, also when an admin adds the record. Link: `/dashboard`.
+  - `inefficient-trip`: a planned trip's chosen route needs 15% or more fuel than the recommended route (compared by km, so it also works for electric vehicles). Once per trip. Link: `/trips?trip=<id>`.
+  - `crisis-suggestion`: while crisis mode is on, a saved trip (created, edited, recalculated or planned again) is part of a `combine` or `postpone` suggestion. Once per suggestion id; turning crisis mode on makes none (the page shows them), and a `route` suggestion is left to `inefficient-trip`. Link: `/crisis?suggestion=<id>`.
+- `GET /notifications` returns `notifications` (the newest 50: `{ _id, type, message, link, read, createdAt }`) and `unreadCount` (all unread).
+- `PUT /notifications/:id/read` marks one read and returns it. Another user's notification answers 404, like a missing one.
+- `PUT /notifications/read-all` marks all of the user's notifications read.
+- A link may point to something deleted since: `GET /trips/:id` then answers 404 and the crisis page says the suggestion is no longer available.
+
 ## Places
 For the trip form; limited to 30 per user per 10 minutes. Results are cached on the server.
 - `GET /places/search?text=` (3 to 100 characters) returns `places`: up to 5 `{ name, lat, lng }` in Pakistan, best first.
@@ -97,6 +108,6 @@ Individual and Organizational accounts only; admins get 403. Months are `YYYY-MM
 All require Admin role.
 - `GET /admin/users`
 - `GET /admin/users/:id`
-- `PUT /admin/users/:id` (changing the role also removes budgets the new role cannot have: all of them for Admin, the vehicle budgets for Individual)
-- `DELETE /admin/users/:id` (also deletes the user's vehicles, fuel records and budgets)
+- `PUT /admin/users/:id` (changing the role also removes what the new role cannot have: all budgets and notifications for Admin, the vehicle budgets for Individual)
+- `DELETE /admin/users/:id` (also deletes the user's vehicles, fuel records, budgets, trips and notifications)
 - `GET /admin/vehicles?user=&registrationNumber=` (the registration search ignores spaces and hyphens: `lea 12` finds `LEA-1234`)

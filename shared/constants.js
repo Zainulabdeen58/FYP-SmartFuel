@@ -145,3 +145,11 @@ export const COMBINE_TRIP_RADIUS_KM = 5;
 export const ROAD_DISTANCE_FACTOR = 1.3;
 // Suggestions that save less driving than this are not worth showing.
 export const MIN_CRISIS_SAVING_KM = 1;
+
+// Notifications (FR-13). Each type is one kind of critical event.
+export const NOTIFICATION_TYPES = ["budget-warning", "budget-over", "inefficient-trip", "crisis-suggestion"];
+// A planned trip is inefficient when its chosen route needs at least this many percent
+// more fuel than the recommended route.
+export const INEFFICIENT_ROUTE_PERCENT = 15;
+// MongoDB deletes a notification this many days after it was made.
+export const NOTIFICATION_KEEP_DAYS = 60;

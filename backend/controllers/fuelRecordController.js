@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import FuelRecord from "../models/FuelRecord.js";
 import Vehicle from "../models/Vehicle.js";
 import { isOwnerOrAdmin, ownerFilter } from "../utils/access.js";
+import { monthOfDay } from "../utils/dates.js";
+import { notifyBudgetLimits } from "../utils/notifications.js";
 import {
   checkFuelDate,
   checkOdometer,
@@ -119,6 +121,8 @@ export async function createFuelRecord(req, res) {
   const record = new FuelRecord({ user: vehicle.user, vehicle: vehicle._id });
   applyFields(record, data);
   await record.save();
+  // More spending may reach a budget limit (record.user is the vehicle's owner).
+  await notifyBudgetLimits(record.user, monthOfDay(record.date));
   res.status(201).json({ success: true, message: "Fuel record added", record });
 }
 
@@ -220,6 +224,7 @@ export async function updateFuelRecord(req, res) {
 
   applyFields(record, data);
   await record.save();
+  await notifyBudgetLimits(record.user, monthOfDay(record.date));
   res.json({ success: true, message: "Fuel record updated", record });
 }
 

@@ -6,6 +6,7 @@ import useFetch from "../hooks/useFetch";
 import useMonthlyBudgetSummary from "../hooks/useMonthlyBudgetSummary";
 import useVehicles from "../hooks/useVehicles";
 import { currentMonthInPakistan, hasOdometerReading } from "../validation";
+import { confirmToast, showToast } from "../toast";
 import BudgetAlerts from "./BudgetAlerts";
 import FuelRecordForm from "./FuelRecordForm";
 import Icon from "./Icon";
@@ -56,10 +57,11 @@ function FuelRecords({ user }) {
   const totalCost = records.reduce((sum, r) => sum + r.totalCost, 0);
 
   const remove = async (id) => {
-    if (!confirm("Delete this fuel entry?")) return;
+    if (!(await confirmToast("Delete this fuel entry?"))) return;
 
     try {
-      await api.delete(`/fuel-records/${id}`);
+      const { data } = await api.delete(`/fuel-records/${id}`);
+      showToast(data.message);
       reloadRecordsAndBudget();
     } catch (err) {
       setError(err.response?.data?.message || "Could not delete fuel entry");

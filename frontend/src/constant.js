@@ -7,6 +7,7 @@ export {
   MAX_BUDGET_MONTHS_AHEAD,
   MAX_STATION_LENGTH,
   MAX_TRIP_PURPOSE_LENGTH,
+  NOTIFICATION_KEEP_DAYS,
   PAKISTAN_BOUNDS,
   REGISTER_ROLES,
   ROLES,
@@ -127,4 +128,12 @@ export const FUEL_RECORD_LABELS = {
   totalCost: "Total cost (Rs)",
   odometer: "Odometer reading (km)",
   station: "Fuel station (optional)",
+};
+
+// Notifications (NotificationBell.jsx): the title and icon of each type.
+export const NOTIFICATION_KINDS = {
+  "budget-warning": { title: "Budget almost used", icon: "fuel" },
+  "budget-over": { title: "Budget exceeded", icon: "alert" },
+  "inefficient-trip": { title: "Route needs more fuel", icon: "route" },
+  "crisis-suggestion": { title: "Crisis mode suggestion", icon: "alert" },
 };

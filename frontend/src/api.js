@@ -8,10 +8,17 @@ const api = axios.create({
 const AUTH_ENDPOINTS = ["/auth/login", "/auth/register"];
 
 let handleUnauthorized = null;
+let handleSavedChange = null;
 
 // Set by useAuth, so any other 401 (expired or rejected token) signs the user out.
 export function setUnauthorizedHandler(handler) {
   handleUnauthorized = handler;
+}
+
+// Set by useNotifications: every saved change (a new fuel record, a trip...) may have
+// made a notification, so the bell checks again.
+export function setSavedChangeHandler(handler) {
+  handleSavedChange = handler;
 }
 
 api.interceptors.request.use((config) => {
@@ -21,7 +28,11 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const { method, url = "" } = response.config;
+    if (method !== "get" && !url.startsWith("/notifications")) handleSavedChange?.();
+    return response;
+  },
   (error) => {
     const url = error.config?.url || "";
     const isAuthEndpoint = AUTH_ENDPOINTS.some((path) => url.startsWith(path));

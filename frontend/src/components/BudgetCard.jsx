@@ -4,6 +4,7 @@ import { MAX_BUDGET_MONTHS_AHEAD } from "../constant";
 import { formatMonthLabel, formatRupees, formatVehicleLabel } from "../format";
 import useMonthlyBudgetSummary from "../hooks/useMonthlyBudgetSummary";
 import { addMonths, checkBudgetMonth, currentMonthInPakistan, listMonths } from "../validation";
+import { confirmToast, showToast } from "../toast";
 import BudgetAlerts from "./BudgetAlerts";
 import BudgetForm from "./BudgetForm";
 import Icon from "./Icon";
@@ -71,10 +72,11 @@ function BudgetCard({ user }) {
   };
 
   const removeBudget = async (budget, budgetName) => {
-    if (!confirm(`Remove the ${budgetName} for ${formatMonthLabel(summary.month)}?`)) return;
+    if (!(await confirmToast(`Remove the ${budgetName} for ${formatMonthLabel(summary.month)}?`, "Remove"))) return;
 
     try {
-      await api.delete(`/budgets/${budget._id}`);
+      const { data } = await api.delete(`/budgets/${budget._id}`);
+      showToast(data.message);
       reloadSummary();
     } catch (err) {
       setError(err.response?.data?.message || "Could not remove budget");

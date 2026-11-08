@@ -134,7 +134,7 @@ body,
 .profile-sidebar,
 .profile-form,
 .search-input,
-.theme-toggle,
+.icon-button,
 input,
 select {
   transition:
@@ -636,7 +636,7 @@ p {
   font-weight: 700;
 }
 
-.theme-toggle {
+.icon-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -659,7 +659,7 @@ p {
     transform 0.18s ease;
 }
 
-.theme-toggle:hover {
+.icon-button:hover {
   color: var(--green);
   border-color: var(--border-hover);
   transform: translateY(-1px);
@@ -3474,6 +3474,319 @@ a.submit-button {
 
   font-size: 11px;
   line-height: 1.8;
+}
+
+/* The suggestion a notification linked to. */
+.suggestion-card.highlighted {
+  border-color: var(--green);
+}
+
+/* A trip opened from an old notification that was deleted since. */
+.trip-missing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  gap: 12px;
+}
+
+/* =========================
+   NOTIFICATIONS
+========================= */
+
+.notification-bell {
+  position: relative;
+}
+
+.notification-bell .icon-button {
+  position: relative;
+}
+
+/* Unread count on the bell. */
+.notification-count {
+  min-width: 17px;
+  height: 17px;
+
+  position: absolute;
+  top: -6px;
+  right: -6px;
+
+  padding: 0 4px;
+
+  color: #fff;
+  background: var(--red);
+
+  border: 2px solid var(--bg);
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 13px;
+  text-align: center;
+}
+
+.notification-panel {
+  width: min(380px, calc(100vw - 28px));
+  max-height: min(520px, calc(100vh - 100px));
+
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  background: var(--elev-1);
+
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius);
+
+  box-shadow: var(--shadow);
+
+  overflow: hidden;
+}
+
+.notification-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding: 14px 16px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.notification-panel-header h3 {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 13px;
+}
+
+/* A button that looks like a link. */
+.text-button {
+  padding: 0;
+
+  color: var(--green);
+  background: none;
+
+  border: 0;
+
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.text-button:hover {
+  text-decoration: underline;
+}
+
+.notification-list {
+  margin: 0;
+  padding: 0;
+
+  overflow-y: auto;
+
+  list-style: none;
+}
+
+.notification-item {
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 11px;
+
+  padding: 12px 16px;
+
+  color: var(--text-muted);
+  background: none;
+
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+
+  font: inherit;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  background: var(--fill);
+}
+
+.notification-item.unread {
+  background: var(--fill);
+
+  border-left-color: var(--green);
+}
+
+.notification-icon {
+  width: 28px;
+  height: 28px;
+
+  flex-shrink: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--green);
+  background: var(--fill-2);
+
+  border-radius: 8px;
+}
+
+.notification-item.budget-over .notification-icon,
+.notification-item.crisis-suggestion .notification-icon {
+  color: var(--red);
+}
+
+.notification-item.inefficient-trip .notification-icon {
+  color: var(--blue);
+}
+
+.notification-text {
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.notification-text strong {
+  color: var(--text);
+
+  font-size: 11px;
+}
+
+.notification-item.unread .notification-text span {
+  color: var(--text-soft);
+}
+
+.notification-text small {
+  color: var(--text-faint);
+
+  font-size: 9px;
+}
+
+.notification-empty,
+.notification-footnote {
+  margin: 0;
+  padding: 14px 16px;
+
+  color: var(--text-muted);
+
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.notification-footnote {
+  padding: 9px 16px;
+
+  color: var(--text-faint);
+
+  font-size: 9px;
+}
+
+/* On phones the bell is not at the right edge, so the list spans the screen. */
+@media (max-width: 650px) {
+  .notification-panel {
+    width: auto;
+
+    position: fixed;
+    top: 70px;
+    left: 14px;
+    right: 14px;
+  }
+}
+
+/* =========================
+   TOASTS (react-toastify)
+========================= */
+
+/* react-toastify's colours and sizes, set from the app's theme tokens. The container's
+   class (more specific than react-toastify's own rules) also places it below the top bar,
+   centred over the content (right of the sidebar). */
+.Toastify__toast-container.app-toasts {
+  --toastify-color-light: var(--elev-1);
+  --toastify-color-dark: var(--elev-1);
+  --toastify-text-color-light: var(--text);
+  --toastify-text-color-dark: var(--text);
+  --toastify-color-success: var(--success);
+  --toastify-color-error: var(--red);
+  --toastify-icon-color-success: var(--success);
+  --toastify-icon-color-error: var(--red);
+  --toastify-color-progress-light: var(--green);
+  --toastify-color-progress-dark: var(--green);
+  --toastify-color-progress-success: var(--success);
+  --toastify-color-progress-error: var(--red);
+  --toastify-font-family: var(--font);
+  --toastify-toast-width: min(420px, calc(100vw - 28px));
+  --toastify-toast-bd-radius: 14px;
+  --toastify-toast-shadow: var(--shadow);
+  --toastify-z-index: 400;
+
+  top: 84px;
+  left: calc(50% + var(--sidebar) / 2);
+}
+
+.app-toasts .Toastify__toast {
+  margin-bottom: 10px;
+
+  border: 1px solid var(--border-hover);
+
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* react-toastify makes toasts full width with square corners on phones; keep them cards. */
+@media (max-width: 480px) {
+  .Toastify__toast-container.app-toasts {
+    width: auto;
+
+    left: 14px;
+    right: 14px;
+
+    transform: none;
+  }
+
+  .app-toasts .Toastify__toast {
+    border-radius: 14px;
+  }
+}
+
+.confirm-toast p {
+  margin: 0;
+}
+
+.confirm-toast-actions {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 12px;
+}
+
+/* Side by side, also on phones (where row buttons are full width). */
+.confirm-toast-actions button {
+  width: auto;
+  min-height: 34px;
+
+  padding: 0 14px;
+
+  font-size: 11px;
 }
 
 /* Hide the focus outline Recharts draws on a clicked chart. */

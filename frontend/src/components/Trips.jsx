@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import api from "../api";
 import { CRISIS_TRIP_STATUSES, TRIP_STATUS_LABELS } from "../constant";
 import {
@@ -14,6 +14,7 @@ import {
 import useTrips from "../hooks/useTrips";
 import useVehicles from "../hooks/useVehicles";
 import { isTripOverdue } from "../validation";
+import { confirmToast, showToast } from "../toast";
 import Icon from "./Icon";
 import TripDetails from "./TripDetails";
 import TripForm from "./TripForm";
@@ -27,7 +28,10 @@ function Trips({ user }) {
 
   const [showForm, setShowForm] = useState(false);
   const [editingTrip, setEditingTrip] = useState(null);
-  const [openTripId, setOpenTripId] = useState(null);
+  // The open trip is in the address (?trip=<id>), so a notification can link to it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const openTripId = searchParams.get("trip");
+  const setOpenTripId = (tripId) => setSearchParams(tripId ? { trip: tripId } : {}, { replace: true });
   // Changes after a save, so the open trip is loaded again.
   const [savedCount, setSavedCount] = useState(0);
 
@@ -48,10 +52,11 @@ function Trips({ user }) {
   };
 
   const remove = async (trip) => {
-    if (!confirm("Delete this trip?")) return;
+    if (!(await confirmToast("Delete this trip?"))) return;
 
     try {
-      await api.delete(`/trips/${trip._id}`);
+      const { data } = await api.delete(`/trips/${trip._id}`);
+      showToast(data.message);
       if (openTripId === trip._id) setOpenTripId(null);
       reload();
     } catch (err) {

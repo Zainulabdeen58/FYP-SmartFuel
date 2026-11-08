@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../api";
 import { formatVehicleType } from "../format";
 import useVehicles from "../hooks/useVehicles";
+import { confirmToast, showToast } from "../toast";
 import Icon from "./Icon";
 import VehicleForm from "./VehicleForm";
 
@@ -18,10 +19,11 @@ function Vehicles() {
   const [showCreate, setShowCreate] = useState(false);
 
   const remove = async (id) => {
-    if (!confirm("Delete this vehicle with all its fuel records, budgets and trips?")) return;
+    if (!(await confirmToast("Delete this vehicle with all its fuel records, budgets and trips?"))) return;
 
     try {
-      await api.delete(`/vehicles/${id}`);
+      const { data } = await api.delete(`/vehicles/${id}`);
+      showToast(data.message);
       load();
     } catch (err) {
       setError(err.response?.data?.message || "Could not delete vehicle");

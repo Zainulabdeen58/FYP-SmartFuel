@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import Budget from "../models/Budget.js";
-import FuelRecord from "../models/FuelRecord.js";
 import Vehicle from "../models/Vehicle.js";
-import { BUDGET_WARNING_PERCENT } from "../../shared/constants.js";
-import { getMonthDateRange } from "../utils/dates.js";
+import { formatRupees } from "../../shared/format.js";
+import { getBudgetStatus, loadMonthSpending } from "../utils/budgetStatus.js";
+import { notifyBudgetLimits } from "../utils/notifications.js";
 import { roundToTwoDecimals } from "../utils/numbers.js";
 import {
   checkBudgetAmount,
@@ -15,15 +15,6 @@ import {
 
 // The routes block admins, so every query here is limited to req.user's own budgets.
 // "Overall budget" = the month's budget with no vehicle (the fleet budget for Organizational accounts).
-
-const formatRupees = (amount) => `Rs ${amount.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
-
-function getBudgetStatus(spentAmount, budgetAmount) {
-  const percentUsed = (spentAmount / budgetAmount) * 100;
-  if (percentUsed >= 100) return "over";
-  if (percentUsed >= BUDGET_WARNING_PERCENT) return "warning";
-  return "ok";
-}
 
 function compareSpendingWithBudget(spentAmount, budget) {
   if (!budget) return { spent: spentAmount, budget: null };
@@ -71,26 +62,19 @@ export async function getMonthlyBudgetSummary(req, res) {
 
   const userId = req.user._id;
   const isOrganizationAccount = req.user.role === "Organizational";
-  const { monthStart, nextMonthStart } = getMonthDateRange(month);
 
-  const [monthBudgets, spendingPerVehicle, userVehicles] = await Promise.all([
+  const [monthBudgets, spending, userVehicles] = await Promise.all([
     Budget.find({ user: userId, month }),
-    // Month's spending per vehicle: { _id: vehicleId, spent }
-    FuelRecord.aggregate([
-      { $match: { user: userId, date: { $gte: monthStart, $lt: nextMonthStart } } },
-      { $group: { _id: "$vehicle", spent: { $sum: "$totalCost" } } }
-    ]),
+    loadMonthSpending(userId, month),
     // Only Organizational accounts get a budget per vehicle.
     isOrganizationAccount
       ? Vehicle.find({ user: userId }).select("vehicleName registrationNumber fuelType").sort({ vehicleName: 1 })
       : []
   ]);
 
-  const getVehicleSpending = (vehicleId) =>
-    roundToTwoDecimals(spendingPerVehicle.find((row) => row._id.equals(vehicleId))?.spent || 0);
+  const getVehicleSpending = (vehicleId) => spending.perVehicle.get(String(vehicleId)) ?? 0;
   const getVehicleBudget = (vehicleId) => monthBudgets.find((budget) => budget.vehicle?.equals(vehicleId));
 
-  const totalSpent = roundToTwoDecimals(spendingPerVehicle.reduce((total, row) => total + row.spent, 0));
   const overallBudget = monthBudgets.find((budget) => budget.vehicle === null);
 
   const vehicleSummaries = userVehicles
@@ -108,7 +92,7 @@ export async function getMonthlyBudgetSummary(req, res) {
     summary: {
       month,
       editable: checkBudgetMonth(month) === "",
-      overall: compareSpendingWithBudget(totalSpent, overallBudget),
+      overall: compareSpendingWithBudget(spending.total, overallBudget),
       vehicles: vehicleSummaries
     }
   });
@@ -166,6 +150,8 @@ export async function createOrUpdateBudget(req, res) {
     { amount: newAmount },
     { new: true, upsert: true, runValidators: true }
   );
+  // A lower budget may already be nearly used or exceeded.
+  await notifyBudgetLimits(req.user._id, month);
   res.json({ success: true, message: "Budget saved", budget });
 }
 

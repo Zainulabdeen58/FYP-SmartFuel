@@ -293,6 +293,17 @@ const Icon = ({ name, size = 20 }) => {
         <path d="M12 9.5V14M12 17.2v.1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
+    bell: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+        <path
+          d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinejoin="round"
+        />
+        <path d="M10 20.5a2.2 2.2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
     refresh: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
         <path

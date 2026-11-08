@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../api";
+import { confirmToast, showToast } from "../toast";
 
 // All admin-page data, searches and actions; the Admin component only renders.
 function useAdmin(currentUser) {
@@ -78,10 +79,11 @@ function useAdmin(currentUser) {
       return;
     }
 
-    if (!confirm("Delete this user with all their vehicles, fuel records, budgets and trips?")) return;
+    if (!(await confirmToast("Delete this user with all their vehicles, fuel records, budgets, trips and notifications?"))) return;
 
     try {
-      await api.delete(`/admin/users/${id}`);
+      const { data } = await api.delete(`/admin/users/${id}`);
+      showToast(data.message);
       loadUsers();
       loadVehicles();
     } catch (err) {
@@ -90,10 +92,11 @@ function useAdmin(currentUser) {
   };
 
   const deleteVehicle = async (id) => {
-    if (!confirm("Delete this vehicle with all its fuel records, budgets and trips?")) return;
+    if (!(await confirmToast("Delete this vehicle with all its fuel records, budgets and trips?"))) return;
 
     try {
-      await api.delete(`/vehicles/${id}`);
+      const { data } = await api.delete(`/vehicles/${id}`);
+      showToast(data.message);
       loadVehicles();
     } catch (err) {
       setError(err.response?.data?.message || "Could not delete vehicle");

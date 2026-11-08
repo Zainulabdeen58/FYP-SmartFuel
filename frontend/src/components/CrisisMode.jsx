@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import api from "../api";
 import { TRIP_PRIORITY_LABELS } from "../constant";
 import {
@@ -71,11 +71,12 @@ function formatSaving({ km, litres, cost }) {
   return parts.join(" · ");
 }
 
-function SuggestionCard({ suggestion, busy, onAccept, onIgnore }) {
+// `highlighted`: the suggestion a notification linked to.
+function SuggestionCard({ suggestion, highlighted, busy, onAccept, onIgnore }) {
   const { title, text, effect } = describeSuggestion(suggestion);
 
   return (
-    <div className="chart-card suggestion-card">
+    <div className={`chart-card suggestion-card${highlighted ? " highlighted" : ""}`}>
       <div className="suggestion-head">
         <h3>{title}</h3>
         <span className="suggestion-saving">Saves about {formatSaving(suggestion.saving)}</span>
@@ -111,7 +112,6 @@ function SuggestionCard({ suggestion, busy, onAccept, onIgnore }) {
   );
 }
 
-// This month's planned trips against what is left of the month's overall budget.
 // A card with a title and a bulleted list.
 function ListCard({ title, items }) {
   return (
@@ -128,6 +128,7 @@ function ListCard({ title, items }) {
   );
 }
 
+// This month's planned trips against what is left of the month's overall budget.
 function BudgetCheck({ budget }) {
   if (!budget) {
     return <p className="chart-note crisis-block">Set this month's budget on the dashboard to compare it with your planned trips.</p>;
@@ -160,6 +161,9 @@ function CrisisMode({ user, saveUser }) {
   const [actionError, setActionError] = useState("");
   // What is being saved ("mode", "ignored" or a suggestion id), to disable its buttons.
   const [busy, setBusy] = useState("");
+  // Set when a notification about one suggestion opened this page.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const linkedSuggestionId = searchParams.get("suggestion");
 
   // Sends one request; returns its answer, or null after showing the error.
   const run = async (busyKey, request) => {
@@ -190,6 +194,8 @@ function CrisisMode({ user, saveUser }) {
       api.post(`/crisis/suggestions/${encodeURIComponent(suggestion.id)}/${action}`),
     );
     if (data) setMessage(data.message);
+    // The answered suggestion is gone now; that is not news.
+    if (linkedSuggestionId) setSearchParams({}, { replace: true });
     reload();
   };
 
@@ -200,6 +206,9 @@ function CrisisMode({ user, saveUser }) {
   };
 
   const suggestions = advice?.suggestions ?? [];
+  const linkedSuggestionGone = Boolean(
+    linkedSuggestionId && advice && !suggestions.some(({ id }) => id === linkedSuggestionId),
+  );
 
   return (
     <section>
@@ -279,6 +288,13 @@ function CrisisMode({ user, saveUser }) {
 
           <BudgetCheck budget={advice.budget} />
 
+          {linkedSuggestionGone && (
+            <div className="budget-alert warning crisis-block" role="status">
+              The suggestion from your notification is no longer available: its trips have changed, or it was
+              accepted or ignored.
+            </div>
+          )}
+
           {suggestions.length > 0 && (
             <p className="chart-note crisis-block">
               Savings are estimates from each trip's route, mileage and fuel price.
@@ -290,6 +306,7 @@ function CrisisMode({ user, saveUser }) {
               <SuggestionCard
                 key={suggestion.id}
                 suggestion={suggestion}
+                highlighted={suggestion.id === linkedSuggestionId}
                 busy={busy === suggestion.id}
                 onAccept={() => respond(suggestion, "accept")}
                 onIgnore={() => respond(suggestion, "ignore")}

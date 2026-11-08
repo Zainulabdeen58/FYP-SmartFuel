@@ -6,6 +6,7 @@ import {
   MAX_TRIP_PURPOSE_LENGTH,
   TRIP_PRIORITIES,
 } from "../../shared/constants.js";
+import { parseFuelDate, todayInPakistan } from "../../shared/validation.js";
 
 const placeSchema = new mongoose.Schema(
   {
@@ -82,6 +83,16 @@ tripSchema.statics.releaseCombinedTrips = function (deletedTripIds) {
     { combinedInto: { $in: deletedTripIds }, status: "combined" },
     { status: "planned", $unset: { combinedInto: 1 } }
   );
+};
+
+// The user's planned trips from today on (Pakistan time), oldest first, without route lines:
+// what crisis mode suggestions are worked out from. Overdue trips are left out.
+tripSchema.statics.findUpcomingPlanned = function (userId) {
+  return this.find({ user: userId, status: "planned", date: { $gte: parseFuelDate(todayInPakistan()) } })
+    .select("-routes.geometry")
+    .populate("vehicle", TRIP_VEHICLE_FIELDS)
+    .sort({ date: 1, createdAt: 1 })
+    .lean();
 };
 
 export default mongoose.model("Trip", tripSchema);

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Slide, ToastContainer } from "react-toastify";
 import { ADMIN_LINK, NAV_LINKS, ROLE_LABELS } from "../constant";
 import Icon from "./Icon";
+import NotificationBell from "./NotificationBell";
 import useTheme from "../hooks/useTheme";
 
 function Layout({ user, logout, children }) {
@@ -109,8 +111,11 @@ function Layout({ user, logout, children }) {
               System operational
             </div>
 
+            {/* Admins have no budgets, trips or crisis mode, so no notifications. */}
+            {user.role !== "Admin" && <NotificationBell />}
+
             <button
-              className="theme-toggle"
+              className="icon-button"
               onClick={toggle}
               title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
               aria-label="Toggle color theme"
@@ -130,6 +135,16 @@ function Layout({ user, logout, children }) {
       {mobileOpen && (
         <div className="mobile-overlay" onClick={() => setMobileOpen(false)} />
       )}
+
+      {/* Toasts from toast.js (questions before deleting, success messages). */}
+      <ToastContainer
+        className="app-toasts"
+        position="top-center"
+        autoClose={4000}
+        transition={Slide}
+        theme={theme}
+        newestOnTop
+      />
     </div>
   );
 }

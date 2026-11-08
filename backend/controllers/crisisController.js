@@ -1,10 +1,10 @@
 import Budget from "../models/Budget.js";
-import FuelRecord from "../models/FuelRecord.js";
-import Trip, { TRIP_VEHICLE_FIELDS } from "../models/Trip.js";
+import Trip from "../models/Trip.js";
 import User from "../models/User.js";
+import { loadMonthSpending } from "../utils/budgetStatus.js";
 import { buildCrisisSuggestions, compareTripsWithBudget, totalSaving } from "../utils/crisisAdvice.js";
 import { getMonthDateRange } from "../utils/dates.js";
-import { currentMonthInPakistan, parseFuelDate, todayInPakistan } from "../utils/validation.js";
+import { currentMonthInPakistan } from "../utils/validation.js";
 
 // The routes block admins, so every query here is limited to req.user's own trips.
 // Suggestions are never stored: they are worked out from the trips on every request.
@@ -15,26 +15,13 @@ const ACCEPTED_MESSAGES = {
   route: "Recommended route chosen"
 };
 
-// The user's planned trips from today on, oldest first (overdue trips are left out).
-function loadUpcomingTrips(userId) {
-  return Trip.find({ user: userId, status: "planned", date: { $gte: parseFuelDate(todayInPakistan()) } })
-    .select("-routes.geometry")
-    .populate("vehicle", TRIP_VEHICLE_FIELDS)
-    .sort({ date: 1, createdAt: 1 })
-    .lean();
-}
-
 // What is left of the month's overall budget after its fuel entries; null without a budget.
 async function loadBudgetLeft(userId, month) {
-  const { monthStart, nextMonthStart } = getMonthDateRange(month);
-  const [budget, [spending]] = await Promise.all([
+  const [budget, spending] = await Promise.all([
     Budget.findOne({ user: userId, month, vehicle: null }),
-    FuelRecord.aggregate([
-      { $match: { user: userId, date: { $gte: monthStart, $lt: nextMonthStart } } },
-      { $group: { _id: null, spent: { $sum: "$totalCost" } } }
-    ])
+    loadMonthSpending(userId, month)
   ]);
-  return budget ? budget.amount - (spending?.spent ?? 0) : null;
+  return budget ? budget.amount - spending.total : null;
 }
 
 // Returns { suggestion } or { status, message }. The suggestion is worked out again from
@@ -42,7 +29,7 @@ async function loadBudgetLeft(userId, month) {
 async function findSuggestion(req) {
   if (!req.user.crisisMode) return { status: 400, message: "Turn on crisis mode first" };
 
-  const suggestions = buildCrisisSuggestions(await loadUpcomingTrips(req.user._id));
+  const suggestions = buildCrisisSuggestions(await Trip.findUpcomingPlanned(req.user._id));
   const suggestion = suggestions.find(({ id }) => id === req.params.id);
   if (!suggestion) return { status: 404, message: "This suggestion is no longer available" };
   return { suggestion };
@@ -54,7 +41,7 @@ export async function getCrisisAdvice(req, res) {
 
   const month = currentMonthInPakistan();
   const [upcomingTrips, budgetLeft] = await Promise.all([
-    loadUpcomingTrips(req.user._id),
+    Trip.findUpcomingPlanned(req.user._id),
     loadBudgetLeft(req.user._id, month)
   ]);
   const suggestions = buildCrisisSuggestions(upcomingTrips);

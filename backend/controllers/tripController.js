@@ -4,6 +4,7 @@ import FuelRecord from "../models/FuelRecord.js";
 import Trip, { TRIP_VEHICLE_FIELDS } from "../models/Trip.js";
 import Vehicle from "../models/Vehicle.js";
 import { isOwnerOrAdmin, ownerFilter } from "../utils/access.js";
+import { notifyAboutTrip } from "../utils/notifications.js";
 import { findRoutes } from "../utils/ors.js";
 import { addFuelEstimates, buildEstimateBasis, chooseRecommended } from "../utils/tripEstimate.js";
 import {
@@ -156,6 +157,7 @@ export async function createTrip(req, res) {
   });
   await calculateRoutes(trip, vehicle);
   await trip.save();
+  await notifyAboutTrip(req.user, trip);
   res.status(201).json({ success: true, message: savedMessage(trip, "saved"), trip: await withDetails(trip) });
 }
 
@@ -262,6 +264,7 @@ export async function updateTrip(req, res) {
   if (trip.status === "completed" && current.status !== "completed") {
     await Trip.updateMany({ combinedInto: trip._id, status: "combined" }, { status: "completed" });
   }
+  await notifyAboutTrip(req.user, trip);
   res.json({ success: true, message: savedMessage(trip, "updated"), trip: await withDetails(trip) });
 }
 
@@ -280,6 +283,7 @@ export async function recalculateTripRoutes(req, res) {
 
   await calculateRoutes(trip, vehicle);
   await trip.save();
+  await notifyAboutTrip(req.user, trip);
   res.json({ success: true, message: savedMessage(trip, "recalculated"), trip: await withDetails(trip) });
 }
 
@@ -299,6 +303,7 @@ export async function planTripAgain(req, res) {
   trip.status = "planned";
   trip.combinedInto = undefined;
   await trip.save();
+  await notifyAboutTrip(req.user, trip);
 
   const isOverdue = toDateText(trip.date) < todayInPakistan();
   res.json({
