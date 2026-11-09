@@ -14,6 +14,8 @@ import Icon from "./Icon";
 function FuelRecords({ user }) {
   // Admins have no budgets, so no budget alerts.
   const canHaveBudget = user.role !== "Admin";
+  // Admins only monitor entries; owners record real fuel purchases.
+  const canChange = user.role !== "Admin";
   const [vehicleFilter, setVehicleFilter] = useState("");
   const [editingRecord, setEditingRecord] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -87,18 +89,24 @@ function FuelRecords({ user }) {
           <span className="eyebrow">FUEL LOG</span>
           <h1>Fuel Records</h1>
 
-          <p>Record every fuel purchase: vehicle, date, litres and cost.</p>
+          <p>
+            {canChange
+              ? "Record every fuel purchase: vehicle, date, litres and cost."
+              : "View fuel purchases recorded by users. Only vehicle owners can add or change entries."}
+          </p>
         </div>
 
-        <button
-          className="submit-button small"
-          onClick={openCreate}
-          disabled={!fuelVehicles.length}
-          title={fuelVehicles.length ? "" : "Add a petrol or diesel vehicle first"}
-        >
-          <Icon name="plus" size={18} />
-          Add fuel entry
-        </button>
+        {canChange && (
+          <button
+            className="submit-button small"
+            onClick={openCreate}
+            disabled={!fuelVehicles.length}
+            title={fuelVehicles.length ? "" : "Add a petrol or diesel vehicle first"}
+          >
+            <Icon name="plus" size={18} />
+            Add fuel entry
+          </button>
+        )}
       </div>
 
       {pageError && <div className="form-error page-error">{pageError}</div>}
@@ -159,7 +167,7 @@ function FuelRecords({ user }) {
         </div>
       )}
 
-      {(showCreate || editingRecord) && (
+      {canChange && (showCreate || editingRecord) && (
         <FuelRecordForm
           key={editingRecord?._id || "create"}
           record={editingRecord}
@@ -230,28 +238,30 @@ function FuelRecords({ user }) {
               </div>
             </div>
 
-            <div className="row-actions">
-              <button
-                className="edit-button"
-                onClick={() => {
-                  setShowCreate(false);
-                  setEditingRecord(r);
-                }}
-                title="Edit fuel entry"
-              >
-                <Icon name="edit" size={17} />
-                Edit
-              </button>
+            {canChange && (
+              <div className="row-actions">
+                <button
+                  className="edit-button"
+                  onClick={() => {
+                    setShowCreate(false);
+                    setEditingRecord(r);
+                  }}
+                  title="Edit fuel entry"
+                >
+                  <Icon name="edit" size={17} />
+                  Edit
+                </button>
 
-              <button
-                className="delete-button"
-                onClick={() => remove(r._id)}
-                title="Delete fuel entry"
-              >
-                <Icon name="trash" size={17} />
-                Delete
-              </button>
-            </div>
+                <button
+                  className="delete-button"
+                  onClick={() => remove(r._id)}
+                  title="Delete fuel entry"
+                >
+                  <Icon name="trash" size={17} />
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
         ))}
 
@@ -267,16 +277,22 @@ function FuelRecords({ user }) {
               <Icon name="fuel" size={28} />
             </div>
 
-            {fuelVehicles.length ? (
+            {fuelVehicles.length || !canChange ? (
               <>
                 <h3>{vehicleFilter ? "No entries for this vehicle" : "No fuel entries yet"}</h3>
 
-                <p>Add your first fuel entry to start tracking spending.</p>
+                <p>
+                  {canChange
+                    ? "Add your first fuel entry to start tracking spending."
+                    : "Users add their own fuel purchases. You can view them here once they exist."}
+                </p>
 
-                <button className="submit-button small" onClick={openCreate}>
-                  <Icon name="plus" size={17} />
-                  Add first fuel entry
-                </button>
+                {canChange && (
+                  <button className="submit-button small" onClick={openCreate}>
+                    <Icon name="plus" size={17} />
+                    Add first fuel entry
+                  </button>
+                )}
               </>
             ) : (
               <>

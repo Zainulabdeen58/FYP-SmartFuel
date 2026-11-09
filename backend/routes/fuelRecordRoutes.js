@@ -6,10 +6,19 @@ import {
   updateFuelRecord,
   deleteFuelRecord
 } from "../controllers/fuelRecordController.js";
-import { protect } from "../middleware/auth.js";
+import { nonAdminOnly, protect } from "../middleware/auth.js";
+
+// Admins may view every entry; only vehicle owners record real purchases.
+const viewOnlyForAdmins = nonAdminOnly(
+  "Admins can view fuel records but not add or change them. Vehicle owners record their own purchases."
+);
 
 const router = Router();
 router.use(protect);
-router.route("/").post(createFuelRecord).get(getFuelRecords);
-router.route("/:id").get(getFuelRecord).put(updateFuelRecord).delete(deleteFuelRecord);
+router.route("/").get(getFuelRecords).post(viewOnlyForAdmins, createFuelRecord);
+router
+  .route("/:id")
+  .get(getFuelRecord)
+  .put(viewOnlyForAdmins, updateFuelRecord)
+  .delete(viewOnlyForAdmins, deleteFuelRecord);
 export default router;

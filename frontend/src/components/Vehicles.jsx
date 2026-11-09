@@ -6,7 +6,7 @@ import { confirmToast, showToast } from "../toast";
 import Icon from "./Icon";
 import VehicleForm from "./VehicleForm";
 
-function Vehicles() {
+function Vehicles({ user }) {
   const {
     data: vehicles,
     error,
@@ -17,6 +17,8 @@ function Vehicles() {
 
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [showCreate, setShowCreate] = useState(false);
+  // Admin manages every vehicle but does not own a fleet (no trips/budgets of their own).
+  const canAddVehicle = user?.role !== "Admin";
 
   const remove = async (id) => {
     if (!(await confirmToast("Delete this vehicle with all its fuel records, budgets and trips?"))) return;
@@ -42,19 +44,25 @@ function Vehicles() {
           <span className="eyebrow">RESOURCE LIBRARY</span>
           <h1>Vehicles</h1>
 
-          <p>Manage your registered vehicles and their fuel information.</p>
+          <p>
+            {canAddVehicle
+              ? "Manage your registered vehicles and their fuel information."
+              : "View, update or delete vehicles registered by users across the system."}
+          </p>
         </div>
 
-        <button
-          className="submit-button small"
-          onClick={() => {
-            setEditingVehicle(null);
-            setShowCreate(true);
-          }}
-        >
-          <Icon name="plus" size={18} />
-          Add vehicle
-        </button>
+        {canAddVehicle && (
+          <button
+            className="submit-button small"
+            onClick={() => {
+              setEditingVehicle(null);
+              setShowCreate(true);
+            }}
+          >
+            <Icon name="plus" size={18} />
+            Add vehicle
+          </button>
+        )}
       </div>
 
       {error && <div className="form-error page-error">{error}</div>}
@@ -82,7 +90,7 @@ function Vehicles() {
         </div>
       </div>
 
-      {(showCreate || editingVehicle) && (
+      {((canAddVehicle && showCreate) || editingVehicle) && (
         <VehicleForm
           key={editingVehicle?._id || "create"}
           vehicle={editingVehicle}
@@ -184,15 +192,21 @@ function Vehicles() {
 
             <h3>No vehicles yet</h3>
 
-            <p>Add your first vehicle to start managing your fleet.</p>
+            <p>
+              {canAddVehicle
+                ? "Add your first vehicle to start managing your fleet."
+                : "Users add their own vehicles. You can edit or delete them here once they exist."}
+            </p>
 
-            <button
-              className="submit-button small"
-              onClick={() => setShowCreate(true)}
-            >
-              <Icon name="plus" size={17} />
-              Add first vehicle
-            </button>
+            {canAddVehicle && (
+              <button
+                className="submit-button small"
+                onClick={() => setShowCreate(true)}
+              >
+                <Icon name="plus" size={17} />
+                Add first vehicle
+              </button>
+            )}
           </div>
         )}
       </div>

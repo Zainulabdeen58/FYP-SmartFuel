@@ -83,6 +83,14 @@ function normalizeVehicleText(data) {
 }
 
 export async function createVehicle(req, res) {
+  // Admins manage other users' vehicles; they do not own a fleet or create trips.
+  if (req.user.role === "Admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Admins cannot add vehicles. Individual and Organizational users add their own."
+    });
+  }
+
   const data = pickVehicleFields(req.body);
   const error = vehicleTypeError(data) || vehicleError(data);
   if (error) return res.status(400).json({ success: false, message: error });

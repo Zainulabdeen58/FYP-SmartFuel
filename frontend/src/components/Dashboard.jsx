@@ -160,10 +160,22 @@ function Dashboard({ user }) {
         </span>
       </div>
 
-      <div className="feature-grid">
-        {WORKSPACE_CARDS.map((card) => (
-          <WorkspaceCard key={card.to} card={card} />
-        ))}
+          <div className="feature-grid">
+        {WORKSPACE_CARDS.map((card) => {
+          // Admin does not create vehicles; they only manage records users added.
+          if (card.to === "/vehicles" && user.role === "Admin") {
+            return (
+              <WorkspaceCard
+                key={card.to}
+                card={{
+                  ...card,
+                  text: "View, update and delete vehicle records across all users.",
+                }}
+              />
+            );
+          }
+          return <WorkspaceCard key={card.to} card={card} />;
+        })}
         {user.role === "Admin" && <WorkspaceCard card={ADMIN_CARD} />}
       </div>
 

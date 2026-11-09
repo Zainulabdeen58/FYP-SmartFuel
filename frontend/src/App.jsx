@@ -31,7 +31,7 @@ export default function App() {
           <Routes>
             <Route path="/dashboard" element={<Dashboard user={user} />} />
 
-            <Route path="/vehicles" element={<Vehicles />} />
+            <Route path="/vehicles" element={<Vehicles user={user} />} />
 
             <Route path="/fuel-records" element={<FuelRecords user={user} />} />
 
